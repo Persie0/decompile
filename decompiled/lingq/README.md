@@ -22,4 +22,4 @@ unzip decompiled/lingq/6.2.0/lingq-6.2.0-jadx-sources.zip -d /tmp/lingq-6.2.0
 
 The 6.2.0 source comes from the code-bearing base APK inside the XAPK. Its configuration splits contain no DEX code.
 
-JADX exited with code 3 for both APKs because it reported decompilation errors. The source files, JADX-generated .jobf name maps, and logs are included. These are best-effort decompilations; some methods may be incomplete, and original R8/ProGuard names cannot be recovered without the original mapping files.
+JADX exited with code 3 for both APKs because it reported decompilation errors. The source files, JADX-generated .jobf name maps, and logs are included. These are best-effort decompilations; some methods may be incomplete, and original R8/ProGuard names cannot be recovered without the original mapping files. The client/API map and News-reader trace are in [docs/lingq-analysis](../../docs/lingq-analysis/README.md).

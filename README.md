@@ -8,4 +8,4 @@ The decompiled source ZIPs are divided into Git blobs. Reconstruct them with:
 python3 tools/reassemble_sources.py
 ~~~
 
-The reconstructed ZIPs will be written under decompiled/lingq. Extraction notes and archive checksums are in [decompiled/lingq/README.md](decompiled/lingq/README.md). Static investigation findings are in [SECURITY_REVIEW.md](SECURITY_REVIEW.md).
+The reconstructed ZIPs will be written under decompiled/lingq. Extraction notes and archive checksums are in [decompiled/lingq/README.md](decompiled/lingq/README.md). Static investigation findings are in [SECURITY_REVIEW.md](SECURITY_REVIEW.md). The client architecture, backend API map, News-reader trace, mod findings, and workflow provenance are in [docs/lingq-analysis](docs/lingq-analysis/README.md).
