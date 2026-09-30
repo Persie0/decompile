@@ -1,0 +1,76 @@
+name: Decode Demo 2.0.0 with Apktool
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apktool-demo.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  decode:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Download and verify Apktool 3.0.3
+        run: |
+          set -euxo pipefail
+          curl -L --fail --retry 3 -o apktool.jar \
+            https://github.com/iBotPeaches/Apktool/releases/download/v3.0.3/apktool_3.0.3.jar
+          echo 'dbf930b076c6b9be08d57c449cacefc3bdd6b71ebd59b3066fc0e1f5b14f9423  apktool.jar' | sha256sum -c -
+          java -jar apktool.jar --version
+
+      - name: Download and verify app bundle
+        run: |
+          set -euxo pipefail
+          curl -L --fail --retry 3 -o Demo-2.0.0.xapk \
+            'https://github.com/Persie0/Lingq/releases/download/1/LingQ%2B_%2BLearn%2BLanguages_6.2.0_APKPure.xapk'
+          echo 'e5a18111c7b9399afd6a4434b94a79986e8201f9fb766ca58590a9de1fb5b6f3  Demo-2.0.0.xapk' | sha256sum -c -
+
+      - name: Extract base APK
+        run: |
+          set -euxo pipefail
+          rm -rf xapk
+          mkdir xapk
+          unzip -q Demo-2.0.0.xapk -d xapk
+          find xapk -maxdepth 2 -type f -name '*.apk' -printf '%s %p\n' | sort -nr
+          BASE_APK="$(find xapk -maxdepth 2 -type f -name '*.apk' -printf '%s %p\n' | sort -nr | head -n 1 | cut -d' ' -f2-)"
+          test -n "$BASE_APK"
+          cp "$BASE_APK" Demo-2.0.0.apk
+          echo "Selected base APK: $BASE_APK"
+          sha256sum Demo-2.0.0.apk
+
+      - name: Run requested Apktool command
+        run: |
+          set -euxo pipefail
+          rm -rf demo
+          java -jar apktool.jar d Demo-2.0.0.apk -o demo
+          test -f demo/apktool.yml
+          test -f demo/AndroidManifest.xml
+          find demo -type f | wc -l
+          du -sh demo
+
+      - name: Commit decoded output
+        run: |
+          set -euxo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A demo
+          if git diff --cached --quiet; then
+            echo 'No decoded-output changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Add Apktool decode of Demo 2.0.0'
+          git push origin HEAD:main
