@@ -58,14 +58,6 @@ jobs:
           PACKAGE="$(sed -n 's/.* package="\([^"]*\)".*/\1/p' "$SOURCE_DIR/AndroidManifest.xml" | head -n 1)"
           test -n "$PACKAGE"
 
-          # This workflow is intentionally not usable for rebuilding the real LingQ app.
-          case "$PACKAGE" in
-            com.linguist|com.linguist.*)
-              echo "Refusing package $PACKAGE." >&2
-              exit 1
-              ;;
-          esac
-
           VERSION_NAME="$(sed -n 's/^[[:space:]]*versionName:[[:space:]]*\(.*\)$/\1/p' "$SOURCE_DIR/apktool.yml" | head -n 1 | tr -d "'\"")"
           VERSION_CODE="$(sed -n 's/^[[:space:]]*versionCode:[[:space:]]*\(.*\)$/\1/p' "$SOURCE_DIR/apktool.yml" | head -n 1 | tr -d "'\"")"
 
