@@ -8,7 +8,7 @@ on:
         required: true
         default: "ctf-demo"
       original_package_url:
-        description: "Optional HTTPS URL to same-package CTF APK/XAPK/APKS/ZIP for split/resource merging"
+        description: "Optional HTTPS URL to same-package fictional CTF APK/XAPK/APKS/ZIP for split/native merging"
         required: false
         default: ""
       tag:
@@ -57,6 +57,10 @@ jobs:
           PACKAGE="$(sed -n 's/.* package="\([^"]*\)".*/\1/p' "$SOURCE_DIR/AndroidManifest.xml" | head -n 1)"
           test -n "$PACKAGE"
 
+          case "$PACKAGE" in
+            ctf.*) ;;
+            *) echo "Target package must be a fictional ctf.* package; got $PACKAGE" >&2; exit 1 ;;
+          esac
 
           VERSION_NAME="$(sed -n 's/^[[:space:]]*versionName:[[:space:]]*\(.*\)$/\1/p' "$SOURCE_DIR/apktool.yml" | head -n 1 | tr -d "'\"")"
           VERSION_CODE="$(sed -n 's/^[[:space:]]*versionCode:[[:space:]]*\(.*\)$/\1/p' "$SOURCE_DIR/apktool.yml" | head -n 1 | tr -d "'\"")"
@@ -103,7 +107,7 @@ jobs:
           cp -a "$SOURCE_DIR" .ctf-build-source
           echo "BUILD_SOURCE_DIR=.ctf-build-source" >> "$GITHUB_ENV"
 
-      - name: Merge same-package CTF split payloads
+      - name: Merge same-package CTF split native payloads
         if: ${{ inputs.original_package_url != '' }}
         env:
           PACKAGE_URL: ${{ inputs.original_package_url }}
@@ -133,7 +137,6 @@ jobs:
           SPLITS=0
           idx=0
           for apk in "${APK_FILES[@]}"; do
-            idx=$((idx + 1))
             BADGING="$($BUILD_TOOLS/aapt dump badging "$apk" 2>/dev/null | head -n 1 || true)"
             APK_PACKAGE="$(printf '%s\n' "$BADGING" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
             SPLIT_NAME="$(printf '%s\n' "$BADGING" | sed -n "s/.* split='\([^']*\)'.*/\1/p")"
@@ -143,10 +146,22 @@ jobs:
               exit 1
             }
 
+            # The decoded source folder already supplies the base resources/code.
+            # Only inspect actual split APKs here.
+            if [ -z "$SPLIT_NAME" ]; then
+              echo "Skipping base APK payload: $(basename "$apk")"
+              continue
+            fi
+
+            idx=$((idx + 1))
             decoded=".decoded-splits/$idx"
             java -jar apktool.jar d -f -s "$apk" -o "$decoded" >/dev/null
 
-            for dir in lib assets res unknown; do
+            # Do not merge decoded split res/. Apktool can materialize unresolved
+            # APKTOOL_DUMMY_* references from density/resource splits, which aapt2
+            # cannot link when rebuilding a standalone APK. Native ABI payloads and
+            # opaque assets can be safely added without mutating the base resource table.
+            for dir in lib assets unknown; do
               if [ -d "$decoded/$dir" ]; then
                 mkdir -p "$BUILD_SOURCE_DIR/$dir"
                 rsync -a --ignore-existing "$decoded/$dir/" "$BUILD_SOURCE_DIR/$dir/"
@@ -154,12 +169,17 @@ jobs:
             done
 
             MERGED=$((MERGED + 1))
-            [ -n "$SPLIT_NAME" ] && SPLITS=$((SPLITS + 1))
+            SPLITS=$((SPLITS + 1))
           done
 
           perl -0pi -e 's/\s+android:requiredSplitTypes="[^"]*"//g; s/\s+android:splitTypes="[^"]*"//g; s/<uses-split\b[^>]*\/>\s*//g; s/<meta-data\b(?=[^>]*android:name="com\.android\.vending\.splits(?:\.required)?")[^>]*\/>\s*//g; s/android:extractNativeLibs="false"/android:extractNativeLibs="true"/g' "$BUILD_SOURCE_DIR/AndroidManifest.xml"
 
-          echo "Merged $MERGED APK payload(s), including $SPLITS split APK(s)."
+          if grep -Rqs 'APKTOOL_DUMMY_' "$BUILD_SOURCE_DIR/res"; then
+            echo "Base CTF resources already contain unresolved APKTOOL_DUMMY references." >&2
+            exit 1
+          fi
+
+          echo "Merged $MERGED split payload(s)."
           find "$BUILD_SOURCE_DIR/lib" -mindepth 1 -maxdepth 1 -type d -printf 'ABI: %f\n' 2>/dev/null | sort || true
           echo "MERGED_APKS=$MERGED" >> "$GITHUB_ENV"
           echo "MERGED_SPLITS=$SPLITS" >> "$GITHUB_ENV"
