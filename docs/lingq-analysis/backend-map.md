@@ -2,58 +2,89 @@
 
 ## Boundary
 
-This repository contains Android client code and decompiled APK output. It does not contain LingQ's server implementation, database, entitlement rules, or production API logs. The route list is a map of requests the 6.2.0 client knows how to make; it is not proof that every route is currently enabled or returns a particular result.
+This repository contains Android client code and decompiled APK output. It does not contain LingQ's server implementation, production database, entitlement rules, or live API logs. The route list is a map of requests the 6.2.0 client knows how to make; it is not proof that every route is currently enabled or returns a particular result.
 
 ## Hosts and request behavior
 
-The decompiled ServerEnvironment enum names three base URLs:
+The decompiled `ServerEnvironment` enum names three base URLs:
 
-- Production: https://www.lingq.com/
-- QA: https://qa.lingq.com/
-- QA4: https://qa4.lingq.com/
+- Production: `https://www.lingq.com/`
+- QA: `https://qa.lingq.com/`
+- QA4: `https://qa4.lingq.com/`
 
-BaseApplication observes the selected environment and supplies the URL to the network layer. C1798a in com/lingq/core/network/interceptors is the OkHttp interceptor. Its request path includes:
+`BaseApplication` observes the selected environment and supplies the URL to the network layer. `com/lingq/core/network/interceptors/C1798a.java` is an OkHttp interceptor. Its request path includes:
 
-- Android/app version, package name and a GUID in User-Agent.
-- Accept: application/json.
-- Content-type: application/x-www-form-urlencoded; charset=UTF-8.
-- Authorization: Token plus the saved login token when present.
-- A 401 response invokes the app's credential-clearing/session handling path.
+- Android/app version, package name, and a GUID in `User-Agent`;
+- `Accept: application/json`;
+- form URL-encoded content type for applicable requests;
+- `Authorization: Token ...` when a saved login token is present;
+- credential/session handling after a 401 response.
 
-Retrofit service method annotations were renamed during obfuscation. JADX output uses p000/mj3 for GET and p000/j17 for POST; the Retrofit request parser p000/bx3.java maps those annotations to HTTP verbs. Path, query, URL and body parameter annotations are also renamed. Route declarations are indexed in [api-routes.md](api-routes.md).
+Retrofit annotation names were obfuscated. The request parser `p000/bx3.java` maps the recovered annotations to HTTP verbs:
+
+- `@mj3` → GET
+- `@j17` → POST
+- `@g17` → PATCH
+- `@ay1` → DELETE
+- `@uq3` → generic HTTP method/path
+
+Path, query, URL, and body annotations are also renamed.
 
 ## API/service layer
 
-The 6.2.0 DEX exposes 22 Retrofit service interfaces with 163 route declarations. The index lists 155 non-entitlement routes and summarizes 8 subscription, profile, offer and purchase routes. These cover:
+The 6.2.0 DEX exposes **192 HTTP method declarations across 22 Retrofit service interfaces**. The complete index is in [api-routes.md](api-routes.md). The declaration distribution is:
 
-- Account signup/login/profile, subscription, purchase receipts and device registration.
-- Library shelves, lesson/collection search, lesson text/info/translation, imports and media.
-- Vocabulary/cards, dictionaries, TTS and word lookups.
-- Chat, chat usage, translation and explanation.
-- Lesson progress, bookmarks, review, stats, streaks, referrals and notices.
-- Challenges, World Cup features, flags, folders, playlists and badges.
+- 91 GET
+- 72 POST
+- 17 PATCH
+- 11 direct DELETE annotations
+- 1 generic HTTP declaration that specifies DELETE
 
-API request models are under com/lingq/core/network/api/requests. Response models are under com/lingq/core/network/api/result. Repositories under com/lingq/core/data/repository combine service calls with database reads/writes. Domain use cases under com/lingq/core/domain and feature-specific domain packages feed view models/state holders.
+The earlier 163 count represented only GET + POST declarations and omitted PATCH/DELETE/generic HTTP declarations.
+
+The route surface covers:
+
+- account signup/login/profile, subscription, purchase receipt submission, offers, and device registration;
+- library shelves, server-supplied dynamic tab/content URLs, lesson/collection search, lesson text/info/translation, imports, and media;
+- vocabulary/cards, dictionaries, TTS, and word lookups;
+- chat, chat usage, translation, and explanation;
+- lesson progress, bookmarks, reviews, stats, streaks, referrals, and notices;
+- challenges, World Cup features, flags, folders, playlists, and badges.
+
+API request models live under `com/lingq/core/network/api/requests`. Response models live under `com/lingq/core/network/api/result`. Repositories under `com/lingq/core/data/repository` combine service calls with database reads/writes. Domain use cases under `com/lingq/core/domain` and feature-specific packages feed view models/state holders.
 
 ## Local data
 
-Room is the persistent cache for lesson, library, counter, progress and download state. The schema/entities and DAOs are under com/lingq/core/database. DataStore holds preferences/session settings, including the chosen server environment. Library and reader state are exposed as Kotlin Flows, so network refreshes can update an already-open screen.
+Room is the persistent cache for lesson, library, counter, progress, and download state. Schema/entities and DAOs are under `com/lingq/core/database`. DataStore holds preferences/session settings, including the chosen server environment. Library and reader state are exposed as Kotlin Flows, so a network refresh can update an already-open screen.
 
 A common library pattern is:
 
-1. Call the v3 shelf or search API.
-2. Decode ResultShelf and ResultLibraryItem data.
-3. Store/update local rows and join relationships in Room.
-4. Observe those rows and render them in the UI.
+1. call the v3 shelf/search or server-supplied dynamic URL;
+2. decode `ResultShelf` / `ResultLibraryItem` data;
+3. store/update local rows and relationships in Room;
+4. observe those rows and render them in the UI.
 
-Reader content follows the same local/remote pattern. A lesson can exist in local storage while its latest text, sentence translation, or media details still require a server response.
+Reader content follows the same local/remote pattern. A lesson can exist in local storage while its latest text, sentence translation, or media data still requires a server response.
 
-## Account, purchase and word limits
+## Account, purchase, and word limits
 
-The app receives profile/subscription fields from the service and uses them to decide which account UI/state to render. For Google Play purchases, the client sends a purchase receipt to the API and then refreshes the profile. This means the 20-word limit you reported is tied to account/profile state, not just a reader preference the 6.2.0 client can safely or completely redefine. Server-owned entitlement data and server responses remain authoritative.
+The account limit is represented by server-provided profile state including `cardsLimit` and `cardsCount`. In 6.2.0 the session layer derives `canCreateLingQs` from that state; a separate transform explicitly checks `cardsLimit == 20`. Reader word-token interaction consumes that derived state and routes to `UpgradeReason.LIMIT_WORDS` when permission is false.
 
-I cannot give instructions to patch that paid limit, fake the profile, or forge purchase requests. A reader/content bug for an account with legitimate access is a separate issue and can be diagnosed via the flow in [news-reader-trace.md](news-reader-trace.md).
+The network service also declares profile-account, subscription, free-card, and Android purchase endpoints. The client submits purchase data to LingQ and caches/refetches account state; the APK does not contain the corresponding server-side validation logic.
+
+See [entitlement-flow.md](entitlement-flow.md) for the source-level 5.5.9/6.2.0 comparison. The repository intentionally does not provide binary-patch instructions to falsify Premium state or purchase validation.
+
+## News and article reader boundary
+
+News is modeled as a library shelf (`LibraryShelfType.News` → `news`). Shelf/tab data comes from the service; tabs can contain an `apiUrl` that the client passes to a runtime-URL GET method. After an item is selected, it uses the standard lesson info/text/sentence/word APIs and reader/cache path.
+
+That means there are two independent failure classes:
+
+- **content path:** News shelf/tab/item/lesson data is absent or fails to load;
+- **entitlement path:** article content loads, but new-word interaction is unavailable because of account state.
+
+See [news-reader-trace.md](news-reader-trace.md) for the full decision tree.
 
 ## What static analysis cannot answer
 
-The APK does not reveal server database logic or current production feature flags. It cannot show whether a News shelf is currently returned for a given language/account, whether a particular article is licensed/available, why a request fails on a live account, or whether an entitlement check is repeated server-side. Those require an authorized runtime observation or server-side access.
+The APK does not reveal server database logic, current production feature flags, or current account-specific responses. It cannot show whether a News shelf is currently returned for a given language/account, why a live request fails, whether a particular article is available/licensed, or exactly which checks the server repeats. Those questions require authorized runtime observation or server-side access.
