@@ -1,0 +1,58 @@
+name: Decode LingQ 5.5.9 smali
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/decode-559-smali.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  decode:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Download and verify APK
+        run: |
+          set -euxo pipefail
+          curl -L --fail --retry 3 \
+            -o lingq-5.5.9.apk \
+            'https://github.com/Persie0/Lingq/releases/download/1/LingQ.ver.5.5.9.build.424.apk'
+          echo '2313cf14a0b8b7b24975f4f9bf16677a80286284160c618db126c17bb7647fef  lingq-5.5.9.apk' | sha256sum -c -
+
+      - name: Download and verify Apktool
+        run: |
+          set -euxo pipefail
+          curl -L --fail --retry 3 \
+            -o apktool.jar \
+            'https://github.com/iBotPeaches/Apktool/releases/download/v3.0.3/apktool_3.0.3.jar'
+          echo 'dbf930b076c6b9be08d57c449cacefc3bdd6b71ebd59b3066fc0e1f5b14f9423  apktool.jar' | sha256sum -c -
+
+      - name: Decode APK to smali
+        run: |
+          set -euxo pipefail
+          rm -rf decoded-5.5.9
+          java -jar apktool.jar d -f -r lingq-5.5.9.apk -o decoded-5.5.9
+          find decoded-5.5.9 -type f -name '*.smali' | wc -l
+          tar -czf lingq-5.5.9-smali.tar.gz decoded-5.5.9
+          sha256sum lingq-5.5.9-smali.tar.gz > lingq-5.5.9-smali.tar.gz.sha256
+
+      - name: Upload smali artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lingq-5.5.9-smali
+          path: |
+            lingq-5.5.9-smali.tar.gz
+            lingq-5.5.9-smali.tar.gz.sha256
+          if-no-files-found: error
