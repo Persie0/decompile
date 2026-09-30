@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_lesson_preview" app:startDestination="@id/fragment_lesson_preview"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <fragment android:label="Lesson Preview" android:name="com.lingq.feature.library.preview.LessonPreviewFragment" android:id="@id/fragment_lesson_preview">
+        <argument android:name="source" app:argType="string" />
+        <argument android:name="url" app:argType="string" />
+        <argument android:name="shelfCode" app:argType="string" />
+        <argument android:name="lessonId" app:argType="integer" />
+        <argument android:name="lessonPath" app:argType="com.lingq.core.analytics.data.LqAnalyticsValues$LessonPath" app:nullable="true" />
+        <argument android:name="isVirtual" android:defaultValue="false" app:argType="boolean" />
+        <argument android:name="hasAudio" android:defaultValue="false" app:argType="boolean" />
+        <argument android:name="duration" android:defaultValue="0" app:argType="integer" />
+        <action android:id="@id/actionToReaderCompose" app:destination="@id/nav_graph_reader" />
+    </fragment>
+    <action android:id="@id/actionToLessonPreview" app:destination="@id/fragment_lesson_preview" />
+</navigation>

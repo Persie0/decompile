@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:compileSdkVersion="37" android:compileSdkVersionCodename="17" android:requiredSplitTypes="base__abi,base__density" android:splitTypes="" package="com.linguist" platformBuildVersionCode="37" platformBuildVersionName="17">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="com.android.vending.BILLING"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+    <uses-permission android:maxSdkVersion="28" android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <queries>
+        <provider android:authorities="com.facebook.katana.provider.PlatformProvider"/>
+        <provider android:authorities="com.facebook.orca.provider.PlatformProvider"/>
+        <intent>
+            <action android:name="com.android.vending.billing.InAppBillingService.BIND"/>
+        </intent>
+        <intent>
+            <action android:name="com.google.android.apps.play.billingtestcompanion.BillingOverrideService.BIND"/>
+        </intent>
+        <package android:name="com.facebook.katana"/>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <category android:name="android.intent.category.BROWSABLE"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <category android:name="android.intent.category.BROWSABLE"/>
+            <data android:scheme="http"/>
+        </intent>
+    </queries>
+    <queries>
+        <package android:name="com.linguist"/>
+        <package android:name="com.microsoft.office.outlook"/>
+        <package android:name="com.google.android.gm"/>
+        <package android:name="com.google.android.gm.lite"/>
+        <package android:name="com.yahoo.mobile.client.android.mail"/>
+        <package android:name="me.bluemail.mail"/>
+        <package android:name="io.cleanfox.android"/>
+        <package android:name="ch.protonmail.android"/>
+        <package android:name="com.readdle.spark"/>
+        <package android:name="com.easilydo.mail"/>
+        <package android:name="ru.yandex.mail"/>
+        <package android:name="ru.mail.mailapp"/>
+    </queries>
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService"/>
+        </intent>
+    </queries>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:maxSdkVersion="30" android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID"/>
+    <uses-permission android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCE"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_TOPICS"/>
+    <permission android:name="com.linguist.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" android:protectionLevel="signature"/>
+    <uses-permission android:name="com.linguist.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"/>
+    <application android:allowBackup="false" android:appComponentFactory="androidx.core.app.CoreComponentFactory" android:dataExtractionRules="@xml/data_extraction_rules" android:extractNativeLibs="false" android:fullBackupContent="@xml/backup_rules" android:hardwareAccelerated="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:name="com.linguist.LingQApplication" android:roundIcon="@mipmap/ic_launcher_round" android:supportsRtl="true" android:theme="@style/AppTheme.SplashScreen" android:usesCleartextTraffic="true">
+        <meta-data android:name="firebase_analytics_collection_deactivated" android:value="false"/>
+        <activity android:exported="true" android:name="com.facebook.CustomTabActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="fb111663448884678"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="cct.com.linguist" android:scheme="fbconnect"/>
+            </intent-filter>
+        </activity>
+        <meta-data android:name="asset_statements" android:resource="@string/asset_statements"/>
+        <meta-data android:name="app_code" android:value="LingQ"/>
+        <meta-data android:name="language_code" android:value="all"/>
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="\111663448884678"/>
+        <meta-data android:name="com.facebook.sdk.ClientToken" android:value="b4db5490cc28691e1fdf5af11f4ff6a6"/>
+        <meta-data android:name="FCM_SENDER_ID" android:value="\1012553130695"/>
+        <meta-data android:name="google_client_id" android:value="1012553130695.apps.googleusercontent.com"/>
+        <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="@string/default_notification_channel_id"/>
+        <meta-data android:name="kochava_key" android:value="kolingq-25-languages-m2gtj9"/>
+        <meta-data android:name="amplitude_key" android:value="7e7d461c44bcc42ae955e39d8ddd301a"/>
+        <meta-data android:name="iterable_key" android:value="7a2c7d6f3f86449996e93f2a2bfa841c"/>
+        <meta-data android:name="web2wave_key" android:value="fee6d5df-83e2-4fa3-88f5-a610bd935ac0"/>
+        <provider android:authorities="com.linguist.androidx-startup" android:exported="false" android:name="androidx.startup.InitializationProvider">
+            <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer" android:value="androidx.startup"/>
+            <meta-data android:name="androidx.lifecycle.ProcessLifecycleInitializer" android:value="androidx.startup"/>
+            <meta-data android:name="okhttp3.internal.platform.PlatformInitializer" android:value="androidx.startup"/>
+            <meta-data android:name="androidx.profileinstaller.ProfileInstallerInitializer" android:value="androidx.startup"/>
+            <meta-data android:name="net.danlew.android.joda.JodaTimeInitializer" android:value="androidx.startup"/>
+        </provider>
+        <meta-data android:name="google_analytics_adid_collection_enabled" android:value="false"/>
+        <activity android:exported="true" android:launchMode="singleTask" android:name="com.lingq.ui.MainActivity" android:theme="@style/AppTheme.SplashScreen" android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="lingq"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter android:label="@string/lingq_import_lesson">
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:mimeType="text/plain"/>
+                <data android:mimeType="application/txt"/>
+                <data android:mimeType="application/octet-stream"/>
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="application/pdf"/>
+                <data android:mimeType="application/epub+zip"/>
+                <data android:mimeType="application/x-subrip"/>
+                <data android:mimeType="application/x-mobipocket-ebook"/>
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
+                <data android:mimeType="audio/mpeg"/>
+                <data android:mimeType="audio/mp4"/>
+                <data android:mimeType="audio/x-m4a"/>
+                <data android:mimeType="audio/x-wav"/>
+                <data android:mimeType="text/ttml"/>
+                <data android:mimeType="application/ttml+xml"/>
+                <data android:mimeType="text/srv3"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true" android:label="@string/app_name">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPrefix="/challenges"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/cup-2026"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/cup-2026/"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPrefix="/library"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPrefix="/en/signup/"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/.*/.*/courses/..*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/learn/..*/web/community/challenges/.*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/learn/..*/web/activities/lingqs-of-day/.*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/learn/..*/web/lesson/.*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/learn/..*/web/editor.*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/learn/..*/web/editor.*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/learn-italian-online/courses/.*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/learn/..*/web/library/vocabulary.*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/learn/..*/web/library.*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/learn/..*/web/library/.*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/learn/..*/web/reader/.*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/learn/..*/web/library/course/.*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/learn/..*/web/library/playlist"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/learn/..*/web/settings/referrals"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/uni/..*/learn/..*/web/library/course/.*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/upgrade/..*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/accounts/login/..*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/reader/..*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/..*/library/..*/..*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/lingqs-offer/..*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/year_in_review/2024"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/.*/learn/.*/web/profile/"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/.*/learn/.*/web/profile/..*"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/accounts/subscription/basic_2024/12/..*/checkout/"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/accounts/subscription/promo/..*/checkout/"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/accounts/subscription/"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/.*/lynx"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/lynx"/>
+                <data android:scheme="https"/>
+                <data android:host="www.lingq.com"/>
+                <data android:pathPattern="/.*/learn/.*/web/"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true" android:label="@string/app_name">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="lingq.com" android:pathPattern="/upgrade/..*" android:scheme="https"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https"/>
+                <data android:host="links.lingq.com"/>
+                <data android:pathPrefix="/"/>
+                <data android:scheme="http"/>
+                <data android:host="click.lingq.com"/>
+                <data android:pathPrefix="/uni/ls/click"/>
+            </intent-filter>
+        </activity>
+        <service android:exported="false" android:foregroundServiceType="mediaPlayback" android:name="com.lingq.core.player.service.PlayerService"/>
+        <receiver android:exported="true" android:name="com.lingq.core.player.service.PlayerService$MediaReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:exported="true" android:name="com.lingq.feature.widget.PlaylistWidgetReceiver">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/playlist_widget_info"/>
+        </receiver>
+        <receiver android:exported="true" android:label="@string/streak_widget_title" android:name="com.lingq.feature.widget.streak.StreakWidgetReceiver">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/streak_widget_info"/>
+        </receiver>
+        <service android:exported="false" android:name="com.lingq.commons.services.LingQFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/ic_lingq"/>
+        <meta-data android:name="com.google.firebase.messaging.default_notification_color" android:resource="@color/indigo_dark"/>
+        <meta-data android:name="com.google.mlkit.vision.DEPENDENCIES" android:value="ocr,ocr_chinese,ocr_japanese,ocr_korean"/>
+        <provider android:authorities="com.linguist.provider" android:exported="false" android:grantUriPermissions="true" android:name="androidx.core.content.FileProvider">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_path"/>
+        </provider>
+        <service android:directBootAware="true" android:exported="false" android:name="com.google.firebase.components.ComponentDiscoveryService">
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.crashlytics.FirebaseCrashlyticsKtxRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.crashlytics.CrashlyticsRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.perf.FirebasePerfKtxRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.perf.FirebasePerfRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingKtxRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.sessions.FirebaseSessionsRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.remoteconfig.FirebaseRemoteConfigKtxRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.remoteconfig.RemoteConfigRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.analytics.connector.internal.AnalyticsConnectorRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsKtxRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.FirebaseCommonKtxRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.abt.component.AbtRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.datatransport.TransportRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+        </service>
+        <meta-data android:name="com.google.android.play.billingclient.version" android:value="8.3.0"/>
+        <activity android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize" android:exported="false" android:name="com.android.billingclient.api.ProxyBillingActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <activity android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize" android:exported="false" android:name="com.android.billingclient.api.ProxyBillingActivityV2" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <activity android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize" android:name="com.facebook.FacebookActivity" android:theme="@style/com_facebook_activity_theme"/>
+        <activity android:name="com.facebook.CustomTabMainActivity"/>
+        <service android:exported="false" android:name="com.iterable.iterableapi.IterableFirebaseMessagingService">
+            <intent-filter android:priority="-1">
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <receiver android:exported="false" android:name="com.iterable.iterableapi.IterablePushActionReceiver">
+            <intent-filter>
+                <action android:name="com.iterable.push.ACTION_PUSH_ACTION"/>
+            </intent-filter>
+        </receiver>
+        <activity android:excludeFromRecents="true" android:exported="false" android:launchMode="singleTask" android:name="com.iterable.iterableapi.IterableTrampolineActivity" android:taskAffinity="" android:theme="@style/TrampolineActivity.Transparent"/>
+        <uses-library android:name="androidx.security" android:required="false"/>
+        <activity android:exported="false" android:name="com.google.mlkit.vision.documentscanner.internal.GmsDocumentScanningDelegateActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
+        <service android:directBootAware="true" android:exported="false" android:name="com.google.mlkit.common.internal.MlKitComponentDiscoveryService">
+            <meta-data android:name="com.google.firebase.components:com.google.mlkit.vision.text.internal.TextRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.mlkit.vision.common.internal.VisionCommonRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.mlkit.common.internal.CommonComponentRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+        </service>
+        <provider android:authorities="com.linguist.mlkitinitprovider" android:exported="false" android:initOrder="99" android:name="com.google.mlkit.common.internal.MlKitInitProvider"/>
+        <activity android:enabled="true" android:excludeFromRecents="true" android:exported="false" android:name="androidx.glance.appwidget.action.ActionTrampolineActivity" android:theme="@android:style/Theme.NoDisplay"/>
+        <activity android:enabled="true" android:exported="false" android:launchMode="singleInstance" android:name="androidx.glance.appwidget.action.InvisibleActionTrampolineActivity" android:noHistory="true" android:taskAffinity="androidx.glance.appwidget.ListAdapterCallbackTrampoline" android:theme="@style/Widget.Glance.AppWidget.CallbackTrampoline"/>
+        <receiver android:enabled="true" android:exported="false" android:name="androidx.glance.appwidget.action.ActionCallbackBroadcastReceiver"/>
+        <receiver android:enabled="true" android:exported="false" android:name="androidx.glance.appwidget.UnmanagedSessionReceiver"/>
+        <receiver android:enabled="true" android:exported="false" android:name="androidx.glance.appwidget.MyPackageReplacedReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+            </intent-filter>
+        </receiver>
+        <service android:exported="true" android:name="androidx.glance.appwidget.GlanceRemoteViewsService" android:permission="android.permission.BIND_REMOTEVIEWS"/>
+        <service android:directBootAware="false" android:enabled="@bool/enable_system_job_service_default" android:exported="true" android:name="androidx.work.impl.background.systemjob.SystemJobService" android:permission="android.permission.BIND_JOB_SERVICE"/>
+        <service android:directBootAware="false" android:enabled="@bool/enable_system_foreground_service_default" android:exported="false" android:name="androidx.work.impl.foreground.SystemForegroundService"/>
+        <receiver android:directBootAware="false" android:enabled="true" android:exported="false" android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"/>
+        <receiver android:directBootAware="false" android:enabled="false" android:exported="false" android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:directBootAware="false" android:enabled="true" android:exported="true" android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver" android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="androidx.work.diagnostics.REQUEST_DIAGNOSTICS"/>
+            </intent-filter>
+        </receiver>
+        <service android:directBootAware="true" android:exported="false" android:name="androidx.room.MultiInstanceInvalidationService"/>
+        <activity android:excludeFromRecents="true" android:exported="false" android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <service android:exported="true" android:name="com.google.android.gms.auth.api.signin.RevocationBoundService" android:permission="com.google.android.gms.auth.api.signin.permission.REVOCATION_NOTIFICATION" android:visibleToInstantApps="true"/>
+        <receiver android:exported="true" android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver" android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+            </intent-filter>
+            <meta-data android:name="com.google.android.gms.cloudmessaging.FINISHED_AFTER_HANDLED" android:value="true"/>
+        </receiver>
+        <service android:directBootAware="true" android:exported="false" android:name="com.google.firebase.messaging.FirebaseMessagingService">
+            <intent-filter android:priority="-500">
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <service android:enabled="false" android:exported="false" android:name="com.google.firebase.sessions.SessionLifecycleService"/>
+        <provider android:authorities="com.linguist.firebaseinitprovider" android:directBootAware="true" android:exported="false" android:initOrder="100" android:name="com.google.firebase.provider.FirebaseInitProvider"/>
+        <receiver android:enabled="true" android:exported="false" android:name="com.google.android.gms.measurement.AppMeasurementReceiver"/>
+        <service android:enabled="true" android:exported="false" android:name="com.google.android.gms.measurement.AppMeasurementService"/>
+        <service android:enabled="true" android:exported="false" android:name="com.google.android.gms.measurement.AppMeasurementJobService" android:permission="android.permission.BIND_JOB_SERVICE"/>
+        <activity android:exported="false" android:name="com.google.android.gms.common.api.GoogleApiActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <provider android:authorities="com.linguist.FacebookInitProvider" android:exported="false" android:name="com.facebook.internal.FacebookInitProvider"/>
+        <receiver android:exported="false" android:name="com.facebook.CurrentAccessTokenExpirationBroadcastReceiver">
+            <intent-filter>
+                <action android:name="com.facebook.sdk.ACTION_CURRENT_ACCESS_TOKEN_CHANGED"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:exported="false" android:name="com.facebook.AuthenticationTokenManager$CurrentAuthenticationTokenChangedBroadcastReceiver">
+            <intent-filter>
+                <action android:name="com.facebook.sdk.ACTION_CURRENT_AUTHENTICATION_TOKEN_CHANGED"/>
+            </intent-filter>
+        </receiver>
+        <uses-library android:name="android.ext.adservices" android:required="false"/>
+        <service android:name="androidx.core.widget.RemoteViewsCompatService" android:permission="android.permission.BIND_REMOTEVIEWS"/>
+        <uses-library android:name="androidx.window.extensions" android:required="false"/>
+        <uses-library android:name="androidx.window.sidecar" android:required="false"/>
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
+        <service android:exported="false" android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery">
+            <meta-data android:name="backend:com.google.android.datatransport.cct.CctBackendFactory" android:value="cct"/>
+        </service>
+        <receiver android:directBootAware="false" android:enabled="true" android:exported="true" android:name="androidx.profileinstaller.ProfileInstallReceiver" android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.SKIP_FILE"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION"/>
+            </intent-filter>
+        </receiver>
+        <service android:exported="false" android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService" android:permission="android.permission.BIND_JOB_SERVICE"/>
+        <receiver android:exported="false" android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver"/>
+        <activity android:exported="false" android:name="com.google.android.play.core.common.PlayCoreDialogWrapperActivity" android:stateNotNeeded="true" android:theme="@style/Theme.PlayCore.Transparent"/>
+        <meta-data android:name="com.android.vending.splits.required" android:value="true"/>
+        <meta-data android:name="com.android.stamp.source" android:value="https://play.google.com/store"/>
+        <meta-data android:name="com.android.stamp.type" android:value="STAMP_TYPE_DISTRIBUTION_APK"/>
+        <meta-data android:name="com.android.vending.splits" android:resource="@xml/splits0"/>
+        <meta-data android:name="com.android.vending.derived.apk.id" android:value="3"/>
+    </application>
+</manifest>

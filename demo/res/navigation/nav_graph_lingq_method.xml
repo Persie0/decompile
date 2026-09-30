@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_lingq_method" app:startDestination="@id/fragment_lingq_method"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <fragment android:label="LingQ Method" android:name="com.lingq.feature.statistics.LingQMethodFragment" android:id="@id/fragment_lingq_method" />
+    <action android:id="@id/actionToLingQMethod" app:destination="@id/fragment_lingq_method" />
+</navigation>

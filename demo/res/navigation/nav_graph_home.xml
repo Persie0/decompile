@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_home" app:startDestination="@id/fragment_home"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_reader" />
+    <include app:graph="@navigation/nav_graph_review_parent" />
+    <include app:graph="@navigation/nav_graph_settings_review" />
+    <include app:graph="@navigation/nav_graph_settings" />
+    <include app:graph="@navigation/nav_graph_notifications" />
+    <include app:graph="@navigation/nav_graph_challenges" />
+    <include app:graph="@navigation/nav_graph_challenges_details" />
+    <include app:graph="@navigation/nav_graph_cup" />
+    <include app:graph="@navigation/nav_graph_help" />
+    <include app:graph="@navigation/nav_graph_lesson_info" />
+    <include app:graph="@navigation/nav_graph_collection" />
+    <include app:graph="@navigation/nav_graph_karaoke" />
+    <include app:graph="@navigation/nav_graph_lesson_preview" />
+    <include app:graph="@navigation/nav_graph_web_view" />
+    <include app:graph="@navigation/nav_graph_invite_friends" />
+    <include app:graph="@navigation/nav_graph_user_import" />
+    <include app:graph="@navigation/nav_graph_user_import_data" />
+    <include app:graph="@navigation/nav_graph_book_challenge_chooser_parent" />
+    <include app:graph="@navigation/nav_graph_lingq_method" />
+    <fragment android:label="Home" android:name="com.lingq.ui.HomeFragment" android:id="@id/fragment_home">
+        <argument android:name="languageFromDeeplink" android:defaultValue="" app:argType="string" />
+        <argument android:name="shareData" android:defaultValue="@null" app:argType="com.lingq.core.navigation.model.ImportDataNavArg" app:nullable="true" />
+        <argument android:name="currentTrack" android:defaultValue="0" app:argType="integer" />
+        <action android:id="@id/actionToReader" app:destination="@id/nav_graph_reader" app:launchSingleTop="true" app:popUpTo="@id/nav_graph_reader" app:popUpToInclusive="true" />
+        <action android:id="@id/actionToReaderCompose" app:destination="@id/nav_graph_reader" app:launchSingleTop="true" app:popUpTo="@id/nav_graph_reader" app:popUpToInclusive="true" />
+        <action android:id="@id/actionToSettings" app:destination="@id/nav_graph_settings" />
+        <action android:id="@id/actionToNotifications" app:destination="@id/nav_graph_notifications" />
+        <action android:id="@id/actionToChallenges" app:destination="@id/nav_graph_challenges" />
+        <action android:id="@id/actionToHelp" app:destination="@id/nav_graph_help" />
+        <action android:id="@id/actionToReview" app:destination="@id/nav_graph_review_parent" />
+        <action android:id="@id/actionToReviewSettings" app:destination="@id/nav_graph_settings_review" />
+        <action android:id="@id/actionToLessonInfo" app:destination="@id/nav_graph_lesson_info" />
+        <action android:id="@id/actionToCollection" app:destination="@id/nav_graph_collection" />
+        <action android:id="@id/actionToKaraoke" app:destination="@id/nav_graph_karaoke" />
+        <action android:id="@id/actionToLessonPreview" app:destination="@id/nav_graph_lesson_preview" />
+        <action android:id="@id/actionToChallengeDetails" app:destination="@id/nav_graph_challenges_details" />
+        <action android:id="@id/actionToWeb" app:destination="@id/nav_graph_web_view" />
+        <action android:id="@id/actionToInviteFriends" app:destination="@id/nav_graph_invite_friends" />
+        <action android:id="@id/actionToImport" app:destination="@id/nav_graph_user_import" />
+        <action android:id="@id/actionToImportData" app:destination="@id/nav_graph_user_import_data" />
+        <action android:id="@id/actionToBookChallengeChooser" app:destination="@id/nav_graph_book_challenge_chooser_parent" />
+        <action android:id="@id/actionToLingQMethod" app:destination="@id/nav_graph_lingq_method" />
+    </fragment>
+    <action android:id="@id/actionToHome" app:destination="@id/fragment_home" app:launchSingleTop="true" app:popUpTo="@id/fragment_start" app:popUpToInclusive="true" />
+    <action android:id="@id/actionToCup" app:destination="@id/nav_graph_cup" />
+</navigation>

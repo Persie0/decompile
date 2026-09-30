@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:id="@id/viewCourse" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:minHeight="50.0dp" android:paddingStart="@dimen/activity_horizontal_margin" android:paddingEnd="@dimen/activity_horizontal_margin"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView android:ellipsize="end" android:gravity="center_vertical" android:id="@id/tvTitle" android:layout_width="@dimen/match_constraints" android:layout_height="wrap_content" android:maxLines="2" android:textDirection="locale" android:layout_marginEnd="16.0dp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toStartOf="@id/ivForward" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" style="@style/BodyLarge" />
+    <ImageView android:id="@id/ivForward" android:layout_width="12.0dp" android:layout_height="12.0dp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" app:srcCompat="@drawable/ic_chevron_right_s" app:tint="?colorOnSurface" />
+    <View android:id="@id/divider" android:background="?colorOutlineVariant" android:layout_width="match_parent" android:layout_height="1.0dp" app:layout_constraintBottom_toBottomOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

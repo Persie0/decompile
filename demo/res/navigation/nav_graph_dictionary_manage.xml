@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_dictionary_manage" app:startDestination="@id/fragment_dictionaries_manage"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <dialog android:label="Dictionaries Manage" android:name="com.lingq.feature.dictionary.DictionariesManageFragment" android:id="@id/fragment_dictionaries_manage" />
+    <action android:id="@id/actionToDictionaryManage" app:destination="@id/fragment_dictionaries_manage" />
+</navigation>

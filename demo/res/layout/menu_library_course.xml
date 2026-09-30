@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:id="@id/viewOutside" android:layout_width="wrap_content" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.cardview.widget.CardView android:layout_gravity="center_horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="30.0dp" android:layout_marginEnd="30.0dp" app:cardBackgroundColor="?colorSurfaceContainer" app:cardCornerRadius="10.0dp" app:cardElevation="12.0dp" app:cardPreventCornerOverlap="false" app:cardUseCompatPadding="true">
+        <RelativeLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <LinearLayout android:id="@id/btnViewCourse" android:paddingTop="@dimen/list_vertical_margin" android:paddingBottom="@dimen/list_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:layout_alignParentTop="true" android:paddingStart="@dimen/spacing_high" android:paddingEnd="@dimen/spacing_high">
+                <ImageView android:layout_gravity="center_vertical" android:layout_width="24.0dp" android:layout_height="24.0dp" android:scaleType="fitCenter" app:srcCompat="@drawable/ic_collection_course_s" />
+                <TextView android:textAppearance="@style/BodyMedium" android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/lesson_view_course" android:layout_marginStart="@dimen/spacing_high" />
+            </LinearLayout>
+            <LinearLayout android:id="@id/btnAddToPlaylist" android:paddingTop="@dimen/list_vertical_margin" android:paddingBottom="@dimen/list_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:layout_below="@id/btnViewCourse" android:paddingStart="@dimen/spacing_high" android:paddingEnd="@dimen/spacing_high">
+                <ImageView android:layout_gravity="center_vertical" android:layout_width="24.0dp" android:layout_height="24.0dp" android:scaleType="fitCenter" app:srcCompat="@drawable/ic_playlist_icon" />
+                <TextView android:textAppearance="@style/BodyMedium" android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/lesson_add_to_playlist" android:layout_marginStart="@dimen/spacing_high" />
+            </LinearLayout>
+            <LinearLayout android:id="@id/btnBlacklistCourse" android:paddingTop="@dimen/list_vertical_margin" android:paddingBottom="@dimen/list_vertical_margin" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:layout_below="@id/btnAddToPlaylist" android:paddingStart="@dimen/spacing_high" android:paddingEnd="@dimen/spacing_high">
+                <ImageView android:layout_gravity="center_vertical" android:layout_width="24.0dp" android:layout_height="24.0dp" android:scaleType="fitCenter" app:srcCompat="@drawable/ic_no_interested_in_course" />
+                <TextView android:textAppearance="@style/BodyLarge" android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/course_not_interested_in_course" android:layout_marginStart="@dimen/spacing_high" />
+            </LinearLayout>
+            <LinearLayout android:id="@id/btnReport" android:paddingTop="@dimen/list_vertical_margin" android:paddingBottom="@dimen/list_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:layout_below="@id/btnBlacklistCourse" android:paddingStart="@dimen/spacing_high" android:paddingEnd="@dimen/spacing_high">
+                <ImageView android:layout_gravity="center_vertical" android:layout_width="24.0dp" android:layout_height="24.0dp" android:scaleType="fitCenter" app:srcCompat="@drawable/ic_report" />
+                <TextView android:textAppearance="@style/BodyMedium" android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/card_report" android:layout_marginStart="@dimen/spacing_high" />
+            </LinearLayout>
+            <LinearLayout android:id="@id/btnLike" android:paddingTop="@dimen/list_vertical_margin" android:paddingBottom="@dimen/list_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:layout_below="@id/btnReport" android:paddingStart="@dimen/spacing_high" android:paddingEnd="@dimen/spacing_high">
+                <ImageView android:layout_gravity="center_vertical" android:id="@id/like" android:layout_width="24.0dp" android:layout_height="24.0dp" android:scaleType="fitCenter" app:srcCompat="@drawable/ic_heart_s" />
+                <TextView android:textAppearance="@style/BodyMedium" android:layout_gravity="center_vertical" android:id="@id/tvLike" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="@dimen/spacing_high" />
+            </LinearLayout>
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+</FrameLayout>

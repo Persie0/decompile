@@ -1,0 +1,80 @@
+.class public final synthetic Lp1a;
+.super Ljava/lang/Object;
+.source "SourceFile"
+
+# interfaces
+.implements Lzi3;
+
+
+# instance fields
+.field public final synthetic a:Lck;
+
+.field public final synthetic b:Ljava/lang/String;
+
+.field public final synthetic c:Lv78;
+
+.field public final synthetic d:Lv78;
+
+.field public final synthetic e:Lon3;
+
+.field public final synthetic f:Landroidx/compose/runtime/internal/a;
+
+
+# direct methods
+.method public synthetic constructor <init>(Lck;Ljava/lang/String;Lv78;Lv78;Lon3;Landroidx/compose/runtime/internal/a;I)V
+    .locals 0
+
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    iput-object p1, p0, Lp1a;->a:Lck;
+
+    iput-object p2, p0, Lp1a;->b:Ljava/lang/String;
+
+    iput-object p3, p0, Lp1a;->c:Lv78;
+
+    iput-object p4, p0, Lp1a;->d:Lv78;
+
+    iput-object p5, p0, Lp1a;->e:Lon3;
+
+    iput-object p6, p0, Lp1a;->f:Landroidx/compose/runtime/internal/a;
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public final invoke(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+    .locals 8
+
+    move-object v6, p1
+
+    check-cast v6, Lye1;
+
+    check-cast p2, Ljava/lang/Integer;
+
+    invoke-virtual {p2}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    const p1, 0x180001
+
+    invoke-static {p1}, Lpk9;->z(I)I
+
+    move-result v7
+
+    iget-object v0, p0, Lp1a;->a:Lck;
+
+    iget-object v1, p0, Lp1a;->b:Ljava/lang/String;
+
+    iget-object v2, p0, Lp1a;->c:Lv78;
+
+    iget-object v3, p0, Lp1a;->d:Lv78;
+
+    iget-object v4, p0, Lp1a;->e:Lon3;
+
+    iget-object v5, p0, Lp1a;->f:Landroidx/compose/runtime/internal/a;
+
+    invoke-static/range {v0 .. v7}, Lpk9;->b(Lck;Ljava/lang/String;Lv78;Lv78;Lon3;Landroidx/compose/runtime/internal/a;Lye1;I)V
+
+    sget-object p0, Lxfa;->a:Lxfa;
+
+    return-object p0
+.end method

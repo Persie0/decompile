@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:layout_width="match_parent" android:layout_height="match_parent" android:transitionGroup="true"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.lingq.feature.review.views.speaking.AudioMatchView android:id="@id/viewAudioMatch" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/activity_horizontal_margin" android:layout_marginStart="@dimen/activity_horizontal_margin" android:layout_marginEnd="@dimen/activity_horizontal_margin" />
+    <com.google.android.material.progressindicator.CircularProgressIndicator android:layout_gravity="center" android:id="@id/viewProgress" android:visibility="gone" android:layout_width="@dimen/progress_size" android:layout_height="@dimen/progress_size" style="@style/Widget.ProgressCircle" />
+</FrameLayout>

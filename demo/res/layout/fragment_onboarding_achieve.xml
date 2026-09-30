@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent" android:transitionGroup="true"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.google.android.material.appbar.AppBarLayout android:id="@id/appbar" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <com.google.android.material.appbar.MaterialToolbar android:id="@id/toolbar" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    </com.google.android.material.appbar.AppBarLayout>
+    <LinearLayout android:orientation="vertical" android:id="@id/viewContent" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_above="@id/btnContinue" android:layout_below="@id/appbar" android:paddingStart="@dimen/activity_horizontal_margin" android:paddingEnd="@dimen/activity_horizontal_margin">
+        <TextView android:gravity="center" android:id="@id/tv_title" android:paddingBottom="@dimen/list_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/welcome_what_you_can_achieve" android:paddingStart="@dimen/activity_horizontal_margin" android:paddingEnd="@dimen/activity_horizontal_margin" style="@style/TitleLarge" />
+        <androidx.recyclerview.widget.RecyclerView android:layout_gravity="center" android:id="@id/rv_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_standard" />
+    </LinearLayout>
+    <com.google.android.material.button.MaterialButton android:id="@id/btnContinue" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/ui_continue" android:layout_alignParentBottom="true" android:layout_marginStart="@dimen/onboarding_topics_button_margin" android:layout_marginEnd="@dimen/onboarding_topics_button_margin" style="@style/OnboardingButton" />
+</RelativeLayout>

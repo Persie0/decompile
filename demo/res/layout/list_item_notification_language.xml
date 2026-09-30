@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:orientation="horizontal" android:paddingTop="@dimen/list_vertical_margin" android:paddingBottom="@dimen/list_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:paddingStart="@dimen/activity_horizontal_margin" android:paddingEnd="@dimen/activity_horizontal_margin"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView android:textAppearance="@style/BodyLarge" android:id="@id/tvLanguage" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_centerVertical="true" android:textDirection="locale" android:layout_toStartOf="@id/ivCollapse" style="@style/BodyLarge" />
+    <ImageView android:id="@id/ivCollapse" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginEnd="10.0dp" android:layout_alignParentEnd="true" app:srcCompat="@drawable/ic_chevron_right_s" />
+</RelativeLayout>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:topLeftRadius="@dimen/btn_corner_large" android:topRightRadius="@dimen/btn_corner_large" android:bottomLeftRadius="@dimen/btn_corner_large" android:bottomRightRadius="@dimen/btn_corner_large" />
+    <solid android:color="?loadingColor" />
+</shape>

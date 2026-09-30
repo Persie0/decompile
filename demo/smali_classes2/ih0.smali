@@ -1,0 +1,31 @@
+.class public final Lih0;
+.super Ljava/lang/Object;
+.source "SourceFile"
+
+
+# static fields
+.field public static final synthetic a:Lih0;
+
+.field public static final b:Ljava/lang/String;
+
+
+# direct methods
+.method static constructor <clinit>()V
+    .locals 1
+
+    new-instance v0, Lih0;
+
+    invoke-direct {v0}, Ljava/lang/Object;-><init>()V
+
+    sput-object v0, Lih0;->a:Lih0;
+
+    const-class v0, Ljh0;
+
+    invoke-virtual {v0}, Ljava/lang/Class;->getSimpleName()Ljava/lang/String;
+
+    move-result-object v0
+
+    sput-object v0, Lih0;->b:Ljava/lang/String;
+
+    return-void
+.end method

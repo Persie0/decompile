@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="challenges_cup_banner_ends_in">
+        <item quantity="other">%1$d일 후 종료</item>
+    </plurals>
+    <plurals name="challenges_participants">
+        <item quantity="one">참가자 %s명</item>
+        <item quantity="other">참가자 %s명</item>
+    </plurals>
+    <plurals name="cup_days_remaining">
+        <item quantity="other">%1$d일 남음</item>
+    </plurals>
+    <plurals name="cup_days_until">
+        <item quantity="other">%1$d일 후 시작</item>
+    </plurals>
+    <plurals name="exo_controls_fastforward_by_amount_description">
+        <item quantity="one">%d초 빨리 감기</item>
+        <item quantity="other">%d초 빨리 감기</item>
+    </plurals>
+    <plurals name="exo_controls_rewind_by_amount_description">
+        <item quantity="one">%d초 되감기</item>
+        <item quantity="other">%d초 되감기</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_days">
+        <item quantity="one">내일</item>
+        <item quantity="other">%d일 후</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_hours">
+        <item quantity="one">1시간 후</item>
+        <item quantity="other">%d시간 후</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_minutes">
+        <item quantity="one">1분 후</item>
+        <item quantity="other">%d분 후</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_seconds">
+        <item quantity="one">1초 후</item>
+        <item quantity="other">%d초 후</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_days_ago">
+        <item quantity="one">어제</item>
+        <item quantity="other">%d일 전</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_hours_ago">
+        <item quantity="one">1시간 전</item>
+        <item quantity="other">%d시간 전</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_minutes_ago">
+        <item quantity="one">1분 전</item>
+        <item quantity="other">%d분 전</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_seconds_ago">
+        <item quantity="one">1초 전</item>
+        <item quantity="other">%d초 전</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_hours">
+        <item quantity="one">1시간</item>
+        <item quantity="other">%d시간</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_minutes">
+        <item quantity="one">1분</item>
+        <item quantity="other">%d분</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_seconds">
+        <item quantity="one">1초</item>
+        <item quantity="other">%d초</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_days">
+        <item quantity="one">내일</item>
+        <item quantity="other">%d일 후</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_hours">
+        <item quantity="one">1시간 후</item>
+        <item quantity="other">%d시간 후</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_minutes">
+        <item quantity="one">1분 후</item>
+        <item quantity="other">%d분 후</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_seconds">
+        <item quantity="one">1초 내</item>
+        <item quantity="other">%d초 후</item>
+    </plurals>
+    <plurals name="joda_time_android_num_days_ago">
+        <item quantity="one">어제</item>
+        <item quantity="other">%d일 전</item>
+    </plurals>
+    <plurals name="joda_time_android_num_hours_ago">
+        <item quantity="one">1시간 전</item>
+        <item quantity="other">%d시간 전</item>
+    </plurals>
+    <plurals name="joda_time_android_num_minutes_ago">
+        <item quantity="one">1분 전</item>
+        <item quantity="other">%d분 전</item>
+    </plurals>
+    <plurals name="joda_time_android_num_seconds_ago">
+        <item quantity="one">1초 전</item>
+        <item quantity="other">%d초 전</item>
+    </plurals>
+    <plurals name="lingq_courses_count_Course">
+        <item quantity="other">%d 코스</item>
+    </plurals>
+    <plurals name="lingq_lessons_count_Lessons">
+        <item quantity="other">%d 레슨</item>
+    </plurals>
+    <plurals name="lingq_likes_count_like">
+        <item quantity="other">%d 좋아요</item>
+    </plurals>
+    <plurals name="lingq_lingqs_count_LingQs">
+        <item quantity="other">%d LingQ</item>
+    </plurals>
+    <plurals name="mtrl_badge_content_description">
+        <item quantity="one">새 알림 %d개</item>
+        <item quantity="other">새 알림 %d개</item>
+    </plurals>
+    <plurals name="paging_move_known_action_button">
+        <item quantity="other">이 %d 단어를 이미 알고 있습니다.</item>
+    </plurals>
+    <plurals name="settings_daily_streak_target_estimated_minutes">
+        <item quantity="other">하루 약 %d분 학습에 해당합니다.</item>
+    </plurals>
+    <plurals name="stats_listen_for_n_more_minutes">
+        <item quantity="other">일일 목표를 달성하기 위해 %d을(를) 더 들어보세요.</item>
+    </plurals>
+    <plurals name="stats_streak_days_count_day">
+        <item quantity="other">%d일</item>
+    </plurals>
+</resources>

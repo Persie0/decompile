@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center_vertical" android:orientation="vertical" android:id="@id/viewContent" android:padding="@dimen/spacing_high" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.facebook.shimmer.ShimmerFrameLayout android:id="@id/tvLessonTitle" android:background="@drawable/dr_loading_elements_bg" android:layout_width="match_parent" android:layout_height="16.0dp" android:layout_marginTop="4.0dp" android:layout_marginEnd="40.0dp" android:backgroundTint="?loadingColor" app:shimmer_base_alpha="0.8" app:shimmer_base_color="?loadingColor" app:shimmer_colored="true" app:shimmer_highlight_alpha="1.0" app:shimmer_highlight_color="?loadingColor" />
+    <com.facebook.shimmer.ShimmerFrameLayout android:id="@id/tvDuration" android:background="@drawable/dr_loading_elements_bg" android:layout_width="180.0dp" android:layout_height="15.0dp" android:layout_marginTop="8.0dp" android:backgroundTint="?loadingColor" app:shimmer_base_alpha="0.8" app:shimmer_base_color="?loadingColor" app:shimmer_colored="true" app:shimmer_highlight_alpha="1.0" app:shimmer_highlight_color="?loadingColor" />
+</LinearLayout>

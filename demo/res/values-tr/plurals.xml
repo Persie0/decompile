@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="challenges_cup_banner_ends_in">
+        <item quantity="one">%1$d gün içinde sona eriyor</item>
+        <item quantity="other">%1$d gün içinde sona eriyor</item>
+    </plurals>
+    <plurals name="challenges_participants">
+        <item quantity="one">%s katılımcı</item>
+        <item quantity="other">%s katılımcı</item>
+    </plurals>
+    <plurals name="cup_days_remaining">
+        <item quantity="one">%1$d gün kaldı</item>
+        <item quantity="other">%1$d gün kaldı</item>
+    </plurals>
+    <plurals name="cup_days_until">
+        <item quantity="one">%1$d gün sonra başlıyor</item>
+        <item quantity="other">%1$d gün sonra başlıyor</item>
+    </plurals>
+    <plurals name="exo_controls_fastforward_by_amount_description">
+        <item quantity="one">%d saniye ileri sar</item>
+        <item quantity="other">%d saniye ileri sar</item>
+    </plurals>
+    <plurals name="exo_controls_rewind_by_amount_description">
+        <item quantity="one">%d saniye geri sar</item>
+        <item quantity="other">%d saniye geri sar</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_days">
+        <item quantity="one">yarın</item>
+        <item quantity="other">%d gün içinde</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_hours">
+        <item quantity="one">1 saat içinde</item>
+        <item quantity="other">%d saat içinde</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_minutes">
+        <item quantity="one">1 dak. içinde</item>
+        <item quantity="other">%d dakika içinde</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_seconds">
+        <item quantity="one">1 san. içinde</item>
+        <item quantity="other">%d saniye içinde</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_days_ago">
+        <item quantity="one">dün</item>
+        <item quantity="other">%d gün önce</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_hours_ago">
+        <item quantity="one">1 saat önce</item>
+        <item quantity="other">%d saat önce</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_minutes_ago">
+        <item quantity="one">1 dak. önce</item>
+        <item quantity="other">%d dakika önce</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_seconds_ago">
+        <item quantity="one">1 saniye önce</item>
+        <item quantity="other">%d saniye önce</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_hours">
+        <item quantity="one">1 saat</item>
+        <item quantity="other">%d saat</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_minutes">
+        <item quantity="one">1 dakika</item>
+        <item quantity="other">%d dakika</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_seconds">
+        <item quantity="one">1 saniye</item>
+        <item quantity="other">%d saniye</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_days">
+        <item quantity="one">yarın</item>
+        <item quantity="other">%d gün içinde</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_hours">
+        <item quantity="one">1 saat içinde</item>
+        <item quantity="other">%d saat içinde</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_minutes">
+        <item quantity="one">1 dakika içinde</item>
+        <item quantity="other">%d dakika içinde</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_seconds">
+        <item quantity="one">1 saniye içinde</item>
+        <item quantity="other">%d saniye içinde</item>
+    </plurals>
+    <plurals name="joda_time_android_num_days_ago">
+        <item quantity="one">dün</item>
+        <item quantity="other">%d gün önce</item>
+    </plurals>
+    <plurals name="joda_time_android_num_hours_ago">
+        <item quantity="one">1 saat önce</item>
+        <item quantity="other">%d saat önce</item>
+    </plurals>
+    <plurals name="joda_time_android_num_minutes_ago">
+        <item quantity="one">1 dakika önce</item>
+        <item quantity="other">%d dakika önce</item>
+    </plurals>
+    <plurals name="joda_time_android_num_seconds_ago">
+        <item quantity="one">1 saniye önce</item>
+        <item quantity="other">%d saniye önce</item>
+    </plurals>
+    <plurals name="lingq_courses_count_Course">
+        <item quantity="one">%d Kurs</item>
+        <item quantity="other">%d Kurs</item>
+    </plurals>
+    <plurals name="lingq_lessons_count_Lessons">
+        <item quantity="one">%d Ders</item>
+        <item quantity="other">%d Ders</item>
+    </plurals>
+    <plurals name="lingq_likes_count_like">
+        <item quantity="one">%d Beğeni</item>
+        <item quantity="other">%d Beğeni</item>
+    </plurals>
+    <plurals name="lingq_lingqs_count_LingQs">
+        <item quantity="one">%d LingQ</item>
+        <item quantity="other">%d LingQ</item>
+    </plurals>
+    <plurals name="mtrl_badge_content_description">
+        <item quantity="one">%d yeni bildirim</item>
+        <item quantity="other">%d yeni bildirim</item>
+    </plurals>
+    <plurals name="paging_move_known_action_button">
+        <item quantity="one">Bu kelimeyi biliyorum</item>
+        <item quantity="other">Bu %d kelimeyi biliyorum</item>
+    </plurals>
+    <plurals name="settings_daily_streak_target_estimated_minutes">
+        <item quantity="one">Bu, günde yaklaşık %d dk çalışma demektir.</item>
+        <item quantity="other">Bu, günde yaklaşık %d dk çalışma demektir.</item>
+    </plurals>
+    <plurals name="stats_listen_for_n_more_minutes">
+        <item quantity="one">Günlük hedefine ulaşmak için %d dakika daha dinle.</item>
+        <item quantity="other">Günlük hedefine ulaşmak için %d dakika daha dinle.</item>
+    </plurals>
+    <plurals name="stats_streak_days_count_day">
+        <item quantity="one">%d Gün</item>
+        <item quantity="other">%d Gün</item>
+    </plurals>
+</resources>

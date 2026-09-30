@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_invite_friends" app:startDestination="@id/fragment_invite_friends"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <dialog android:label="Invite Friends" android:name="com.lingq.feature.more.InviteFriendsFragment" android:id="@id/fragment_invite_friends" />
+    <action android:id="@id/actionToInviteFriends" app:destination="@id/fragment_invite_friends" />
+</navigation>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditText android:id="@id/et_tags" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/spacing_high" android:hint="@string/texts_type_tag_here" android:inputType="text" android:imeOptions="actionDone" android:autofillHints="true" />
+    <TextView android:layout_gravity="end|center" android:id="@id/tv_clear" android:padding="@dimen/spacing_high" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/ui_clear" style="@style/LabelLarge" />
+    <FrameLayout android:layout_gravity="center" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <androidx.recyclerview.widget.RecyclerView android:id="@id/view_tags" android:paddingTop="@dimen/spacing_standard" android:paddingBottom="@dimen/spacing_standard" android:scrollbars="vertical" android:fadingEdge="vertical" android:fadingEdgeLength="@dimen/spacing_standard" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="240.0dp" android:requiresFadingEdge="vertical" android:paddingStart="@dimen/spacing_high" android:paddingEnd="@dimen/spacing_high" />
+        <com.google.android.material.progressindicator.CircularProgressIndicator android:id="@id/viewProgress" android:layout_width="@dimen/progress_size" android:layout_height="@dimen/progress_size" style="@style/Widget.ProgressCircle" />
+    </FrameLayout>
+</LinearLayout>

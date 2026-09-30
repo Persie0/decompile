@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:orientation="horizontal" android:padding="@dimen/spacing_standard" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:id="@id/tvNumber" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textDirection="locale" style="@style/TitleLarge" />
+    <TextView android:textAppearance="@style/TitleLarge" android:id="@id/tvTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignBaseline="@id/tvNumber" android:textDirection="locale" android:layout_marginStart="5.0dp" android:layout_toStartOf="@id/numbersView" android:layout_toEndOf="@id/tvNumber" />
+    <com.lingq.core.ui.views.NumberStepper android:id="@id/numbersView" android:background="@drawable/dr_number_stepper_bg" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" />
+</RelativeLayout>

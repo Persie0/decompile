@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_gravity="end" android:orientation="horizontal" android:id="@id/viewRoot" android:paddingTop="@dimen/spacing_high" android:paddingBottom="@dimen/spacing_high" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:paddingStart="@dimen/activity_horizontal_margin" android:paddingEnd="@dimen/activity_horizontal_margin"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:id="@id/tvSubscription" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/upgrade_manage_subscription" android:layout_marginEnd="@dimen/spacing_high" android:layout_toStartOf="@id/tv_upgrade" android:layout_alignParentStart="true" style="@style/TitleLarge" />
+    <TextView android:textColor="?blueTint" android:id="@id/tv_upgrade" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/ui_manage" android:layout_alignParentEnd="true" style="@style/BodyMedium" />
+</RelativeLayout>

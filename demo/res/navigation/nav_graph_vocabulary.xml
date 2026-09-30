@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_vocabulary" app:startDestination="@id/fragment_vocabulary"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_token_parent" />
+    <include app:graph="@navigation/nav_graph_web_view" />
+    <include app:graph="@navigation/nav_graph_settings_vocabulary_parent" />
+    <fragment android:label="Vocabulary" android:name="com.lingq.feature.vocabulary.VocabularyFragment" android:id="@id/fragment_vocabulary">
+        <argument android:name="vocabularyLanguageFromDeeplink" android:defaultValue="" app:argType="string" />
+        <argument android:name="lotd" android:defaultValue="" app:argType="string" />
+        <action android:id="@id/actionToTokenParent" app:destination="@id/nav_graph_token_parent" />
+        <deepLink app:uri="lingq://vocabulary/{vocabularyLanguageFromDeeplink}" />
+        <action android:id="@id/actionToVocabularyFilterParent" app:destination="@id/nav_graph_settings_vocabulary_parent" />
+    </fragment>
+    <action android:id="@id/actionToVocabulary" app:destination="@id/fragment_vocabulary" />
+    <action android:id="@id/actionToWeb" app:destination="@id/nav_graph_web_view" />
+</navigation>

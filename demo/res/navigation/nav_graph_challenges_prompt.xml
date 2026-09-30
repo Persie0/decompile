@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_challenges_prompt" app:startDestination="@id/fragment_challenges_monthly_prompt"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_challenges" />
+    <dialog android:label="Challenge Monthly Prompt" android:name="com.lingq.feature.challenges.ChallengesMonthlyPromptFragment" android:id="@id/fragment_challenges_monthly_prompt">
+        <action android:id="@id/actionToChallenges" app:destination="@id/nav_graph_challenges" />
+        <argument android:name="userNotice" app:argType="com.lingq.core.navigation.model.NoticeNavArg" />
+        <argument android:name="images" app:argType="string[]" />
+    </dialog>
+    <action android:id="@id/actionToChallengesPrompt" app:destination="@id/fragment_challenges_monthly_prompt" />
+</navigation>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="exo_controls_playback_speeds">
+        <item>0.25x</item>
+        <item>0.5x</item>
+        <item>0.75x</item>
+        <item>Normal</item>
+        <item>1.25x</item>
+        <item>1.5x</item>
+        <item>2x</item>
+    </string-array>
+    <string-array name="interface_languages_entries">
+        <item>English</item>
+        <item>Spanish</item>
+        <item>German</item>
+        <item>French</item>
+        <item>Italian</item>
+        <item>Portuguese</item>
+        <item>Portuguese (Brazilian)</item>
+        <item>Japanese</item>
+        <item>Chinese</item>
+        <item>Chinese (Traditional)</item>
+        <item>Korean</item>
+        <item>Russian</item>
+        <item>Dutch</item>
+        <item>Greek</item>
+        <item>Polish</item>
+        <item>Ukrainian</item>
+        <item>Turkish</item>
+        <item>Lithuanian</item>
+    </string-array>
+    <string-array name="interface_languages_values">
+        <item>en</item>
+        <item>es</item>
+        <item>de</item>
+        <item>fr</item>
+        <item>it</item>
+        <item>pt_BR</item>
+        <item>ja</item>
+        <item>zh_CN</item>
+        <item>zh_TW</item>
+        <item>ko</item>
+        <item>ru</item>
+        <item>nl</item>
+        <item>el</item>
+        <item>pl</item>
+        <item>uk</item>
+        <item>tr</item>
+        <item>lt</item>
+    </string-array>
+    <string-array name="pref_lesson_asian_cantonese_entries">
+        <item>@string/settings_asian_jyutping</item>
+        <item>@string/settings_asian_simplified</item>
+        <item>@string/settings_asian_no_transliteration</item>
+    </string-array>
+    <string-array name="pref_lesson_asian_cantonese_values">
+        <item>Jyutping</item>
+        <item>Simplified</item>
+        <item>Off</item>
+    </string-array>
+    <string-array name="pref_lesson_asian_chinese_entries">
+        <item>@string/settings_asian_pinyin</item>
+        <item>@string/settings_asian_traditional</item>
+        <item>@string/settings_asian_no_transliteration</item>
+    </string-array>
+    <string-array name="pref_lesson_asian_chinese_traditional_entries">
+        <item>@string/settings_asian_pinyin</item>
+        <item>@string/settings_asian_simplified</item>
+        <item>@string/settings_asian_no_transliteration</item>
+    </string-array>
+    <string-array name="pref_lesson_asian_chinese_traditional_values">
+        <item>Pinyin</item>
+        <item>Simplified</item>
+        <item>Off</item>
+    </string-array>
+    <string-array name="pref_lesson_asian_chinese_values">
+        <item>Pinyin</item>
+        <item>Traditional</item>
+        <item>Off</item>
+    </string-array>
+    <string-array name="pref_lesson_asian_japanese_entries">
+        <item>@string/settings_asian_romaji</item>
+        <item>@string/settings_asian_hiragana</item>
+        <item>@string/settings_asian_furigana</item>
+        <item>@string/settings_asian_no_transliteration</item>
+    </string-array>
+    <string-array name="pref_lesson_asian_japanese_values">
+        <item>Romaji</item>
+        <item>Hiragana</item>
+        <item>Furigana</item>
+        <item>Off</item>
+    </string-array>
+    <string-array name="pref_lesson_latin_entries">
+        <item>@string/settings_latin</item>
+        <item>@string/settings_asian_no_transliteration</item>
+    </string-array>
+    <string-array name="pref_lesson_latin_values">
+        <item>Latin</item>
+        <item>Off</item>
+    </string-array>
+</resources>

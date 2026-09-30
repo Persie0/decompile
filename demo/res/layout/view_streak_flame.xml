@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:layout_gravity="center" android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView android:layout_gravity="center" android:id="@id/ivStreak" android:layout_width="42.0dp" android:layout_height="42.0dp" android:scaleType="fitCenter" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" app:srcCompat="@drawable/ic_fire_no_star" />
+    <TextView android:layout_gravity="center" android:id="@id/tvStreak" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="0.0dp" app:layout_constraintBottom_toBottomOf="@id/ivStreak" app:layout_constraintEnd_toEndOf="@id/ivStreak" app:layout_constraintHeight_percent="0.55" app:layout_constraintStart_toStartOf="@id/ivStreak" app:layout_constraintTop_toTopOf="@id/ivStreak" app:layout_constraintVertical_bias="1.0" style="@style/LabelSmall" />
+</androidx.constraintlayout.widget.ConstraintLayout>

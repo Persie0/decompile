@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_help" app:startDestination="@id/fragment_help"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_web_view" />
+    <fragment android:label="Help" android:name="com.lingq.feature.more.HelpFragment" android:id="@id/fragment_help">
+        <action android:id="@id/actionToWeb" app:destination="@id/nav_graph_web_view" />
+    </fragment>
+    <action android:id="@id/actionToHelp" app:destination="@id/fragment_help" />
+</navigation>

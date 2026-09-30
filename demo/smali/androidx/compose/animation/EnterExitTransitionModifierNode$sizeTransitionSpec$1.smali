@@ -1,0 +1,102 @@
+.class final Landroidx/compose/animation/EnterExitTransitionModifierNode$sizeTransitionSpec$1;
+.super Lkotlin/jvm/internal/Lambda;
+.source "SourceFile"
+
+# interfaces
+.implements Lvi3;
+
+
+# annotations
+.annotation system Ldalvik/annotation/Signature;
+    value = {
+        "Lkotlin/jvm/internal/Lambda;",
+        "Lvi3;"
+    }
+.end annotation
+
+
+# instance fields
+.field public final synthetic b:Landroidx/compose/animation/j;
+
+
+# direct methods
+.method public constructor <init>(Landroidx/compose/animation/j;)V
+    .locals 0
+
+    iput-object p1, p0, Landroidx/compose/animation/EnterExitTransitionModifierNode$sizeTransitionSpec$1;->b:Landroidx/compose/animation/j;
+
+    const/4 p1, 0x1
+
+    invoke-direct {p0, p1}, Lkotlin/jvm/internal/Lambda;-><init>(I)V
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public final invoke(Ljava/lang/Object;)Ljava/lang/Object;
+    .locals 3
+
+    check-cast p1, Lz9a;
+
+    sget-object v0, Landroidx/compose/animation/EnterExitState;->PreEnter:Landroidx/compose/animation/EnterExitState;
+
+    sget-object v1, Landroidx/compose/animation/EnterExitState;->Visible:Landroidx/compose/animation/EnterExitState;
+
+    invoke-interface {p1, v0, v1}, Lz9a;->b(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v0
+
+    const/4 v2, 0x0
+
+    iget-object p0, p0, Landroidx/compose/animation/EnterExitTransitionModifierNode$sizeTransitionSpec$1;->b:Landroidx/compose/animation/j;
+
+    if-eqz v0, :cond_0
+
+    iget-object p0, p0, Landroidx/compose/animation/j;->O:Lvs2;
+
+    iget-object p0, p0, Lvs2;->a:Lgaa;
+
+    iget-object p0, p0, Lgaa;->c:Lvt0;
+
+    if-eqz p0, :cond_2
+
+    iget-object v2, p0, Lvt0;->c:Ll43;
+
+    goto :goto_0
+
+    :cond_0
+    sget-object v0, Landroidx/compose/animation/EnterExitState;->PostExit:Landroidx/compose/animation/EnterExitState;
+
+    invoke-interface {p1, v1, v0}, Lz9a;->b(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result p1
+
+    if-eqz p1, :cond_1
+
+    iget-object p0, p0, Landroidx/compose/animation/j;->P:Lqv2;
+
+    iget-object p0, p0, Lqv2;->a:Lgaa;
+
+    iget-object p0, p0, Lgaa;->c:Lvt0;
+
+    if-eqz p0, :cond_2
+
+    iget-object v2, p0, Lvt0;->c:Ll43;
+
+    goto :goto_0
+
+    :cond_1
+    sget-object v2, Landroidx/compose/animation/i;->d:Lbg9;
+
+    :cond_2
+    :goto_0
+    if-nez v2, :cond_3
+
+    sget-object p0, Landroidx/compose/animation/i;->d:Lbg9;
+
+    return-object p0
+
+    :cond_3
+    return-object v2
+.end method

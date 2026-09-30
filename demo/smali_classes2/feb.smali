@@ -1,0 +1,56 @@
+.class public final Lfeb;
+.super Lqcb;
+.source "SourceFile"
+
+
+# instance fields
+.field public final synthetic g:Lwr9;
+
+
+# direct methods
+.method public constructor <init>(Lgeb;Lwr9;)V
+    .locals 0
+
+    iput-object p2, p0, Lfeb;->g:Lwr9;
+
+    const-string p1, "com.google.android.gms.common.api.internal.IStatusCallback"
+
+    const/4 p2, 0x0
+
+    invoke-direct {p0, p1, p2}, Lqcb;-><init>(Ljava/lang/String;I)V
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public final F(ILandroid/os/Parcel;Landroid/os/Parcel;)Z
+    .locals 0
+
+    const/4 p3, 0x1
+
+    if-ne p1, p3, :cond_0
+
+    sget-object p1, Lcom/google/android/gms/common/api/Status;->CREATOR:Landroid/os/Parcelable$Creator;
+
+    invoke-static {p2, p1}, Lzcb;->a(Landroid/os/Parcel;Landroid/os/Parcelable$Creator;)Landroid/os/Parcelable;
+
+    move-result-object p1
+
+    check-cast p1, Lcom/google/android/gms/common/api/Status;
+
+    invoke-static {p2}, Lzcb;->c(Landroid/os/Parcel;)V
+
+    iget-object p0, p0, Lfeb;->g:Lwr9;
+
+    const/4 p2, 0x0
+
+    invoke-static {p1, p2, p0}, Lh6d;->d(Lcom/google/android/gms/common/api/Status;Ljava/lang/Object;Lwr9;)V
+
+    return p3
+
+    :cond_0
+    const/4 p0, 0x0
+
+    return p0
+.end method

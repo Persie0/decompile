@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:icon="@drawable/ic_notifications_mark_selected" android:id="@id/item_mark_all_as_read" android:title="Mark All Notifications As Read" app:showAsAction="ifRoom" />
+    <item android:icon="@drawable/ic_library_settings" android:id="@id/item_settings" android:title="@string/settings_text_settings" app:showAsAction="always" />
+</menu>

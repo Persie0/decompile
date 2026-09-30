@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector android:height="119.0dp" android:width="173.0dp" android:autoMirrored="true" android:viewportWidth="173.0" android:viewportHeight="119.0"
+  xmlns:aapt="http://schemas.android.com/aapt" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="#ffffff" android:pathData="M2,28C2,24.13 5.13,21 9,21H85.5H122.1C123.96,21 125.74,21.74 127.05,23.05L138.5,34.5L152.87,48.44C154.23,49.76 155,51.57 155,53.46V69V110C155,113.87 151.87,117 148,117H9C5.13,117 2,113.87 2,110V28Z" />
+    <path android:fillColor="#00000000" android:pathData="M125,21H78.5H12C6.48,21 2,25.48 2,31V69V107C2,112.52 6.48,117 12,117H145C150.52,117 155,112.52 155,107V51.5" android:strokeColor="#d1d4d8" android:strokeWidth="4.0" android:strokeLineCap="round" />
+    <path android:fillColor="#ffffff" android:pathData="M34,0C28.48,0 24,4.48 24,10V13.5H124.62C126.78,13.5 128.85,14.38 130.36,15.93L159.74,46.17C161.19,47.66 162,49.66 162,51.75V99H163C168.52,99 173,94.52 173,89V10C173,4.48 168.52,0 163,0H34Z" android:fillType="evenOdd" />
+    <path android:fillColor="#00000000" android:pathData="M23,78H134" android:strokeColor="#d4d6da" android:strokeWidth="6.0" android:strokeLineCap="round" />
+    <path android:fillColor="#00000000" android:pathData="M23,62H63" android:strokeColor="#d4d6da" android:strokeWidth="6.0" android:strokeLineCap="round" />
+    <path android:fillColor="#00000000" android:pathData="M23,46H63" android:strokeColor="#d4d6da" android:strokeWidth="6.0" android:strokeLineCap="round" />
+    <path android:fillColor="#00000000" android:pathData="M98,43L98,65" android:strokeColor="#d4d6da" android:strokeWidth="5.0" android:strokeLineCap="round" />
+    <path android:fillColor="#00000000" android:pathData="M87,54H109" android:strokeColor="#d4d6da" android:strokeWidth="5.0" android:strokeLineCap="round" />
+    <path android:fillColor="#00000000" android:pathData="M23,95H134" android:strokeColor="#d4d6da" android:strokeWidth="6.0" android:strokeLineCap="round" />
+    <path android:fillColor="#d2d4d9" android:pathData="M124,46.5V21H126.5L155,49.5V52.5H130C126.69,52.5 124,49.81 124,46.5Z" />
+    <path android:fillColor="@drawable/$ic_empty_library__0" android:pathData="M9,43L148,43A7,7 0,0 1,155 50L155,110A7,7 0,0 1,148 117L9,117A7,7 0,0 1,2 110L2,50A7,7 0,0 1,9 43z" android:fillAlpha="0.25" />
+</vector>

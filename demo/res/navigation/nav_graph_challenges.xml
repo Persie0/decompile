@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_challenges" app:startDestination="@id/fragment_challenges"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_challenges_details" />
+    <include app:graph="@navigation/nav_graph_book_challenge_chooser_parent" />
+    <fragment android:label="Challenges" android:name="com.lingq.feature.challenges.ChallengesFragment" android:id="@id/fragment_challenges">
+        <argument android:name="languageFromDeeplink" android:defaultValue="" app:argType="string" />
+        <deepLink app:uri="lingq://challenges" />
+        <deepLink app:uri="lingq://challenges/{languageFromDeeplink}" />
+        <action android:id="@id/actionToChallengeDetails" app:destination="@id/nav_graph_challenges_details" />
+        <action android:id="@id/actionToBookChallengeChooser" app:destination="@id/nav_graph_book_challenge_chooser_parent" />
+    </fragment>
+    <action android:id="@id/actionToChallenges" app:destination="@id/fragment_challenges" />
+</navigation>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_review" app:startDestination="@id/fragment_review_start"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <fragment android:label="Review Start" android:name="com.lingq.feature.review.ReviewStartFragment" android:id="@id/fragment_review_start" />
+    <fragment android:label="Review Result" android:name="com.lingq.feature.review.activities.ReviewActivityResultFragment" android:id="@id/fragment_review_result">
+        <argument android:name="currentCard" app:argType="string" />
+        <argument android:name="result" app:argType="com.lingq.feature.review.data.ReviewActivityResult" />
+        <argument android:name="answer" android:defaultValue="" app:argType="string" />
+    </fragment>
+    <fragment android:label="Review Flashcard" android:name="com.lingq.feature.review.activities.ReviewActivityFlashcardFragment" android:id="@id/fragment_review_flashcard">
+        <argument android:name="currentCard" app:argType="string" />
+    </fragment>
+    <fragment android:label="Review Multi choice" android:name="com.lingq.feature.review.activities.ReviewActivityMultiAndClozeFragment" android:id="@id/fragment_review_multichoice">
+        <argument android:name="currentCard" app:argType="string" />
+    </fragment>
+    <fragment android:label="Review Complete" android:name="com.lingq.feature.review.ReviewSessionCompleteFragment" android:id="@id/fragment_review_session_complete">
+        <argument android:name="numberOfActivities" app:argType="integer" />
+        <argument android:name="numberOfCorrectActivities" app:argType="integer" />
+    </fragment>
+    <fragment android:label="Review Unscramble" android:name="com.lingq.feature.review.activities.ReviewActivityUnscrambleFragment" android:id="@id/fragment_review_unscramble">
+        <argument android:name="lessonId" android:defaultValue="-1" app:argType="integer" />
+        <argument android:name="sentenceIndex" android:defaultValue="-1" app:argType="integer" />
+    </fragment>
+    <fragment android:label="Review Speaking" android:name="com.lingq.feature.review.activities.ReviewActivitySpeakingFragment" android:id="@id/fragment_review_speaking">
+        <argument android:name="lessonId" android:defaultValue="-1" app:argType="integer" />
+        <argument android:name="sentenceIndex" android:defaultValue="-1" app:argType="integer" />
+    </fragment>
+    <fragment android:label="Review Speaking" android:name="com.lingq.feature.review.activities.ReviewActivityMatchingFragment" android:id="@id/fragment_review_activity_matching">
+        <argument android:name="terms" app:argType="string[]" />
+    </fragment>
+</navigation>

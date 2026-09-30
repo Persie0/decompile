@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_onboarding" app:startDestination="@id/fragment_onboarding"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_home" />
+    <include app:graph="@navigation/nav_graph_upgrade_test" />
+    <fragment android:label="Onboarding" android:name="com.lingq.feature.onboarding.OnboardingStartFragment" android:id="@id/fragment_onboarding" />
+    <fragment android:label="Language" android:name="com.lingq.feature.onboarding.languages.OnboardingLanguageFragment" android:id="@id/fragment_onboarding_language" />
+    <fragment android:label="Onboarding" android:name="com.lingq.feature.onboarding.level.OnboardingLevelFragment" android:id="@id/fragment_onboarding_level" />
+    <fragment android:label="Onboarding" android:name="com.lingq.feature.onboarding.dictionary.OnboardingDictionaryLocaleFragment" android:id="@id/fragment_onboarding_dictionary_locale" />
+    <fragment android:label="Achievement" android:name="com.lingq.feature.onboarding.achieve.OnboardingAchieveFragment" android:id="@id/fragment_onboarding_achieve" />
+    <fragment android:label="Daily Goal" android:name="com.lingq.feature.onboarding.dailygoal.OnboardingDailyGoalFragment" android:id="@id/fragment_onboarding_daily_goal" />
+    <fragment android:label="Notifications" android:name="com.lingq.feature.onboarding.notification.OnboardingNotificationFragment" android:id="@id/fragment_onboarding_notification" />
+    <fragment android:label="Topics" android:name="com.lingq.feature.onboarding.topics.OnboardingTopicsFragment" android:id="@id/fragment_onboarding_topics" />
+    <fragment android:label="Accent" android:name="com.lingq.feature.onboarding.accent.OnboardingAccentFragment" android:id="@id/fragment_onboarding_accent" />
+    <fragment android:label="Register" android:name="com.lingq.feature.onboarding.auth.registration.OnboardingRegistrationFragment" android:id="@id/fragment_onboarding_register" />
+    <fragment android:label="Finish" android:name="com.lingq.feature.onboarding.OnboardingEndFragment" android:id="@id/fragment_onboarding_finish">
+        <argument android:name="username" android:defaultValue="" />
+        <argument android:name="password" android:defaultValue="" />
+        <argument android:name="isSocial" android:defaultValue="false" />
+    </fragment>
+    <fragment android:label="Sign In" android:name="com.lingq.feature.onboarding.auth.login.OnboardingLoginFragment" android:id="@id/fragment_onboarding_login">
+        <argument android:name="authCode" android:defaultValue="" app:argType="string" />
+        <deepLink app:uri="lingq://login/{authCode}" />
+        <deepLink app:uri="lingq://login/" />
+    </fragment>
+    <fragment android:label="@string/login_sign_in_with_email" android:name="com.lingq.feature.onboarding.auth.login.magiclink.EmailLoginFragment" android:id="@id/fragment_email_login" />
+    <fragment android:label="@string/welcome_please_check_email" android:name="com.lingq.feature.onboarding.auth.login.magiclink.CheckEmailFragment" android:id="@id/fragment_check_email">
+        <argument android:name="email" app:argType="string" />
+    </fragment>
+    <action android:id="@id/actionToLogin" app:destination="@id/fragment_onboarding_login" />
+    <action android:id="@id/actionToOnboardingLanguage" app:destination="@id/fragment_onboarding_language" />
+    <action android:id="@id/actionToOnboardingLevel" app:destination="@id/fragment_onboarding_level" />
+    <action android:id="@id/actionToOnboardingAchievement" app:destination="@id/fragment_onboarding_achieve" />
+    <action android:id="@id/actionToOnboardingDictionaryLocale" app:destination="@id/fragment_onboarding_dictionary_locale" />
+    <action android:id="@id/actionToOnboardingDailyGoal" app:destination="@id/fragment_onboarding_daily_goal" />
+    <action android:id="@id/actionToOnboardingTopics" app:destination="@id/fragment_onboarding_topics" />
+    <action android:id="@id/actionToNotifications" app:destination="@id/fragment_onboarding_notification" />
+    <action android:id="@id/actionToOnboardingAccent" app:destination="@id/fragment_onboarding_accent" />
+    <action android:id="@id/actionToOnboardingRegister" app:destination="@id/fragment_onboarding_register" />
+    <action android:id="@id/actionToFinishingFragment" app:destination="@id/fragment_onboarding_finish" />
+    <action android:id="@id/actionToHome" app:destination="@id/nav_graph_home" app:launchSingleTop="true" app:popUpTo="@id/fragment_onboarding" app:popUpToInclusive="true" />
+    <action android:id="@id/actionToUpgradeTest" app:destination="@id/nav_graph_upgrade_test" />
+    <action android:id="@id/actionToEmailLogin" app:destination="@id/fragment_email_login" />
+    <action android:id="@id/actionToCheckEmail" app:destination="@id/fragment_check_email" />
+    <action android:id="@id/actionToOnboarding" app:destination="@id/fragment_onboarding" />
+</navigation>

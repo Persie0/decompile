@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="?selectableItemBackground" android:paddingTop="@dimen/list_vertical_margin" android:paddingBottom="@dimen/list_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="@dimen/activity_horizontal_margin" android:paddingEnd="@dimen/activity_horizontal_margin"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:gravity="start" android:id="@id/tvTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:textDirection="locale" style="@style/BodyLarge" />
+    <TextView android:gravity="start" android:id="@id/tvDescription" android:layout_width="match_parent" android:layout_height="wrap_content" android:textDirection="locale" style="@style/BodyMedium" />
+</LinearLayout>

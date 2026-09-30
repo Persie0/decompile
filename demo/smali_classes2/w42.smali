@@ -1,0 +1,42 @@
+.class public final synthetic Lw42;
+.super Ljava/lang/Object;
+.source "SourceFile"
+
+# interfaces
+.implements Lsg5;
+
+
+# instance fields
+.field public final synthetic a:Lqf;
+
+.field public final synthetic b:F
+
+
+# direct methods
+.method public synthetic constructor <init>(Lqf;F)V
+    .locals 0
+
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    iput-object p1, p0, Lw42;->a:Lqf;
+
+    iput p2, p0, Lw42;->b:F
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public final invoke(Ljava/lang/Object;)V
+    .locals 1
+
+    iget v0, p0, Lw42;->b:F
+
+    check-cast p1, Lrf;
+
+    iget-object p0, p0, Lw42;->a:Lqf;
+
+    invoke-interface {p1, p0, v0}, Lrf;->D(Lqf;F)V
+
+    return-void
+.end method

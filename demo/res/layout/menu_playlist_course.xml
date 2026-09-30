@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView android:id="@id/viewMenu" android:layout_width="wrap_content" android:layout_height="wrap_content" card_view:cardBackgroundColor="?colorSurfaceContainer" card_view:cardCornerRadius="10.0dp" card_view:cardElevation="12.0dp" card_view:cardPreventCornerOverlap="false" card_view:cardUseCompatPadding="true"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:card_view="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content">
+        <LinearLayout android:id="@id/viewRemovePlaylist" android:paddingTop="@dimen/list_vertical_margin" android:paddingBottom="@dimen/list_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:paddingStart="@dimen/spacing_high" android:paddingEnd="@dimen/spacing_high">
+            <TextView android:textAppearance="@style/BodyMedium" android:gravity="center_vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/lesson_remove_from_playlist" />
+        </LinearLayout>
+        <LinearLayout android:id="@id/viewOpenCourse" android:paddingTop="@dimen/list_vertical_margin" android:paddingBottom="@dimen/list_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:paddingStart="@dimen/spacing_high" android:paddingEnd="@dimen/spacing_high">
+            <TextView android:textAppearance="@style/BodyMedium" android:gravity="center_vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/lesson_view_course" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

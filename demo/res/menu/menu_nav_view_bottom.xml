@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item android:icon="@drawable/ic_bottom_library" android:id="@id/nav_graph_library" android:title="@string/feed_library" />
+        <item android:icon="@drawable/ic_bottom_vocabulary" android:id="@id/nav_graph_vocabulary" android:title="@string/lingq_vocabulary" />
+        <item android:icon="@drawable/ic_plus_s" android:id="@id/nav_graph_user_import" android:title="@string/feed_import" />
+        <item android:icon="@drawable/ic_bottom_playlist" android:id="@id/nav_graph_playlist" android:title="@string/lingq_playlist" />
+        <item android:icon="@drawable/ic_hamburger" android:id="@id/nav_graph_more" android:title="@string/ui_more" />
+    </group>
+</menu>

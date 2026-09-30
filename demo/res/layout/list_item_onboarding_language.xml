@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" app:cardCornerRadius="@dimen/btn_corner_medium" app:cardElevation="@dimen/elevation_level_0" app:cardPreventCornerOverlap="true" app:cardUseCompatPadding="true"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="horizontal" android:padding="@dimen/spacing_standard" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <ImageView android:layout_gravity="center" android:id="@id/iv_btn" android:layout_width="36.0dp" android:layout_height="36.0dp" android:layout_marginStart="@dimen/list_horizontal_margin" />
+        <TextView android:layout_gravity="center" android:id="@id/tv_btn" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="20.0dp" style="@style/TitleMedium" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

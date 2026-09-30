@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="challenges_cup_banner_ends_in">
+        <item quantity="one">Se termine dans %1$d jour</item>
+        <item quantity="other">Se termine dans %1$d jours</item>
+    </plurals>
+    <plurals name="challenges_participants">
+        <item quantity="one">%s participant</item>
+        <item quantity="other">%s participants</item>
+    </plurals>
+    <plurals name="cup_days_remaining">
+        <item quantity="one">%1$d jour restant</item>
+        <item quantity="other">%1$d jours restants</item>
+    </plurals>
+    <plurals name="cup_days_until">
+        <item quantity="one">Commence dans %1$d jour</item>
+        <item quantity="other">Commence dans %1$d jours</item>
+    </plurals>
+    <plurals name="exo_controls_fastforward_by_amount_description">
+        <item quantity="one">Avancer de %d seconde</item>
+        <item quantity="other">Avancer de %d secondes</item>
+    </plurals>
+    <plurals name="exo_controls_rewind_by_amount_description">
+        <item quantity="one">Revenir en arrière de %d seconde</item>
+        <item quantity="other">Revenir en arrière de %d secondes</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_days">
+        <item quantity="one">demain</item>
+        <item quantity="other">dans %d jours</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_hours">
+        <item quantity="one">dans 1 heure</item>
+        <item quantity="other">dans %d heures</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_minutes">
+        <item quantity="one">dans 1 minute</item>
+        <item quantity="other">dans %d minutes</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_seconds">
+        <item quantity="one">dans 1 seconde</item>
+        <item quantity="other">dans %d secondes</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_days_ago">
+        <item quantity="one">hier</item>
+        <item quantity="other">Il y a %d jours</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_hours_ago">
+        <item quantity="one">il y a 1 heure</item>
+        <item quantity="other">Il y a %d heures</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_minutes_ago">
+        <item quantity="one">il y a 1 minute</item>
+        <item quantity="other">il y a %d minutes</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_seconds_ago">
+        <item quantity="one">il y a 1 seconde</item>
+        <item quantity="other">il y a %d secondes</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_hours">
+        <item quantity="one">1 heure</item>
+        <item quantity="other">%d heures</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_minutes">
+        <item quantity="one">1 minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_seconds">
+        <item quantity="one">1 seconde</item>
+        <item quantity="other">%d secondes</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_days">
+        <item quantity="one">demain</item>
+        <item quantity="other">dans %d jours</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_hours">
+        <item quantity="one">dans 1 heure</item>
+        <item quantity="other">dans %d heures</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_minutes">
+        <item quantity="one">dans 1 minute</item>
+        <item quantity="other">dans %d minutes</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_seconds">
+        <item quantity="one">dans 1 seconde</item>
+        <item quantity="other">dans %d secondes</item>
+    </plurals>
+    <plurals name="joda_time_android_num_days_ago">
+        <item quantity="one">hier</item>
+        <item quantity="other">Il y a %d jours</item>
+    </plurals>
+    <plurals name="joda_time_android_num_hours_ago">
+        <item quantity="one">il y a 1 heure</item>
+        <item quantity="other">Il y a %d heures</item>
+    </plurals>
+    <plurals name="joda_time_android_num_minutes_ago">
+        <item quantity="one">Il y a 1 minute</item>
+        <item quantity="other">Il y a %d minutes</item>
+    </plurals>
+    <plurals name="joda_time_android_num_seconds_ago">
+        <item quantity="one">Il y a 1 seconde</item>
+        <item quantity="other">Il y a %d secondes</item>
+    </plurals>
+    <plurals name="lingq_courses_count_Course">
+        <item quantity="one">%d Formation</item>
+        <item quantity="many">%d Formations</item>
+        <item quantity="other">%d Formations</item>
+    </plurals>
+    <plurals name="lingq_lessons_count_Lessons">
+        <item quantity="one">%d Leçon</item>
+        <item quantity="many">%d Leçons</item>
+        <item quantity="other">%d Leçons</item>
+    </plurals>
+    <plurals name="lingq_likes_count_like">
+        <item quantity="one">%d Like</item>
+        <item quantity="many">%d Likes</item>
+        <item quantity="other">%d Likes</item>
+    </plurals>
+    <plurals name="lingq_lingqs_count_LingQs">
+        <item quantity="one">%d LingQ</item>
+        <item quantity="many">%d LingQs</item>
+        <item quantity="other">%d LingQs</item>
+    </plurals>
+    <plurals name="mtrl_badge_content_description">
+        <item quantity="one">%d nouvelle notification</item>
+        <item quantity="other">%d nouvelles notifications</item>
+    </plurals>
+    <plurals name="paging_move_known_action_button">
+        <item quantity="one">Je connais ce mot</item>
+        <item quantity="many">Je connais ces %d mots</item>
+        <item quantity="other">Je connais ces %d mots</item>
+    </plurals>
+    <plurals name="settings_daily_streak_target_estimated_minutes">
+        <item quantity="one">"Cela représente environ %d min d'étude par jour."</item>
+        <item quantity="other">"Cela représente environ %d min d'étude par jour."</item>
+    </plurals>
+    <plurals name="stats_listen_for_n_more_minutes">
+        <item quantity="one">Écouter pendant %d minute de plus pour atteindre votre objectif quotidien.</item>
+        <item quantity="many">Écouter pendant %d minutes de plus pour atteindre votre objectif quotidien.</item>
+        <item quantity="other">Écouter pendant %d minutes de plus pour atteindre votre objectif quotidien.</item>
+    </plurals>
+    <plurals name="stats_streak_days_count_day">
+        <item quantity="one">%d Jour</item>
+        <item quantity="many">%d Jours</item>
+        <item quantity="other">%d Jours</item>
+    </plurals>
+</resources>

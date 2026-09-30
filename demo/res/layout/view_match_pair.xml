@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:id="@id/viewTop" android:layout_width="0.0dp" android:layout_height="0.0dp" app:layout_constraintBottom_toTopOf="@id/viewMiddle" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" app:layout_constraintVertical_chainStyle="spread">
+        <com.google.android.material.card.MaterialCardView android:id="@id/card1" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="8.0dp" android:layout_weight="1.0" app:strokeWidth="1.0dp">
+            <com.google.android.material.textview.MaterialTextView android:textAppearance="@style/BodyLarge" android:gravity="center" android:id="@id/tvCard1" android:layout_width="match_parent" android:layout_height="match_parent" />
+        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.card.MaterialCardView android:id="@id/card2" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="8.0dp" android:layout_weight="1.0" app:strokeWidth="1.0dp">
+            <com.google.android.material.textview.MaterialTextView android:textAppearance="@style/BodyLarge" android:gravity="center" android:id="@id/tvCard2" android:layout_width="match_parent" android:layout_height="match_parent" />
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal" android:id="@id/viewMiddle" android:layout_width="0.0dp" android:layout_height="0.0dp" app:layout_constraintBottom_toTopOf="@id/viewBottom" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/viewTop">
+        <com.google.android.material.card.MaterialCardView android:id="@id/card3" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="8.0dp" android:layout_weight="1.0" app:strokeWidth="1.0dp">
+            <com.google.android.material.textview.MaterialTextView android:textAppearance="@style/BodyLarge" android:gravity="center" android:id="@id/tvCard3" android:layout_width="match_parent" android:layout_height="match_parent" />
+        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.card.MaterialCardView android:id="@id/card4" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="8.0dp" android:layout_weight="1.0" app:strokeWidth="1.0dp">
+            <com.google.android.material.textview.MaterialTextView android:textAppearance="@style/BodyLarge" android:gravity="center" android:id="@id/tvCard4" android:layout_width="match_parent" android:layout_height="match_parent" />
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal" android:id="@id/viewBottom" android:layout_width="0.0dp" android:layout_height="0.0dp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/viewMiddle">
+        <com.google.android.material.card.MaterialCardView android:id="@id/card5" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="8.0dp" android:layout_weight="1.0" app:strokeWidth="1.0dp">
+            <com.google.android.material.textview.MaterialTextView android:textAppearance="@style/BodyLarge" android:gravity="center" android:id="@id/tvCard5" android:layout_width="match_parent" android:layout_height="match_parent" />
+        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.card.MaterialCardView android:id="@id/card6" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="8.0dp" android:layout_weight="1.0" app:strokeWidth="1.0dp">
+            <com.google.android.material.textview.MaterialTextView android:textAppearance="@style/BodyLarge" android:gravity="center" android:id="@id/tvCard6" android:layout_width="match_parent" android:layout_height="match_parent" />
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

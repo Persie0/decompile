@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_book_challenge_chooser_parent" app:startDestination="@id/fragment_book_challenge_chooser_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <dialog android:label="Book Challenge Chooser" android:name="com.lingq.feature.challenges.bookchallenge.BookChallengeChooserParentFragment" android:id="@id/fragment_book_challenge_chooser_parent">
+        <argument android:name="isJoined" app:argType="boolean" />
+        <argument android:name="multiBookEnabled" android:defaultValue="false" app:argType="boolean" />
+        <argument android:name="replaceBookId" android:defaultValue="-1" app:argType="integer" />
+    </dialog>
+    <action android:id="@id/actionToBookChallengeChooser" app:destination="@id/fragment_book_challenge_chooser_parent" />
+</navigation>

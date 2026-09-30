@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_languages" app:startDestination="@id/fragment_language_selector"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <dialog android:label="Language" android:name="com.lingq.feature.language.LanguageSelectorFragment" android:id="@id/fragment_language_selector" />
+    <action android:id="@id/actionToLanguageSelector" app:destination="@id/fragment_language_selector" />
+</navigation>

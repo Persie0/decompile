@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_reader" app:startDestination="@id/fragment_reader_compose"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_upgrade_test" />
+    <include app:graph="@navigation/nav_graph_web_view" />
+    <include app:graph="@navigation/nav_graph_help" />
+    <include app:graph="@navigation/nav_graph_review_parent" />
+    <include app:graph="@navigation/nav_graph_settings_review" />
+    <include app:graph="@navigation/nav_graph_stats" />
+    <include app:graph="@navigation/nav_graph_karaoke" />
+    <include app:graph="@navigation/nav_graph_token_parent" />
+    <include app:graph="@navigation/nav_graph_dictionary" />
+    <include app:graph="@navigation/nav_graph_dictionary_manage" />
+    <include app:graph="@navigation/nav_graph_dictionary_locales" />
+    <include app:graph="@navigation/nav_graph_settings_reader" />
+    <include app:graph="@navigation/nav_graph_lesson_info" />
+    <include app:graph="@navigation/nav_graph_lesson_edit_parent" />
+    <include app:graph="@navigation/nav_graph_search" />
+    <fragment android:label="Lesson" android:name="com.lingq.feature.reader.old.ReaderFragment" android:id="@id/fragment_reader" app:launchSingleTop="true" app:popUpTo="@id/fragment_reader" app:popUpToInclusive="true">
+        <argument android:name="lessonId" app:argType="integer" />
+        <argument android:name="courseId" android:defaultValue="-1" app:argType="integer" />
+        <argument android:name="courseTitle" android:defaultValue="" app:argType="string" />
+        <argument android:name="isSentenceMode" android:defaultValue="false" app:argType="boolean" />
+        <argument android:name="lessonLanguageFromDeeplink" android:defaultValue="" app:argType="string" />
+        <argument android:name="lessonPath" app:argType="com.lingq.core.analytics.data.LqAnalyticsValues$LessonPath" app:nullable="true" />
+        <action android:id="@id/actionToLessonComplete" app:destination="@id/fragment_lesson_complete" />
+        <action android:id="@id/actionToLessonVocabulary" app:destination="@id/fragment_lesson_vocabulary" />
+        <action android:id="@id/actionToFirstLingQCongrats" app:destination="@id/fragment_first_lingq_congrats" />
+        <action android:id="@id/actionToHelp" app:destination="@id/nav_graph_help" />
+        <action android:id="@id/actionToWeb" app:destination="@id/nav_graph_web_view" />
+        <action android:id="@id/actionToReview" app:destination="@id/nav_graph_review_parent" />
+        <action android:id="@id/actionToReviewSettings" app:destination="@id/nav_graph_settings_review" />
+        <action android:id="@id/actionToKaraoke" app:destination="@id/nav_graph_karaoke" />
+        <action android:id="@id/actionToDictionaryContent" app:destination="@id/nav_graph_dictionary" />
+        <action android:id="@id/actionToDictionaryManage" app:destination="@id/nav_graph_dictionary_manage" />
+        <action android:id="@id/actionToDictionaryLocales" app:destination="@id/nav_graph_dictionary_locales" />
+        <action android:id="@id/actionToReaderSettings" app:destination="@id/nav_graph_settings_reader" />
+        <action android:id="@id/actionToLessonInfo" app:destination="@id/nav_graph_lesson_info" />
+        <action android:id="@id/actionToLessonEditParent" app:destination="@id/nav_graph_lesson_edit_parent" />
+        <action android:id="@id/actionToDealWithWords" app:destination="@id/fragment_lesson_deal_with_words" />
+        <action android:id="@id/actionToDealBlueWordsComplete" app:destination="@id/fragment_deal_blue_words_complete" />
+        <action android:id="@id/actionToDealAllWordsComplete" app:destination="@id/fragment_lesson_complete_all_words" />
+        <deepLink app:uri="lingq://lesson/{lessonLanguageFromDeeplink}/{lessonId}" />
+    </fragment>
+    <fragment android:label="Lesson Complete" android:name="com.lingq.feature.reader.stats.LessonCompleteFragment" android:id="@id/fragment_lesson_complete">
+        <argument android:name="lessonId" app:argType="integer" />
+        <argument android:name="isCompleting" app:argType="boolean" />
+        <action android:id="@id/actionToStats" app:destination="@id/nav_graph_stats" />
+        <action android:id="@id/actionToTokenParent" app:destination="@id/nav_graph_token_parent" />
+        <action android:id="@id/actionToReview" app:destination="@id/nav_graph_review_parent" />
+        <action android:id="@id/actionToSearch" app:destination="@id/nav_graph_search" />
+    </fragment>
+    <fragment android:label="Lesson Vocabulary" android:name="com.lingq.feature.reader.old.vocabulary.LessonVocabularyFragment" android:id="@id/fragment_lesson_vocabulary">
+        <argument android:name="lessonId" app:argType="integer" />
+        <argument android:name="isDocked" android:defaultValue="false" app:argType="boolean" />
+        <action android:id="@id/actionToTokenParent" app:destination="@id/nav_graph_token_parent" />
+    </fragment>
+    <dialog android:label="First LingQ Congrats" android:name="com.lingq.feature.reader.old.tutorial.LessonFirstLingQCongratsFragment" android:id="@id/fragment_first_lingq_congrats" />
+    <dialog android:label="Move to known" android:name="com.lingq.feature.reader.old.tutorial.LessonDealWithWordsFragment" android:id="@id/fragment_lesson_deal_with_words">
+        <argument android:name="lessonId" app:argType="integer" />
+        <argument android:name="page" app:argType="integer" />
+        <argument android:name="words" app:argType="string[]" />
+    </dialog>
+    <fragment android:label="Move to known" android:name="com.lingq.feature.reader.stats.ui.words.LessonCompleteDealBlueFragment" android:id="@id/fragment_deal_blue_words_complete">
+        <argument android:name="lessonId" app:argType="integer" />
+        <action android:id="@id/actionToTokenParent" app:destination="@id/nav_graph_token_parent" />
+        <action android:id="@id/actionToLessonCompleteVocabulary" app:destination="@id/fragment_lesson_complete_vocabulary" />
+        <action android:id="@id/actionToLessonComplete" app:destination="@id/fragment_lesson_complete" app:popUpTo="@id/fragment_reader_compose" app:popUpToInclusive="false" />
+    </fragment>
+    <fragment android:label="Vocabulary" android:name="com.lingq.feature.reader.stats.ui.lingqs.LessonCompleteVocabularyFragment" android:id="@id/fragment_lesson_complete_vocabulary">
+        <argument android:name="lessonId" app:argType="integer" />
+        <action android:id="@id/actionToTokenParent" app:destination="@id/nav_graph_token_parent" />
+        <action android:id="@id/actionToLessonComplete" app:destination="@id/fragment_lesson_complete" app:popUpTo="@id/fragment_reader_compose" app:popUpToInclusive="false" />
+    </fragment>
+    <fragment android:label="All Words" android:name="com.lingq.feature.reader.stats.ui.all.LessonCompleteAllWordsFragment" android:id="@id/fragment_lesson_complete_all_words">
+        <argument android:name="lessonId" app:argType="integer" />
+        <action android:id="@id/actionToTokenParent" app:destination="@id/nav_graph_token_parent" />
+        <action android:id="@id/actionToLessonComplete" app:destination="@id/fragment_lesson_complete" app:popUpTo="@id/fragment_reader_compose" app:popUpToInclusive="false" />
+        <action android:id="@id/actionToLessonCompleteVocabulary" app:destination="@id/fragment_lesson_complete_vocabulary" />
+        <action android:id="@id/actionToDealBlueWordsComplete" app:destination="@id/fragment_deal_blue_words_complete" />
+    </fragment>
+    <action android:id="@id/actionToReader" app:destination="@id/fragment_reader_compose" app:launchSingleTop="true" app:popUpTo="@id/fragment_reader_compose" app:popUpToInclusive="true" />
+    <action android:id="@id/actionToLessonSentence" app:destination="@id/fragment_reader_compose" />
+    <fragment android:label="Lesson" android:name="com.lingq.feature.reader.reader.ReaderComposeFragment" android:id="@id/fragment_reader_compose" app:launchSingleTop="true" app:popUpTo="@id/fragment_reader_compose" app:popUpToInclusive="true">
+        <argument android:name="lessonId" app:argType="integer" />
+        <argument android:name="courseId" android:defaultValue="-1" app:argType="integer" />
+        <argument android:name="courseTitle" android:defaultValue="" app:argType="string" />
+        <argument android:name="isSentenceMode" android:defaultValue="false" app:argType="boolean" />
+        <argument android:name="lessonLanguageFromDeeplink" android:defaultValue="" app:argType="string" />
+        <argument android:name="lessonPath" app:argType="com.lingq.core.analytics.data.LqAnalyticsValues$LessonPath" app:nullable="true" />
+        <action android:id="@id/actionToLessonComplete" app:destination="@id/fragment_lesson_complete" />
+        <action android:id="@id/actionToLessonVocabulary" app:destination="@id/fragment_lesson_vocabulary" />
+        <action android:id="@id/actionToFirstLingQCongrats" app:destination="@id/fragment_first_lingq_congrats" />
+        <action android:id="@id/actionToHelp" app:destination="@id/nav_graph_help" />
+        <action android:id="@id/actionToWeb" app:destination="@id/nav_graph_web_view" />
+        <action android:id="@id/actionToReview" app:destination="@id/nav_graph_review_parent" />
+        <action android:id="@id/actionToReviewSettings" app:destination="@id/nav_graph_settings_review" />
+        <action android:id="@id/actionToKaraoke" app:destination="@id/nav_graph_karaoke" />
+        <action android:id="@id/actionToDictionaryContent" app:destination="@id/nav_graph_dictionary" />
+        <action android:id="@id/actionToDictionaryManage" app:destination="@id/nav_graph_dictionary_manage" />
+        <action android:id="@id/actionToDictionaryLocales" app:destination="@id/nav_graph_dictionary_locales" />
+        <action android:id="@id/actionToReaderSettings" app:destination="@id/nav_graph_settings_reader" />
+        <action android:id="@id/actionToLessonInfo" app:destination="@id/nav_graph_lesson_info" />
+        <action android:id="@id/actionToLessonEditParent" app:destination="@id/nav_graph_lesson_edit_parent" />
+        <action android:id="@id/actionToDealWithWords" app:destination="@id/fragment_lesson_deal_with_words" />
+        <action android:id="@id/actionToDealBlueWordsComplete" app:destination="@id/fragment_deal_blue_words_complete" />
+        <action android:id="@id/actionToDealAllWordsComplete" app:destination="@id/fragment_lesson_complete_all_words" />
+        <action android:id="@id/actionToSentenceMode" app:destination="@id/fragment_reader_compose" />
+        <action android:id="@id/actionToVideoReader" app:destination="@id/fragment_reader_video" />
+        <deepLink app:uri="lingq://lesson/{lessonLanguageFromDeeplink}/{lessonId}" />
+    </fragment>
+    <fragment android:label="Video Reader" android:name="com.lingq.feature.reader.video.ReaderVideoComposeFragment" android:id="@id/fragment_reader_video">
+        <argument android:name="lessonId" app:argType="integer" />
+        <argument android:name="courseId" android:defaultValue="-1" app:argType="integer" />
+        <argument android:name="courseTitle" android:defaultValue="" app:argType="string" />
+        <argument android:name="isSentenceMode" android:defaultValue="false" app:argType="boolean" />
+        <argument android:name="lessonLanguageFromDeeplink" android:defaultValue="" app:argType="string" />
+        <argument android:name="lessonPath" app:argType="com.lingq.core.analytics.data.LqAnalyticsValues$LessonPath" app:nullable="true" />
+        <action android:id="@id/actionToLessonComplete" app:destination="@id/fragment_lesson_complete" />
+        <action android:id="@id/actionToWeb" app:destination="@id/nav_graph_web_view" />
+        <action android:id="@id/actionToHelp" app:destination="@id/nav_graph_help" />
+        <action android:id="@id/actionToReaderSettings" app:destination="@id/nav_graph_settings_reader" />
+        <action android:id="@id/actionToLessonInfo" app:destination="@id/nav_graph_lesson_info" />
+        <action android:id="@id/actionToLessonEditParent" app:destination="@id/nav_graph_lesson_edit_parent" />
+        <action android:id="@id/actionToDealWithWords" app:destination="@id/fragment_lesson_deal_with_words" />
+        <action android:id="@id/actionToDealBlueWordsComplete" app:destination="@id/fragment_deal_blue_words_complete" />
+        <action android:id="@id/actionToReview" app:destination="@id/nav_graph_review_parent" />
+    </fragment>
+    <action android:id="@id/actionToReaderCompose" app:destination="@id/fragment_reader_compose" app:launchSingleTop="true" app:popUpTo="@id/fragment_reader_compose" app:popUpToInclusive="true" />
+</navigation>

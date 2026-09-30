@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="match_parent" android:transitionGroup="true"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.fragment.app.FragmentContainerView android:name="androidx.navigation.fragment.NavHostFragment" android:id="@id/nav_host_fragment" android:layout_width="@dimen/match_constraints" android:layout_height="@dimen/match_constraints" app:defaultNavHost="true" app:layout_constraintBottom_toTopOf="@id/bottom_navigation_view" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" app:navGraph="@navigation/nav_graph_home_bottom" />
+    <com.google.android.material.bottomnavigation.BottomNavigationView android:orientation="horizontal" android:id="@id/bottom_navigation_view" android:clipToPadding="false" android:layout_width="@dimen/match_constraints" android:layout_height="wrap_content" app:elevation="0.0dp" app:labelMaxLines="1" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:menu="@menu/menu_nav_view_bottom" />
+    <LinearLayout android:gravity="center" android:orientation="vertical" android:id="@id/viewProgress" android:background="@color/fade_bg" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent">
+        <com.google.android.material.progressindicator.CircularProgressIndicator android:visibility="visible" android:layout_width="@dimen/progress_size" android:layout_height="@dimen/progress_size" style="@style/Widget.ProgressCircle" />
+        <TextView android:id="@id/tvSwitchLanguage" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_high" style="@style/BodyLarge" />
+    </LinearLayout>
+    <androidx.compose.ui.platform.ComposeView android:id="@id/viewBetaDialog" android:layout_width="0.0dp" android:layout_height="0.0dp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

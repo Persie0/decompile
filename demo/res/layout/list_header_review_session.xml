@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView android:id="@id/cardView" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="196.0dp" android:layout_marginStart="@dimen/spacing_high" android:layout_marginEnd="@dimen/spacing_high" app:cardBackgroundColor="?loadingColor" app:cardCornerRadius="@dimen/btn_corner_medium" app:cardElevation="@dimen/elevation_level_0" app:cardPreventCornerOverlap="true"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:layout_gravity="center" android:orientation="vertical" android:id="@id/viewLesson" android:layout_width="match_parent" android:layout_height="match_parent">
+        <TextView android:textColor="?greenTint" android:gravity="center" android:layout_gravity="center" android:id="@id/tvTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/complete_keep_up_good_work" style="@style/TitleMedium" />
+        <TextView android:textColor="?greenTint" android:layout_gravity="center" android:id="@id/tv_result" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="30.0dp" android:text="0/20" style="@style/TitleMedium" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

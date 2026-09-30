@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:id="@id/viewParent" android:background="@color/fade_bg" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.google.android.material.card.MaterialCardView android:layout_gravity="center" android:background="@android:color/transparent" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/daily_goal_view_margin" android:paddingStart="30.0dp" android:paddingEnd="30.0dp" app:cardCornerRadius="10.0dp" app:cardElevation="5.0dp" app:contentPadding="5.0dp">
+        <androidx.constraintlayout.widget.ConstraintLayout android:paddingBottom="@dimen/activity_vertical_margin" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <ImageButton android:id="@id/btnCloseUpgrade" android:background="@color/transparent" android:padding="@dimen/spacing_small" android:layout_width="16.0dp" android:layout_height="16.0dp" android:layout_margin="8.0dp" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" app:srcCompat="@drawable/ic_close_s" />
+            <LinearLayout android:gravity="center" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="@dimen/list_horizontal_margin" android:layout_marginEnd="@dimen/list_horizontal_margin" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/btnCloseUpgrade">
+                <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/activity_vertical_margin" app:layout_constraintBottom_toTopOf="@id/tv_title" app:srcCompat="@drawable/ic_offer_ballon" />
+                <TextView android:gravity="center" android:id="@id/tv_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="10.0dp" android:text="@string/upgrade_offer_need_time" app:layout_constraintBottom_toTopOf="@id/tv_desc" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" style="@style/TitleMedium" />
+                <TextView android:gravity="center" android:id="@id/tv_desc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/upgrade_offer_need_time_desc" style="@style/BodyMedium" />
+                <FrameLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/activity_vertical_margin">
+                    <com.google.android.material.button.MaterialButton android:layout_gravity="center" android:id="@id/btnUpgrade" android:padding="@dimen/activity_vertical_margin" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/upgrade_get_more_lingqs" style="@style/UpgradeButton" />
+                    <com.google.android.material.progressindicator.CircularProgressIndicator android:layout_gravity="center" android:id="@id/viewProgress" android:visibility="visible" android:layout_width="@dimen/icon_small_size" android:layout_height="@dimen/icon_small_size" style="@style/Widget.ProgressCircle" />
+                </FrameLayout>
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

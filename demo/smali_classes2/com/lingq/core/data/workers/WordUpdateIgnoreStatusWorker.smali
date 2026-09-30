@@ -1,0 +1,203 @@
+.class public final Lcom/lingq/core/data/workers/WordUpdateIgnoreStatusWorker;
+.super Landroidx/work/CoroutineWorker;
+.source "SourceFile"
+
+
+# instance fields
+.field public final g:Ls7b;
+
+
+# direct methods
+.method public constructor <init>(Landroid/content/Context;Landroidx/work/WorkerParameters;Ls7b;)V
+    .locals 0
+
+    invoke-virtual {p1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    invoke-virtual {p2}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    invoke-virtual {p3}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    invoke-direct {p0, p1, p2}, Landroidx/work/CoroutineWorker;-><init>(Landroid/content/Context;Landroidx/work/WorkerParameters;)V
+
+    iput-object p3, p0, Lcom/lingq/core/data/workers/WordUpdateIgnoreStatusWorker;->g:Ls7b;
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public final d(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    .locals 6
+
+    instance-of v0, p1, Lcom/lingq/core/data/workers/WordUpdateIgnoreStatusWorker$doWork$1;
+
+    if-eqz v0, :cond_0
+
+    move-object v0, p1
+
+    check-cast v0, Lcom/lingq/core/data/workers/WordUpdateIgnoreStatusWorker$doWork$1;
+
+    iget v1, v0, Lcom/lingq/core/data/workers/WordUpdateIgnoreStatusWorker$doWork$1;->c:I
+
+    const/high16 v2, -0x80000000
+
+    and-int v3, v1, v2
+
+    if-eqz v3, :cond_0
+
+    sub-int/2addr v1, v2
+
+    iput v1, v0, Lcom/lingq/core/data/workers/WordUpdateIgnoreStatusWorker$doWork$1;->c:I
+
+    goto :goto_0
+
+    :cond_0
+    new-instance v0, Lcom/lingq/core/data/workers/WordUpdateIgnoreStatusWorker$doWork$1;
+
+    check-cast p1, Lkotlin/coroutines/jvm/internal/ContinuationImpl;
+
+    invoke-direct {v0, p0, p1}, Lcom/lingq/core/data/workers/WordUpdateIgnoreStatusWorker$doWork$1;-><init>(Lcom/lingq/core/data/workers/WordUpdateIgnoreStatusWorker;Lkotlin/coroutines/jvm/internal/ContinuationImpl;)V
+
+    :goto_0
+    iget-object p1, v0, Lcom/lingq/core/data/workers/WordUpdateIgnoreStatusWorker$doWork$1;->a:Ljava/lang/Object;
+
+    sget-object v1, Lkotlin/coroutines/intrinsics/CoroutineSingletons;->COROUTINE_SUSPENDED:Lkotlin/coroutines/intrinsics/CoroutineSingletons;
+
+    iget v2, v0, Lcom/lingq/core/data/workers/WordUpdateIgnoreStatusWorker$doWork$1;->c:I
+
+    const/4 v3, 0x1
+
+    if-eqz v2, :cond_2
+
+    if-ne v2, v3, :cond_1
+
+    :try_start_0
+    invoke-static {p1}, Lkotlin/b;->b(Ljava/lang/Object;)V
+    :try_end_0
+    .catchall {:try_start_0 .. :try_end_0} :catchall_0
+
+    goto :goto_2
+
+    :cond_1
+    const-string p0, "call to \'resume\' before \'invoke\' with coroutine"
+
+    invoke-static {p0}, Lnv;->t(Ljava/lang/String;)V
+
+    const/4 p0, 0x0
+
+    return-object p0
+
+    :cond_2
+    invoke-static {p1}, Lkotlin/b;->b(Ljava/lang/Object;)V
+
+    iget-object p1, p0, Lpg5;->b:Landroidx/work/WorkerParameters;
+
+    iget v2, p1, Landroidx/work/WorkerParameters;->c:I
+
+    iget-object p1, p1, Landroidx/work/WorkerParameters;->b:Lsz1;
+
+    const/4 v4, 0x3
+
+    if-le v2, v4, :cond_3
+
+    new-instance p0, Llg5;
+
+    invoke-direct {p0}, Llg5;-><init>()V
+
+    return-object p0
+
+    :cond_3
+    :try_start_1
+    const-string v2, "language"
+
+    invoke-virtual {p1, v2}, Lsz1;->e(Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v2
+
+    if-nez v2, :cond_4
+
+    new-instance p0, Llg5;
+
+    invoke-direct {p0}, Llg5;-><init>()V
+
+    return-object p0
+
+    :cond_4
+    const-string v4, "lessonId"
+
+    const/4 v5, 0x0
+
+    invoke-virtual {p1, v4, v5}, Lsz1;->c(Ljava/lang/String;I)I
+
+    move-result v4
+
+    const-string v5, "wordIds"
+
+    invoke-virtual {p1, v5}, Lsz1;->d(Ljava/lang/String;)[I
+
+    move-result-object p1
+
+    if-eqz p1, :cond_7
+
+    new-instance v5, Lpv;
+
+    invoke-direct {v5, p1}, Lpv;-><init>([I)V
+
+    iget-object p0, p0, Lcom/lingq/core/data/workers/WordUpdateIgnoreStatusWorker;->g:Ls7b;
+
+    iput v3, v0, Lcom/lingq/core/data/workers/WordUpdateIgnoreStatusWorker$doWork$1;->c:I
+
+    check-cast p0, Lcom/lingq/core/data/repository/z;
+
+    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    new-instance p1, Lcom/lingq/core/network/api/requests/RequestWordsUpdate;
+
+    invoke-direct {p1}, Lcom/lingq/core/network/api/requests/RequestWordsUpdate;-><init>()V
+
+    iput v4, p1, Lcom/lingq/core/network/api/requests/RequestWordsUpdate;->b:I
+
+    iput-object v5, p1, Lcom/lingq/core/network/api/requests/RequestWordsUpdate;->a:Ljava/util/List;
+
+    iget-object p0, p0, Lcom/lingq/core/data/repository/z;->c:Lt7b;
+
+    invoke-interface {p0, v2, p1, v0}, Lt7b;->a(Ljava/lang/String;Lcom/lingq/core/network/api/requests/RequestWordsUpdate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+
+    move-result-object p0
+
+    if-ne p0, v1, :cond_5
+
+    goto :goto_1
+
+    :cond_5
+    sget-object p0, Lxfa;->a:Lxfa;
+
+    :goto_1
+    if-ne p0, v1, :cond_6
+
+    return-object v1
+
+    :cond_6
+    :goto_2
+    invoke-static {}, Log5;->a()Lng5;
+
+    move-result-object p0
+
+    return-object p0
+
+    :cond_7
+    new-instance p0, Llg5;
+
+    invoke-direct {p0}, Llg5;-><init>()V
+    :try_end_1
+    .catchall {:try_start_1 .. :try_end_1} :catchall_0
+
+    return-object p0
+
+    :catchall_0
+    new-instance p0, Lmg5;
+
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    return-object p0
+.end method

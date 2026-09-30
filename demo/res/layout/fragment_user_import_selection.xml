@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:orientation="vertical" android:padding="@dimen/activity_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:transitionGroup="true"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <RelativeLayout android:id="@id/viewTop" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="horizontal" android:id="@id/view_back" android:background="?selectableItemBackground" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <ImageView android:layout_width="wrap_content" android:layout_height="30.0dp" android:scaleType="fitCenter" android:contentDescription="@string/ui_close" app:srcCompat="@drawable/ic_arrow_back" app:tint="?colorOnSurface" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:id="@id/viewAdd" android:background="?selectableItemBackground" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true">
+            <ImageView android:layout_width="24.0dp" android:layout_height="24.0dp" android:scaleType="fitCenter" android:contentDescription="@string/ui_add" app:srcCompat="@drawable/ic_add" app:tint="?colorOnSurface" />
+        </LinearLayout>
+    </RelativeLayout>
+    <com.google.android.material.progressindicator.CircularProgressIndicator android:id="@id/viewProgress" android:visibility="gone" android:layout_width="@dimen/progress_size" android:layout_height="@dimen/progress_size" android:layout_marginTop="50.0dp" android:layout_below="@id/viewTop" android:layout_centerInParent="true" style="@style/Widget.ProgressCircle" />
+    <androidx.recyclerview.widget.RecyclerView android:id="@id/selections" android:padding="@dimen/spacing_high" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_below="@id/viewTop" android:paddingStart="@dimen/spacing_standard" android:paddingEnd="@dimen/spacing_standard" />
+</RelativeLayout>

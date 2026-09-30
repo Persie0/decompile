@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:layout_width="match_parent" android:layout_height="match_parent" android:transitionGroup="true"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
+        <TextView android:textSize="@dimen/review_activity_multi_selection_text_size" android:gravity="center" android:id="@id/tvMatchPairs" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_highest" android:layout_marginBottom="@dimen/spacing_small" android:text="@string/review_match_pairs" android:layout_marginStart="@dimen/activity_horizontal_margin" android:layout_marginEnd="@dimen/activity_horizontal_margin" />
+        <com.lingq.feature.review.views.speaking.MatchPairView android:id="@id/viewMatchPair" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_marginTop="@dimen/activity_horizontal_margin" android:layout_marginBottom="@dimen/activity_horizontal_margin" android:layout_marginStart="@dimen/activity_horizontal_margin" android:layout_marginEnd="@dimen/activity_horizontal_margin" />
+    </LinearLayout>
+    <com.google.android.material.progressindicator.CircularProgressIndicator android:layout_gravity="center" android:id="@id/viewProgress" android:visibility="gone" android:layout_width="@dimen/progress_size" android:layout_height="@dimen/progress_size" style="@style/Widget.ProgressCircle" />
+</FrameLayout>

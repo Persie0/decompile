@@ -1,0 +1,246 @@
+.class public final Lcom/lingq/core/domain/model/challenge/ChallengeRanking;
+.super Ljava/lang/Object;
+.source "SourceFile"
+
+
+# annotations
+.annotation system Ldalvik/annotation/MemberClasses;
+    value = {
+        Lcom/lingq/core/domain/model/challenge/ChallengeRanking$$serializer;
+    }
+.end annotation
+
+.annotation runtime Ley8;
+.end annotation
+
+
+# static fields
+.field public static final Companion:Lcom/lingq/core/domain/model/challenge/d;
+
+
+# instance fields
+.field public a:I
+
+.field public b:I
+
+.field public c:I
+
+.field public d:Lcom/lingq/core/domain/model/challenge/ChallengeProfile;
+
+.field public e:Ljava/lang/String;
+
+.field public f:Ljava/lang/String;
+
+
+# direct methods
+.method static constructor <clinit>()V
+    .locals 1
+
+    new-instance v0, Lcom/lingq/core/domain/model/challenge/d;
+
+    invoke-direct {v0}, Ljava/lang/Object;-><init>()V
+
+    sput-object v0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->Companion:Lcom/lingq/core/domain/model/challenge/d;
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public final equals(Ljava/lang/Object;)Z
+    .locals 4
+
+    const/4 v0, 0x1
+
+    if-ne p0, p1, :cond_0
+
+    return v0
+
+    :cond_0
+    instance-of v1, p1, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;
+
+    const/4 v2, 0x0
+
+    if-nez v1, :cond_1
+
+    return v2
+
+    :cond_1
+    check-cast p1, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;
+
+    iget v1, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->a:I
+
+    iget v3, p1, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->a:I
+
+    if-eq v1, v3, :cond_2
+
+    return v2
+
+    :cond_2
+    iget v1, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->b:I
+
+    iget v3, p1, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->b:I
+
+    if-eq v1, v3, :cond_3
+
+    return v2
+
+    :cond_3
+    iget v1, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->c:I
+
+    iget v3, p1, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->c:I
+
+    if-eq v1, v3, :cond_4
+
+    return v2
+
+    :cond_4
+    iget-object v1, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->d:Lcom/lingq/core/domain/model/challenge/ChallengeProfile;
+
+    iget-object v3, p1, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->d:Lcom/lingq/core/domain/model/challenge/ChallengeProfile;
+
+    invoke-static {v1, v3}, Lfa4;->l(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v1
+
+    if-nez v1, :cond_5
+
+    return v2
+
+    :cond_5
+    iget-object v1, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->e:Ljava/lang/String;
+
+    iget-object v3, p1, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->e:Ljava/lang/String;
+
+    invoke-static {v1, v3}, Lfa4;->l(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v1
+
+    if-nez v1, :cond_6
+
+    return v2
+
+    :cond_6
+    iget-object p0, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->f:Ljava/lang/String;
+
+    iget-object p1, p1, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->f:Ljava/lang/String;
+
+    invoke-static {p0, p1}, Lfa4;->l(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result p0
+
+    if-nez p0, :cond_7
+
+    return v2
+
+    :cond_7
+    return v0
+.end method
+
+.method public final hashCode()I
+    .locals 3
+
+    iget v0, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->a:I
+
+    invoke-static {v0}, Ljava/lang/Integer;->hashCode(I)I
+
+    move-result v0
+
+    const/16 v1, 0x1f
+
+    mul-int/2addr v0, v1
+
+    iget v2, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->b:I
+
+    invoke-static {v2, v0, v1}, Lwq1;->b(III)I
+
+    move-result v0
+
+    iget v2, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->c:I
+
+    invoke-static {v2, v0, v1}, Lwq1;->b(III)I
+
+    move-result v0
+
+    iget-object v2, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->d:Lcom/lingq/core/domain/model/challenge/ChallengeProfile;
+
+    if-nez v2, :cond_0
+
+    const/4 v2, 0x0
+
+    goto :goto_0
+
+    :cond_0
+    invoke-virtual {v2}, Lcom/lingq/core/domain/model/challenge/ChallengeProfile;->hashCode()I
+
+    move-result v2
+
+    :goto_0
+    add-int/2addr v0, v2
+
+    mul-int/2addr v0, v1
+
+    iget-object v2, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->e:Ljava/lang/String;
+
+    invoke-static {v0, v2, v1}, Lux5;->c(ILjava/lang/String;I)I
+
+    move-result v0
+
+    iget-object p0, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->f:Ljava/lang/String;
+
+    invoke-virtual {p0}, Ljava/lang/String;->hashCode()I
+
+    move-result p0
+
+    add-int/2addr p0, v0
+
+    return p0
+.end method
+
+.method public final toString()Ljava/lang/String;
+    .locals 8
+
+    iget v0, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->a:I
+
+    iget v1, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->b:I
+
+    iget v2, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->c:I
+
+    iget-object v3, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->d:Lcom/lingq/core/domain/model/challenge/ChallengeProfile;
+
+    iget-object v4, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->e:Ljava/lang/String;
+
+    iget-object p0, p0, Lcom/lingq/core/domain/model/challenge/ChallengeRanking;->f:Ljava/lang/String;
+
+    const-string v5, ", score="
+
+    const-string v6, ", scoreBehindLeader="
+
+    const-string v7, "ChallengeRanking(rank="
+
+    invoke-static {v0, v1, v7, v5, v6}, Lux5;->q(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v0
+
+    invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+
+    const-string v1, ", profile="
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v0, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    const-string v1, ", bookTitle="
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    const-string v1, ", bookLanguage="
+
+    const-string v2, ")"
+
+    invoke-static {v0, v4, v1, p0, v2}, Lwq1;->u(Ljava/lang/StringBuilder;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object p0
+
+    return-object p0
+.end method

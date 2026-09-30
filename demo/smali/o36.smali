@@ -1,0 +1,154 @@
+.class public final Lo36;
+.super Ljava/lang/Object;
+.source "SourceFile"
+
+# interfaces
+.implements Lq36;
+
+
+# static fields
+.field public static final a:Lo36;
+
+.field public static final b:Lbg9;
+
+.field public static final c:Lbg9;
+
+.field public static final d:Lbg9;
+
+.field public static final e:Lbg9;
+
+.field public static final f:Lbg9;
+
+.field public static final g:Lbg9;
+
+
+# direct methods
+.method static constructor <clinit>()V
+    .locals 5
+
+    new-instance v0, Lo36;
+
+    invoke-direct {v0}, Ljava/lang/Object;-><init>()V
+
+    sput-object v0, Lo36;->a:Lo36;
+
+    const v0, 0x3f4ccccd    # 0.8f
+
+    const/high16 v1, 0x43be0000    # 380.0f
+
+    const/4 v2, 0x0
+
+    const/4 v3, 0x4
+
+    invoke-static {v0, v1, v2, v3}, Lss5;->Y(FFLjava/lang/Object;I)Lbg9;
+
+    move-result-object v1
+
+    sput-object v1, Lo36;->b:Lbg9;
+
+    const v1, 0x3f19999a    # 0.6f
+
+    const/high16 v4, 0x44480000    # 800.0f
+
+    invoke-static {v1, v4, v2, v3}, Lss5;->Y(FFLjava/lang/Object;I)Lbg9;
+
+    move-result-object v1
+
+    sput-object v1, Lo36;->c:Lbg9;
+
+    const/high16 v1, 0x43480000    # 200.0f
+
+    invoke-static {v0, v1, v2, v3}, Lss5;->Y(FFLjava/lang/Object;I)Lbg9;
+
+    move-result-object v0
+
+    sput-object v0, Lo36;->d:Lbg9;
+
+    const/high16 v0, 0x44c80000    # 1600.0f
+
+    const/high16 v1, 0x3f800000    # 1.0f
+
+    invoke-static {v1, v0, v2, v3}, Lss5;->Y(FFLjava/lang/Object;I)Lbg9;
+
+    move-result-object v0
+
+    sput-object v0, Lo36;->e:Lbg9;
+
+    const v0, 0x456d8000    # 3800.0f
+
+    invoke-static {v1, v0, v2, v3}, Lss5;->Y(FFLjava/lang/Object;I)Lbg9;
+
+    move-result-object v0
+
+    sput-object v0, Lo36;->f:Lbg9;
+
+    invoke-static {v1, v4, v2, v3}, Lss5;->Y(FFLjava/lang/Object;I)Lbg9;
+
+    move-result-object v0
+
+    sput-object v0, Lo36;->g:Lbg9;
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public final a()Lbg9;
+    .locals 0
+
+    sget-object p0, Lo36;->g:Lbg9;
+
+    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    return-object p0
+.end method
+
+.method public final b()Lbg9;
+    .locals 0
+
+    sget-object p0, Lo36;->f:Lbg9;
+
+    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    return-object p0
+.end method
+
+.method public final c()Lbg9;
+    .locals 0
+
+    sget-object p0, Lo36;->c:Lbg9;
+
+    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    return-object p0
+.end method
+
+.method public final d()Lbg9;
+    .locals 0
+
+    sget-object p0, Lo36;->e:Lbg9;
+
+    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    return-object p0
+.end method
+
+.method public final e()Lbg9;
+    .locals 0
+
+    sget-object p0, Lo36;->d:Lbg9;
+
+    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    return-object p0
+.end method
+
+.method public final f()Lbg9;
+    .locals 0
+
+    sget-object p0, Lo36;->b:Lbg9;
+
+    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    return-object p0
+.end method

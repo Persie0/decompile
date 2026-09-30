@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent" android:transitionGroup="true"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="vertical" android:id="@id/viewContent" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <com.google.android.material.card.MaterialCardView android:id="@id/cardView" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" app:cardBackgroundColor="?colorSurfaceContainerHigh" app:cardCornerRadius="@dimen/btn_corner_medium" app:cardPreventCornerOverlap="true" app:cardUseCompatPadding="true">
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <com.google.android.material.appbar.MaterialToolbar android:id="@id/toolbar" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                <androidx.compose.ui.platform.ComposeView android:id="@id/viewVocabularyList" android:layout_width="match_parent" android:layout_height="match_parent" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+    <androidx.fragment.app.FragmentContainerView android:id="@id/fragment_container_token" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <androidx.fragment.app.FragmentContainerView android:id="@id/fragment_upgrade" android:layout_width="match_parent" android:layout_height="match_parent" />
+</FrameLayout>

@@ -1,0 +1,102 @@
+.class public final Lh22;
+.super Ljava/lang/Object;
+.source "SourceFile"
+
+# interfaces
+.implements Lkotlinx/serialization/KSerializer;
+
+
+# static fields
+.field public static final b:Lh22;
+
+.field public static final c:Lgk7;
+
+
+# instance fields
+.field public final synthetic a:Lg22;
+
+
+# direct methods
+.method static constructor <clinit>()V
+    .locals 1
+
+    new-instance v0, Lh22;
+
+    invoke-direct {v0}, Lh22;-><init>()V
+
+    sput-object v0, Lh22;->b:Lh22;
+
+    const-string v0, "kotlinx.datetime.DateTimePeriod"
+
+    invoke-static {v0}, Lpb1;->e(Ljava/lang/String;)Lgk7;
+
+    move-result-object v0
+
+    sput-object v0, Lh22;->c:Lgk7;
+
+    return-void
+.end method
+
+.method public constructor <init>()V
+    .locals 1
+
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    sget-object v0, Lg22;->a:Lg22;
+
+    iput-object v0, p0, Lh22;->a:Lg22;
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public final deserialize(Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+    .locals 0
+
+    iget-object p0, p0, Lh22;->a:Lg22;
+
+    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    sget-object p0, Le22;->Companion:Ld22;
+
+    invoke-interface {p1}, Lkotlinx/serialization/encoding/Decoder;->s()Ljava/lang/String;
+
+    move-result-object p1
+
+    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    invoke-static {p1}, Ld22;->a(Ljava/lang/String;)Le22;
+
+    move-result-object p0
+
+    return-object p0
+.end method
+
+.method public final getDescriptor()Lkotlinx/serialization/descriptors/SerialDescriptor;
+    .locals 0
+
+    sget-object p0, Lh22;->c:Lgk7;
+
+    return-object p0
+.end method
+
+.method public final serialize(Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+    .locals 0
+
+    check-cast p2, Le22;
+
+    invoke-virtual {p2}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    iget-object p0, p0, Lh22;->a:Lg22;
+
+    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    invoke-virtual {p2}, Le22;->toString()Ljava/lang/String;
+
+    move-result-object p0
+
+    invoke-interface {p1, p0}, Lkotlinx/serialization/encoding/Encoder;->p(Ljava/lang/String;)V
+
+    return-void
+.end method

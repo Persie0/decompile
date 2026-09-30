@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_stats" app:startDestination="@id/fragment_stats"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_web_view" />
+    <fragment android:label="Stats" android:name="com.lingq.feature.statistics.LanguageStatsUpdateFragment" android:id="@id/fragment_stats">
+        <action android:id="@id/actionToStatsShare" app:destination="@id/fragment_stats_share" />
+        <action android:id="@id/actionToStatsBadges" app:destination="@id/fragment_language_stats_badges" />
+        <action android:id="@id/actionToStatsDetails" app:destination="@id/fragment_stats_details" />
+        <action android:id="@id/actionToStatsCalendar" app:destination="@id/fragment_stats_calendar" />
+        <action android:id="@id/actionToStatsAll" app:destination="@id/fragment_language_stats_all" />
+    </fragment>
+    <fragment android:label="Stats Details" android:name="com.lingq.feature.statistics.LanguageStatsDetailsFragment" android:id="@id/fragment_stats_details">
+        <argument android:name="period" android:defaultValue="Last7Days" app:argType="com.lingq.core.domain.model.language.LanguageProgressPeriod" />
+        <argument android:name="metric" android:defaultValue="KnownWords" app:argType="com.lingq.core.domain.model.language.LanguageProgressMetric" />
+        <action android:id="@id/actionToWeb" app:destination="@id/nav_graph_web_view" />
+    </fragment>
+    <fragment android:label="Language Stats All" android:name="com.lingq.feature.statistics.LanguageStatsAllFragment" android:id="@id/fragment_language_stats_all">
+        <argument android:name="period" android:defaultValue="Today" app:argType="com.lingq.core.domain.model.language.LanguageProgressPeriod" />
+        <action android:id="@id/actionToStatsDetails" app:destination="@id/fragment_stats_details" />
+    </fragment>
+    <fragment android:label="Language Stats Badges" android:name="com.lingq.feature.statistics.LanguageStatsBadgesFragment" android:id="@id/fragment_language_stats_badges" />
+    <fragment android:label="Stats Calendar" android:name="com.lingq.feature.statistics.StatsCalendarFragment" android:id="@id/fragment_stats_calendar" />
+    <dialog android:label="Share Stats" android:name="com.lingq.feature.statistics.StatsShareFragment" android:id="@id/fragment_stats_share" />
+    <action android:id="@id/actionToStats" app:destination="@id/fragment_stats" />
+</navigation>

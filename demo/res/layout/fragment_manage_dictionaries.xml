@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:paddingTop="@dimen/activity_vertical_margin" android:paddingBottom="@dimen/activity_vertical_margin" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:gravity="center" android:id="@id/tvClose" android:background="?selectableItemBackground" android:padding="@dimen/spacing_high" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/ui_close" android:layout_alignTop="@id/tvDictionary" android:layout_alignBottom="@id/tvDictionary" style="@style/BodyLarge" />
+    <TextView android:gravity="center" android:id="@id/tvDictionary" android:padding="@dimen/spacing_high" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/card_check_dictionary" android:layout_centerHorizontal="true" style="@style/TitleLarge" />
+    <androidx.recyclerview.widget.RecyclerView android:id="@id/rvDictionaries" android:paddingBottom="@dimen/activity_vertical_margin" android:fadingEdge="vertical" android:fadingEdgeLength="@dimen/spacing_high" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="@dimen/spacing_high" android:layout_below="@id/tvDictionary" android:requiresFadingEdge="vertical" />
+</RelativeLayout>

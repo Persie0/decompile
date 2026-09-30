@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_chat" app:startDestination="@id/fragment_chat"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_reader" />
+    <fragment android:label="Lynx Chat" android:name="com.lingq.feature.chat.ChatFragment" android:id="@id/fragment_chat">
+        <argument android:name="openLocation" android:defaultValue="" app:argType="string" />
+        <argument android:name="chatId" android:defaultValue="-1" app:argType="integer" />
+        <action android:id="@id/actionToReaderCompose" app:destination="@id/nav_graph_reader" />
+    </fragment>
+    <action android:id="@id/actionToChat" app:destination="@id/fragment_chat" />
+</navigation>

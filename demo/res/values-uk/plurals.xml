@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="challenges_cup_banner_ends_in">
+        <item quantity="one">Завершується через %1$d день</item>
+        <item quantity="few">Завершується через %1$d дні</item>
+        <item quantity="many">Завершується через %1$d днів</item>
+        <item quantity="other">Завершується через %1$d дня</item>
+    </plurals>
+    <plurals name="challenges_participants">
+        <item quantity="one">%s учасник</item>
+        <item quantity="few">%s учасники</item>
+        <item quantity="many">%s учасників</item>
+        <item quantity="other">%s учасника</item>
+    </plurals>
+    <plurals name="cup_days_remaining">
+        <item quantity="one">Залишився %1$d день</item>
+        <item quantity="few">Залишилося %1$d дні</item>
+        <item quantity="many">Залишилося %1$d днів</item>
+        <item quantity="other">Залишилося %1$d дня</item>
+    </plurals>
+    <plurals name="cup_days_until">
+        <item quantity="one">Старт через %1$d день</item>
+        <item quantity="few">Старт через %1$d дні</item>
+        <item quantity="many">Старт через %1$d днів</item>
+        <item quantity="other">Старт через %1$d дня</item>
+    </plurals>
+    <plurals name="exo_controls_fastforward_by_amount_description">
+        <item quantity="one">Перемотати вперед на %d секунду</item>
+        <item quantity="few">Перемотати вперед на %d секунди</item>
+        <item quantity="many">Перемотати вперед на %d секунд</item>
+        <item quantity="other">Перемотати вперед на %d секунди</item>
+    </plurals>
+    <plurals name="exo_controls_rewind_by_amount_description">
+        <item quantity="one">Перемотати назад на %d секунду</item>
+        <item quantity="few">Перемотати назад на %d секунди</item>
+        <item quantity="many">Перемотати назад на %d секунд</item>
+        <item quantity="other">Перемотати назад на %d секунди</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_days">
+        <item quantity="one">завтра</item>
+        <item quantity="other">через %d дн.</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_hours">
+        <item quantity="one">через 1 год.</item>
+        <item quantity="other">через %d год.</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_minutes">
+        <item quantity="one">через 1 хв.</item>
+        <item quantity="other">через %d хв.</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_seconds">
+        <item quantity="one">через 1 с.</item>
+        <item quantity="other">через %d сек.</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_days_ago">
+        <item quantity="one">учора</item>
+        <item quantity="other">%d дн. тому</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_hours_ago">
+        <item quantity="one">1 годину тому</item>
+        <item quantity="other">%d год. тому</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_minutes_ago">
+        <item quantity="one">1 хв. тому</item>
+        <item quantity="other">%d хв. тому</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_seconds_ago">
+        <item quantity="one">1 сек. тому</item>
+        <item quantity="other">%d сек. тому</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_hours">
+        <item quantity="one">1 год</item>
+        <item quantity="other">%d год</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_minutes">
+        <item quantity="one">1 хв</item>
+        <item quantity="other">%d хв</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_seconds">
+        <item quantity="one">1 с</item>
+        <item quantity="other">%d с</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_days">
+        <item quantity="one">завтра</item>
+        <item quantity="other">через %d дн.</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_hours">
+        <item quantity="one">через 1 год.</item>
+        <item quantity="other">через %d год.</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_minutes">
+        <item quantity="one">через 1 хв.</item>
+        <item quantity="other">через %d хв.</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_seconds">
+        <item quantity="one">через 1 сек.</item>
+        <item quantity="other">через %d сек.</item>
+    </plurals>
+    <plurals name="joda_time_android_num_days_ago">
+        <item quantity="one">учора</item>
+        <item quantity="other">%d дн. тому</item>
+    </plurals>
+    <plurals name="joda_time_android_num_hours_ago">
+        <item quantity="one">1 год. тому</item>
+        <item quantity="other">%d год. тому</item>
+    </plurals>
+    <plurals name="joda_time_android_num_minutes_ago">
+        <item quantity="one">1 хвилину тому</item>
+        <item quantity="other">%d хв. тому</item>
+    </plurals>
+    <plurals name="joda_time_android_num_seconds_ago">
+        <item quantity="one">1 сек. тому</item>
+        <item quantity="other">%d сек. тому</item>
+    </plurals>
+    <plurals name="lingq_courses_count_Course">
+        <item quantity="one">%d Курс</item>
+        <item quantity="few">%d Курси</item>
+        <item quantity="many">%d Курси</item>
+        <item quantity="other">%d Курсів</item>
+    </plurals>
+    <plurals name="lingq_lessons_count_Lessons">
+        <item quantity="one">%d Урок</item>
+        <item quantity="few">%d Уроки</item>
+        <item quantity="many">%d Уроки</item>
+        <item quantity="other">%d Уроків</item>
+    </plurals>
+    <plurals name="lingq_likes_count_like">
+        <item quantity="one">%d Лайк</item>
+        <item quantity="few">%d Лайки</item>
+        <item quantity="many">%d Лайки</item>
+        <item quantity="other">%d Лайків</item>
+    </plurals>
+    <plurals name="lingq_lingqs_count_LingQs">
+        <item quantity="one">%d LingQ</item>
+        <item quantity="few">%d LingQ-и</item>
+        <item quantity="many">%d LingQ-и</item>
+        <item quantity="other">%d LingQ-сів</item>
+    </plurals>
+    <plurals name="mtrl_badge_content_description">
+        <item quantity="one">%d нове сповіщення</item>
+        <item quantity="few">%d нові сповіщення</item>
+        <item quantity="many">%d нових сповіщень</item>
+        <item quantity="other">%d нового сповіщення</item>
+    </plurals>
+    <plurals name="paging_move_known_action_button">
+        <item quantity="one">Я знаю це слово</item>
+        <item quantity="few">Я знаю ці %d слова</item>
+        <item quantity="many">Я знаю ці %d слів</item>
+        <item quantity="other">Я знаю ці %d слів</item>
+    </plurals>
+    <plurals name="settings_daily_streak_target_estimated_minutes">
+        <item quantity="one">Це приблизно %d хв навчання на день.</item>
+        <item quantity="few">Це приблизно %d хв навчання на день.</item>
+        <item quantity="many">Це приблизно %d хв навчання на день.</item>
+        <item quantity="other">Це приблизно %d хв навчання на день.</item>
+    </plurals>
+    <plurals name="stats_listen_for_n_more_minutes">
+        <item quantity="one">Прослухайте ще %d хвилину, щоб досягти щоденної цілі.</item>
+        <item quantity="few">Прослухайте ще %d хвилини, щоб досягти щоденної цілі.</item>
+        <item quantity="many">Прослухайте ще %d хвилини, щоб досягти щоденної цілі.</item>
+        <item quantity="other">Прослухайте ще %d хвилин, щоб досягти щоденної цілі.</item>
+    </plurals>
+    <plurals name="stats_streak_days_count_day">
+        <item quantity="one">%d День</item>
+        <item quantity="few">%d Днів</item>
+        <item quantity="many">%d Днів</item>
+        <item quantity="other">%d Днів</item>
+    </plurals>
+</resources>

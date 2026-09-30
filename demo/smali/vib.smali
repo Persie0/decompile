@@ -1,0 +1,11 @@
+.class public interface abstract Lvib;
+.super Ljava/lang/Object;
+.source "SourceFile"
+
+
+# virtual methods
+.method public abstract a(Ljava/lang/Class;)Z
+.end method
+
+.method public abstract c(Ljava/lang/Class;)Lejb;
+.end method

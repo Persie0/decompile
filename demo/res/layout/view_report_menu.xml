@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="match_parent" android:paddingStart="@dimen/activity_vertical_margin" android:paddingEnd="@dimen/activity_vertical_margin"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <RadioGroup android:id="@id/rgIssues" android:layout_width="match_parent" android:layout_height="wrap_content" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+        <RadioButton android:id="@id/rbOffensiveContent" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/report_offensive_content" />
+        <RadioButton android:id="@id/rbAudioProblems" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/report_audio_problems" />
+        <RadioButton android:id="@id/rvPoorTranscript" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/report_poor_quality_transcript" />
+        <RadioButton android:id="@id/rbOther" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/report_other" />
+    </RadioGroup>
+    <com.google.android.material.textfield.TextInputLayout android:id="@id/tlReason" android:visibility="gone" android:layout_width="@dimen/match_constraints" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_standard" android:hint="@string/report_reason" app:counterEnabled="true" app:counterMaxLength="120" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/rgIssues" style="@style/IntroTextInput">
+        <com.google.android.material.textfield.TextInputEditText android:id="@id/etReason" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLength="120" />
+    </com.google.android.material.textfield.TextInputLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

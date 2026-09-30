@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageButton android:background="?selectableItemBackground" android:layout_width="35.0dp" android:layout_height="30.0dp" app:srcCompat="@drawable/ic_minus_s" app:tint="?colorOnPrimary" />
+    <View android:layout_width="1.0dp" android:layout_height="match_parent" android:layout_marginTop="@dimen/spacing_small" android:layout_marginBottom="@dimen/spacing_small" />
+    <ImageButton android:background="?selectableItemBackground" android:layout_width="35.0dp" android:layout_height="30.0dp" app:srcCompat="@drawable/ic_plus_s" app:tint="?colorOnPrimary" />
+</merge>

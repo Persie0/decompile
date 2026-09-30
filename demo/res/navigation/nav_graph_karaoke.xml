@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_karaoke" app:startDestination="@id/fragment_karaoke"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <fragment android:label="Listening" android:name="com.lingq.feature.karaoke.KaraokeFragment" android:id="@id/fragment_karaoke">
+        <argument android:name="lessonId" app:argType="integer" />
+        <argument android:name="fromLesson" android:defaultValue="true" app:argType="boolean" />
+        <argument android:name="video" android:defaultValue="false" app:argType="boolean" />
+    </fragment>
+    <action android:id="@id/actionToKaraoke" app:destination="@id/fragment_karaoke" />
+</navigation>

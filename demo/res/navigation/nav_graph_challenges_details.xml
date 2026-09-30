@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_challenges_details" app:startDestination="@id/fragment_challenges_details"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_collection" />
+    <include app:graph="@navigation/nav_graph_book_challenge_chooser_parent" />
+    <fragment android:label="Challenge Details" android:name="com.lingq.feature.challenges.ChallengeDetailsFragment" android:id="@id/fragment_challenges_details">
+        <argument android:name="challengeCode" app:argType="string" />
+        <argument android:name="challengeType" android:defaultValue="" app:argType="string" />
+        <argument android:name="languageFromDeeplink" android:defaultValue="" app:argType="string" />
+        <action android:id="@id/actionToChallengeShare" app:destination="@id/fragment_challenge_share" />
+        <action android:id="@id/actionToCollection" app:destination="@id/nav_graph_collection" />
+        <action android:id="@id/actionToBookChallengeChooser" app:destination="@id/nav_graph_book_challenge_chooser_parent" />
+        <deepLink app:uri="lingq://challenge/{languageFromDeeplink}/{challengeCode}" />
+        <deepLink app:uri="lingq://challenge/{challengeCode}" />
+    </fragment>
+    <dialog android:label="Share Challenge" android:name="com.lingq.feature.challenges.ChallengeShareFragment" android:id="@id/fragment_challenge_share">
+        <argument android:name="challengeCode" app:argType="string" />
+        <argument android:name="title" app:argType="string" />
+    </dialog>
+    <action android:id="@id/actionToChallengeDetails" app:destination="@id/fragment_challenges_details" />
+</navigation>

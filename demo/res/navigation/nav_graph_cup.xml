@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_cup" app:startDestination="@id/fragment_cup"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <fragment android:label="Cup" android:name="com.lingq.feature.challenges.cup.CupFragment" android:id="@id/fragment_cup">
+        <argument android:name="openSignup" android:defaultValue="false" app:argType="boolean" />
+        <deepLink app:uri="lingq://cup?openSignup={openSignup}" />
+        <deepLink app:uri="lingq://cup" />
+    </fragment>
+    <fragment android:label="Team Languages" android:name="com.lingq.feature.challenges.cup.CupTeamLeaderboardFragment" android:id="@id/fragment_cup_team_leaderboard" />
+    <fragment android:label="Top contributors" android:name="com.lingq.feature.challenges.cup.CupContributorsFragment" android:id="@id/fragment_cup_contributors">
+        <argument android:name="languageCode" android:defaultValue="@null" app:argType="string" app:nullable="true" />
+    </fragment>
+    <fragment android:label="Cup badges" android:name="com.lingq.feature.challenges.cup.CupBadgesFragment" android:id="@id/fragment_cup_badges" />
+    <fragment android:label="Daily Prize" android:name="com.lingq.feature.challenges.cup.CupDailyPrizeFragment" android:id="@id/fragment_cup_daily_prize" />
+    <action android:id="@id/actionToCup" app:destination="@id/fragment_cup" />
+    <action android:id="@id/actionToCupTeamLeaderboard" app:destination="@id/fragment_cup_team_leaderboard" app:enterAnim="@anim/enter_from_right" app:exitAnim="@anim/exit_to_left" app:popEnterAnim="@anim/enter_from_left" app:popExitAnim="@anim/exit_to_right" />
+    <action android:id="@id/actionToCupContributors" app:destination="@id/fragment_cup_contributors" app:enterAnim="@anim/enter_from_right" app:exitAnim="@anim/exit_to_left" app:popEnterAnim="@anim/enter_from_left" app:popExitAnim="@anim/exit_to_right" />
+    <action android:id="@id/actionToCupBadges" app:destination="@id/fragment_cup_badges" />
+    <action android:id="@id/actionToCupDailyPrize" app:destination="@id/fragment_cup_daily_prize" />
+</navigation>

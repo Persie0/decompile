@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:orientation="vertical" android:id="@id/viewCourse" android:layout_width="wrap_content" android:layout_height="wrap_content" android:foreground="?selectableItemBackground"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.google.android.material.card.MaterialCardView android:id="@id/firstBackCard" android:layout_width="248.0dp" android:layout_height="124.0dp" android:layout_marginTop="2.0dp" app:cardCornerRadius="@dimen/btn_corner_medium" app:cardElevation="0.0dp" app:strokeWidth="1.0dp" />
+    <com.google.android.material.card.MaterialCardView android:id="@id/secondBackCard" android:layout_width="246.0dp" android:layout_height="126.0dp" android:layout_marginTop="1.0dp" app:cardCornerRadius="@dimen/btn_corner_medium" app:cardElevation="0.0dp" app:strokeWidth="1.0dp" />
+    <LinearLayout android:orientation="vertical" android:layout_width="244.0dp" android:layout_height="wrap_content">
+        <com.google.android.material.card.MaterialCardView android:layout_gravity="center" android:id="@id/mainCard" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="128.0dp" android:checkable="true" app:cardCornerRadius="@dimen/btn_corner_medium" app:cardElevation="0.0dp">
+            <RelativeLayout android:id="@id/viewBlacklist" android:background="@color/indigo" android:layout_width="match_parent" android:layout_height="match_parent">
+                <ImageView android:layout_width="48.0dp" android:layout_height="48.0dp" android:layout_centerInParent="true" app:srcCompat="@drawable/ic_no_interested_in_course" app:tint="@color/white" />
+            </RelativeLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <TextView android:ellipsize="end" android:id="@id/tvCourseTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_small" android:maxLines="1" android:drawablePadding="@dimen/icon_padding" app:drawableStartCompat="@drawable/ic_collection_course_s" style="@style/BodyLarge" />
+        <TextView android:id="@id/tvCourseRemoved" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_small" android:text="@string/course_removed" style="@style/BodyMedium" />
+        <androidx.constraintlayout.widget.ConstraintLayout android:orientation="horizontal" android:id="@id/viewBlacklistActions" android:layout_width="match_parent" android:layout_height="wrap_content" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toEndOf="@id/ivLesson" app:layout_constraintTop_toBottomOf="@id/tvFeedback">
+            <TextView android:textColor="?blueTint" android:id="@id/btnUndo" android:paddingTop="@dimen/spacing_small" android:paddingBottom="@dimen/spacing_small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_standard" android:foreground="?selectableItemBackground" android:text="@string/ui_undo" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" style="@style/LabelMedium" />
+            <TextView android:textColor="?blueTint" android:id="@id/btnLearnMore" android:paddingTop="@dimen/spacing_small" android:paddingBottom="@dimen/spacing_small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_standard" android:foreground="?selectableItemBackground" android:text="@string/promoted_course_learn_more" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" style="@style/LabelMedium" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+</FrameLayout>

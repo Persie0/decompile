@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:id="@id/viewOutside" android:layout_width="wrap_content" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.cardview.widget.CardView android:layout_gravity="center_horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="30.0dp" android:layout_marginEnd="30.0dp" app:cardBackgroundColor="?colorSurfaceContainer" app:cardCornerRadius="10.0dp" app:cardElevation="12.0dp" app:cardPreventCornerOverlap="false" app:cardUseCompatPadding="true">
+        <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+            <LinearLayout android:id="@id/btnEdit" android:paddingTop="@dimen/list_vertical_margin" android:paddingBottom="@dimen/list_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:layout_alignParentTop="true" android:paddingStart="@dimen/spacing_high" android:paddingEnd="@dimen/spacing_high">
+                <ImageView android:layout_gravity="center_vertical" android:layout_width="24.0dp" android:layout_height="24.0dp" android:scaleType="fitCenter" app:srcCompat="@drawable/ic_edit" />
+                <TextView android:textAppearance="@style/BodyMedium" android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/ui_edit" android:layout_marginStart="@dimen/spacing_high" />
+            </LinearLayout>
+            <LinearLayout android:id="@id/btnDelete" android:paddingTop="@dimen/list_vertical_margin" android:paddingBottom="@dimen/list_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:layout_below="@id/btnEdit" android:paddingStart="@dimen/spacing_high" android:paddingEnd="@dimen/spacing_high">
+                <ImageView android:layout_gravity="center_vertical" android:layout_width="24.0dp" android:layout_height="24.0dp" android:scaleType="fitCenter" app:srcCompat="@drawable/ic_trash" />
+                <TextView android:textAppearance="@style/BodyMedium" android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/ui_delete" android:layout_marginStart="@dimen/spacing_high" />
+            </LinearLayout>
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+</FrameLayout>

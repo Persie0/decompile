@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="match_parent" android:transitionGroup="true"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.google.android.material.appbar.AppBarLayout android:id="@id/appbar" android:layout_width="match_parent" android:layout_height="wrap_content" app:layout_constraintTop_toTopOf="parent">
+        <com.google.android.material.appbar.MaterialToolbar android:id="@id/toolbar" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    </com.google.android.material.appbar.AppBarLayout>
+    <com.google.android.material.card.MaterialCardView android:id="@id/playerCard" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10.0dp" app:cardCornerRadius="@dimen/btn_corner_large" app:cardElevation="8.0dp" app:layout_constraintBottom_toBottomOf="parent">
+        <com.lingq.feature.playlist.PlaylistPlayerView android:id="@id/view_player" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    </com.google.android.material.card.MaterialCardView>
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout android:id="@id/swipe_container" android:layout_width="match_parent" android:layout_height="@dimen/match_constraints" android:paddingStart="@dimen/home_screen_margin" android:paddingEnd="@dimen/home_screen_margin" app:layout_constraintBottom_toTopOf="@id/playerCard" app:layout_constraintTop_toBottomOf="@id/appbar">
+        <androidx.recyclerview.widget.RecyclerView android:id="@id/rvCourseLessons" android:paddingTop="@dimen/spacing_standard" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    <TextView android:gravity="center" android:id="@id/tvNoTracks" android:padding="@dimen/activity_horizontal_margin" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/vocabulary_spinner_height" android:text="@string/texts_no_lessons_with_audio" app:layout_constraintTop_toBottomOf="@id/appbar" style="@style/BodyLarge" />
+</androidx.constraintlayout.widget.ConstraintLayout>

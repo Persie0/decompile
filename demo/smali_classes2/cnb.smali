@@ -1,0 +1,83 @@
+.class public final Lcnb;
+.super Ljava/lang/Object;
+.source "SourceFile"
+
+# interfaces
+.implements Lkmb;
+
+
+# virtual methods
+.method public final b()Ljava/lang/Boolean;
+    .locals 0
+
+    sget-object p0, Ljava/lang/Boolean;->FALSE:Ljava/lang/Boolean;
+
+    return-object p0
+.end method
+
+.method public final c()Ljava/lang/String;
+    .locals 0
+
+    const-string p0, "undefined"
+
+    return-object p0
+.end method
+
+.method public final d()Ljava/util/Iterator;
+    .locals 0
+
+    const/4 p0, 0x0
+
+    return-object p0
+.end method
+
+.method public final e()Ljava/lang/Double;
+    .locals 2
+
+    const-wide/high16 v0, 0x7ff8000000000000L    # Double.NaN
+
+    invoke-static {v0, v1}, Ljava/lang/Double;->valueOf(D)Ljava/lang/Double;
+
+    move-result-object p0
+
+    return-object p0
+.end method
+
+.method public final equals(Ljava/lang/Object;)Z
+    .locals 0
+
+    if-ne p1, p0, :cond_0
+
+    const/4 p0, 0x1
+
+    return p0
+
+    :cond_0
+    instance-of p0, p1, Lcnb;
+
+    return p0
+.end method
+
+.method public final g(Ljava/lang/String;Lmb;Ljava/util/ArrayList;)Lkmb;
+    .locals 0
+
+    new-instance p0, Ljava/lang/IllegalStateException;
+
+    const-string p2, "Undefined has no function "
+
+    invoke-virtual {p2, p1}, Ljava/lang/String;->concat(Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object p1
+
+    invoke-direct {p0, p1}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
+
+    throw p0
+.end method
+
+.method public final k()Lkmb;
+    .locals 0
+
+    sget-object p0, Lkmb;->y:Lcnb;
+
+    return-object p0
+.end method

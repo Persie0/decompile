@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="match_parent" android:transitionGroup="true"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.google.android.material.appbar.AppBarLayout android:id="@id/appbar" android:layout_width="match_parent" android:layout_height="wrap_content" app:layout_constraintTop_toTopOf="parent">
+        <com.google.android.material.appbar.MaterialToolbar android:id="@id/toolbar" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    </com.google.android.material.appbar.AppBarLayout>
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="@dimen/match_constraints" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintTop_toBottomOf="@id/appbar">
+        <LinearLayout android:orientation="vertical" android:id="@id/llHelpContent" android:paddingBottom="@dimen/activity_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="@dimen/activity_horizontal_margin" android:paddingEnd="@dimen/activity_horizontal_margin">
+            <LinearLayout android:orientation="vertical" android:id="@id/viewHelp" android:paddingTop="@dimen/activity_vertical_margin" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/texts_how_to_use_lingq" style="@style/TitleMedium" />
+                <View android:layout_width="match_parent" android:layout_height="1.0dp" android:layout_marginTop="@dimen/activity_vertical_margin" />
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:id="@id/view_support" android:paddingTop="@dimen/activity_vertical_margin" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground">
+                <TextView android:layout_gravity="start" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/texts_email_support" style="@style/TitleMedium" />
+                <View android:layout_width="match_parent" android:layout_height="1.0dp" android:layout_marginTop="@dimen/activity_vertical_margin" />
+            </LinearLayout>
+            <TextView android:paddingTop="@dimen/list_vertical_margin" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/activity_vertical_margin" android:text="@string/help_videos" style="@style/TitleMedium" />
+            <LinearLayout android:orientation="vertical" android:id="@id/viewBriefOverview" android:paddingTop="@dimen/activity_vertical_margin" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/help_brief_overview" style="@style/TitleMedium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/help_brief_overview_description" style="@style/BodyMedium" />
+                <View android:layout_width="match_parent" android:layout_height="1.0dp" android:layout_marginTop="@dimen/spacing_small" />
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:id="@id/viewLibrary" android:paddingTop="@dimen/activity_vertical_margin" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/feed_library" style="@style/TitleMedium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/help_find_content" style="@style/BodyMedium" />
+                <View android:layout_width="match_parent" android:layout_height="1.0dp" android:layout_marginTop="@dimen/list_vertical_margin" />
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:id="@id/viewReader" android:paddingTop="@dimen/activity_vertical_margin" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/settings_reader" style="@style/TitleMedium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/help_study_lessons" style="@style/BodyMedium" />
+                <View android:layout_width="match_parent" android:layout_height="1.0dp" android:layout_marginTop="@dimen/list_vertical_margin" />
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:id="@id/viewAdvancedReader" android:paddingTop="@dimen/activity_vertical_margin" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/quickstart_advanced_reader" style="@style/TitleMedium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/help_customize_lingQ" style="@style/BodyMedium" />
+                <View android:layout_width="match_parent" android:layout_height="1.0dp" android:layout_marginTop="@dimen/list_vertical_margin" />
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:id="@id/viewImport" android:paddingTop="@dimen/activity_vertical_margin" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/feed_imports" style="@style/TitleMedium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/help_create_lessons" style="@style/BodyMedium" />
+                <View android:layout_width="match_parent" android:layout_height="1.0dp" android:layout_marginTop="@dimen/list_vertical_margin" />
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:id="@id/viewPhrases" android:paddingTop="@dimen/activity_vertical_margin" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/card_only_phrases" style="@style/TitleMedium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/help_natives_speak" style="@style/BodyMedium" />
+                <View android:layout_width="match_parent" android:layout_height="1.0dp" android:layout_marginTop="@dimen/list_vertical_margin" />
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:id="@id/viewStats" android:paddingTop="@dimen/activity_vertical_margin" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/stats_stats" style="@style/TitleMedium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/help_track_progress" style="@style/BodyMedium" />
+                <View android:layout_width="match_parent" android:layout_height="1.0dp" android:layout_marginTop="@dimen/list_vertical_margin" />
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:id="@id/viewVocabulary" android:paddingTop="@dimen/activity_vertical_margin" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/lingq_vocabulary" style="@style/TitleMedium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/help_personal_database" style="@style/BodyMedium" />
+                <View android:layout_width="match_parent" android:layout_height="1.0dp" android:layout_marginTop="@dimen/list_vertical_margin" />
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:id="@id/viewEarnCoins" android:paddingTop="@dimen/activity_vertical_margin" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/help_how_to_earn_coins" style="@style/TitleMedium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/help_how_to_earn_coins_description" style="@style/BodyMedium" />
+                <View android:layout_width="match_parent" android:layout_height="1.0dp" android:layout_marginTop="@dimen/list_vertical_margin" />
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:id="@id/viewPlaylists" android:paddingTop="@dimen/activity_vertical_margin" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/playlist_playlists" style="@style/TitleMedium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/help_playlists_description" style="@style/BodyMedium" />
+                <View android:layout_width="match_parent" android:layout_height="1.0dp" android:layout_marginTop="@dimen/list_vertical_margin" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

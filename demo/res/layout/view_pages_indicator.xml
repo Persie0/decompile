@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:gravity="center" android:orientation="horizontal" android:paddingTop="@dimen/btn_padding_height" android:paddingBottom="@dimen/btn_padding_height" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="56.0dp">
+        <ImageButton android:id="@id/btnPageIndicatorPrevious" android:background="@color/transparent" android:layout_width="@dimen/icon_size" android:layout_height="@dimen/icon_size" android:foreground="?selectableItemBackgroundBorderless" app:srcCompat="@drawable/ic_chevron_left_s" app:tint="?colorOnSurface" />
+        <TextView android:layout_gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingStart="@dimen/text_padding" android:paddingEnd="@dimen/text_padding" style="@style/BodyLarge" />
+        <ImageButton android:id="@id/btnPageIndicatorForward" android:background="@color/transparent" android:layout_width="@dimen/icon_size" android:layout_height="@dimen/icon_size" android:foreground="?selectableItemBackgroundBorderless" android:contentDescription="@string/ui_close" app:srcCompat="@drawable/ic_chevron_right_s" app:tint="?colorOnSurface" />
+    </LinearLayout>
+</merge>

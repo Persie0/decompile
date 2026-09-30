@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="challenges_cup_banner_ends_in">
+        <item quantity="one">Λήγει σε %1$d ημέρα</item>
+        <item quantity="other">Λήγει σε %1$d ημέρες</item>
+    </plurals>
+    <plurals name="challenges_participants">
+        <item quantity="one">%s συμμετέχων</item>
+        <item quantity="other">%s συμμετέχοντες</item>
+    </plurals>
+    <plurals name="cup_days_remaining">
+        <item quantity="one">%1$d ημέρα απομένει</item>
+        <item quantity="other">%1$d ημέρες απομένουν</item>
+    </plurals>
+    <plurals name="cup_days_until">
+        <item quantity="one">Ξεκινά σε %1$d ημέρα</item>
+        <item quantity="other">Ξεκινά σε %1$d ημέρες</item>
+    </plurals>
+    <plurals name="exo_controls_fastforward_by_amount_description">
+        <item quantity="one">Γρήγορη προώθηση κατά %d δευτερόλεπτο</item>
+        <item quantity="other">Γρήγορη προώθηση κατά %d δευτερόλεπτα</item>
+    </plurals>
+    <plurals name="exo_controls_rewind_by_amount_description">
+        <item quantity="one">Μετάβαση προς τα πίσω κατά %d δευτερόλεπτο</item>
+        <item quantity="other">Μετάβαση προς τα πίσω κατά %d δευτερόλεπτα</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_days">
+        <item quantity="one">αύριο</item>
+        <item quantity="other">σε %d ημέρες</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_hours">
+        <item quantity="one">σε 1 ώρα</item>
+        <item quantity="other">σε %d ώρες</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_minutes">
+        <item quantity="one">σε 1 λεπτό</item>
+        <item quantity="other">σε %d λεπτά</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_in_num_seconds">
+        <item quantity="one">σε 1 δευτερόλεπτο</item>
+        <item quantity="other">σε %d δευτερόλεπτα</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_days_ago">
+        <item quantity="one">χθες</item>
+        <item quantity="other">πριν από %d ημέρες</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_hours_ago">
+        <item quantity="one">πριν από 1 ώρα</item>
+        <item quantity="other">πριν από %d ώρες</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_minutes_ago">
+        <item quantity="one">πριν από 1 λεπτό</item>
+        <item quantity="other">πριν από %d λεπτά</item>
+    </plurals>
+    <plurals name="joda_time_android_abbrev_num_seconds_ago">
+        <item quantity="one">πριν από 1 δευτερόλεπτο</item>
+        <item quantity="other">πριν από %d δευτερόλεπτα</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_hours">
+        <item quantity="one">1 ώρα</item>
+        <item quantity="other">%d ώρες</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_minutes">
+        <item quantity="one">1 λεπτό</item>
+        <item quantity="other">%d λεπτά</item>
+    </plurals>
+    <plurals name="joda_time_android_duration_seconds">
+        <item quantity="one">1 δευτερόλεπτο</item>
+        <item quantity="other">%d δευτερόλεπτα</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_days">
+        <item quantity="one">αύριο</item>
+        <item quantity="other">σε %d ημέρες</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_hours">
+        <item quantity="one">σε 1 ώρα</item>
+        <item quantity="other">σε %d ώρες</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_minutes">
+        <item quantity="one">σε 1 λεπτό</item>
+        <item quantity="other">σε %d λεπτά</item>
+    </plurals>
+    <plurals name="joda_time_android_in_num_seconds">
+        <item quantity="one">σε 1 δευτερόλεπτο</item>
+        <item quantity="other">σε %d δευτερόλεπτα</item>
+    </plurals>
+    <plurals name="joda_time_android_num_days_ago">
+        <item quantity="one">χθες</item>
+        <item quantity="other">πριν από %d ημέρες</item>
+    </plurals>
+    <plurals name="joda_time_android_num_hours_ago">
+        <item quantity="one">πριν από 1 ώρα</item>
+        <item quantity="other">πριν από %d ώρες</item>
+    </plurals>
+    <plurals name="joda_time_android_num_minutes_ago">
+        <item quantity="one">πριν από 1 λεπτό</item>
+        <item quantity="other">πριν από %d λεπτά</item>
+    </plurals>
+    <plurals name="joda_time_android_num_seconds_ago">
+        <item quantity="one">πριν από 1 δευτερόλεπτο</item>
+        <item quantity="other">πριν από %d δευτερόλεπτα</item>
+    </plurals>
+    <plurals name="lingq_courses_count_Course">
+        <item quantity="one">%d Μάθημα</item>
+        <item quantity="other">%d Μαθήματα</item>
+    </plurals>
+    <plurals name="lingq_lessons_count_Lessons">
+        <item quantity="one">%d Μάθημα</item>
+        <item quantity="other">%d Μαθήματα</item>
+    </plurals>
+    <plurals name="lingq_likes_count_like">
+        <item quantity="one">%d Μου αρέσει</item>
+        <item quantity="other">%d Μου αρέσουν</item>
+    </plurals>
+    <plurals name="lingq_lingqs_count_LingQs">
+        <item quantity="one">%d LingQ</item>
+        <item quantity="other">%d LingQ</item>
+    </plurals>
+    <plurals name="mtrl_badge_content_description">
+        <item quantity="one">%d νέα ειδοποίηση</item>
+        <item quantity="other">%d νέες ειδοποιήσεις</item>
+    </plurals>
+    <plurals name="paging_move_known_action_button">
+        <item quantity="one">Γνωρίζω αυτή τη λέξη</item>
+        <item quantity="other">Γνωρίζω αυτή τη λέξη Γνωρίζω αυτές τις %d λέξεις</item>
+    </plurals>
+    <plurals name="settings_daily_streak_target_estimated_minutes">
+        <item quantity="one">Αυτό αντιστοιχεί σε περίπου %d λεπτό μελέτης την ημέρα.</item>
+        <item quantity="other">Αυτό αντιστοιχεί σε περίπου %d λεπτά μελέτης την ημέρα.</item>
+    </plurals>
+    <plurals name="stats_listen_for_n_more_minutes">
+        <item quantity="one">Άκουσε για %d επιπλέον λεπτό για να πετύχεις τον ημερήσιο στόχο.</item>
+        <item quantity="other">Άκουσε για %d επιπλέον λεπτά για να πετύχεις τον ημερήσιο στόχο.</item>
+    </plurals>
+    <plurals name="stats_streak_days_count_day">
+        <item quantity="one">%d Μέρα</item>
+        <item quantity="other">%d Μέρες</item>
+    </plurals>
+</resources>

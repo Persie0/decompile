@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_main"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_home" />
+    <include app:graph="@navigation/nav_graph_onboarding" />
+    <include app:graph="@navigation/nav_graph_upgrade_test" />
+    <include app:graph="@navigation/nav_graph_web_view" />
+    <include app:graph="@navigation/nav_graph_free_trial" />
+    <include app:graph="@navigation/nav_graph_chat" />
+    <action android:id="@id/actionToOnboarding" app:destination="@id/nav_graph_onboarding" app:launchSingleTop="true" />
+    <action android:id="@id/actionToHome" app:destination="@id/nav_graph_home" app:launchSingleTop="true" />
+    <action android:id="@id/actionToFreeTrial" app:destination="@id/nav_graph_free_trial" app:launchSingleTop="true" app:popUpTo="@id/fragment_free_trial" app:popUpToInclusive="true" />
+    <action android:id="@id/actionToUpgradeTest" app:destination="@id/nav_graph_upgrade_test" app:launchSingleTop="true" app:popUpTo="@id/fragment_upgrade_test" app:popUpToInclusive="true" />
+    <action android:id="@id/actionToLogout" app:destination="@id/nav_graph_onboarding" app:launchSingleTop="true" app:popUpTo="@id/nav_graph_home" app:popUpToInclusive="true" />
+    <action android:id="@id/actionToWeb" app:destination="@id/nav_graph_web_view" />
+    <action android:id="@id/actionToChat" app:destination="@id/nav_graph_chat">
+        <argument android:name="openLocation" android:defaultValue="" app:argType="string" />
+        <argument android:name="chatId" android:defaultValue="-1" app:argType="integer" />
+    </action>
+</navigation>

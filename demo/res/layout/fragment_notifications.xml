@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout android:layout_width="match_parent" android:layout_height="match_parent" android:transitionGroup="true"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.google.android.material.appbar.AppBarLayout android:id="@id/appbar" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <com.google.android.material.appbar.MaterialToolbar android:id="@id/toolbar" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    </com.google.android.material.appbar.AppBarLayout>
+    <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent" app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <com.facebook.shimmer.ShimmerFrameLayout android:id="@id/shimmerLayout" android:layout_width="match_parent" android:layout_height="wrap_content" app:shimmer_repeat_mode="restart" app:shimmer_shape="radial">
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <include layout="@layout/list_item_notifications_loading" />
+                <include layout="@layout/list_item_notifications_loading" />
+                <include layout="@layout/list_item_notifications_loading" />
+                <include layout="@layout/list_item_notifications_loading" />
+                <include layout="@layout/list_item_notifications_loading" />
+            </LinearLayout>
+        </com.facebook.shimmer.ShimmerFrameLayout>
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout android:id="@id/swipe_container" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <androidx.recyclerview.widget.RecyclerView android:id="@id/rvNotifications" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        <TextView android:gravity="center" android:layout_gravity="center" android:id="@id/tvNoNotifications" android:padding="@dimen/activity_horizontal_margin" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="You don't have any notifications" style="@style/HeadlineMedium" />
+    </FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

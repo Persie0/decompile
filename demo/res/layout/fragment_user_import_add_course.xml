@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:padding="@dimen/spacing_highest" android:layout_width="match_parent" android:layout_height="match_parent" android:transitionGroup="true"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="match_parent">
+        <TextView android:id="@id/btnCancel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:text="@string/ui_cancel" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" style="@style/BodyLarge" />
+        <TextView android:id="@id/btnDone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:text="@string/ui_done" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" style="@style/BodyLarge" />
+        <TextView android:id="@id/tvTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20.0dp" android:text="@string/lingq_new_course" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/btnCancel" style="@style/TitleMedium" />
+        <com.google.android.material.textfield.TextInputLayout android:id="@id/tlField" android:layout_width="@dimen/match_constraints" android:layout_height="wrap_content" android:layout_marginTop="20.0dp" android:hint="@string/lingq_course_name" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/tvTitle" style="@style/IntroTextInput">
+            <com.google.android.material.textfield.TextInputEditText android:id="@id/tvField" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>

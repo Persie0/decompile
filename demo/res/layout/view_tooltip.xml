@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView android:id="@id/cardView" android:layout_width="match_parent" android:layout_height="wrap_content" app:cardCornerRadius="@dimen/btn_corner_medium" app:cardElevation="@dimen/elevation_level_3" app:cardUseCompatPadding="true"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.constraintlayout.widget.ConstraintLayout android:id="@id/viewParent" android:background="@drawable/dr_tooltip_gradient_bg" android:padding="@dimen/spacing_standard" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:gravity="start" android:id="@id/tv_message" android:padding="@dimen/text_padding" android:layout_width="@dimen/match_constraints" android:layout_height="wrap_content" android:text="@string/tooltips_start_with_this_lesson" app:autoSizeTextType="uniform" app:layout_constraintEnd_toStartOf="@id/view_more" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" style="@style/BodyLarge" />
+        <ImageView android:id="@id/view_more" android:padding="@dimen/spacing_small" android:layout_width="wrap_content" android:layout_height="wrap_content" android:scaleType="fitCenter" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" app:srcCompat="@drawable/ic_menu" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

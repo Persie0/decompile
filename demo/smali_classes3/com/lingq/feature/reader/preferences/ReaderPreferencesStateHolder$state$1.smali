@@ -1,0 +1,135 @@
+.class final Lcom/lingq/feature/reader/preferences/ReaderPreferencesStateHolder$state$1;
+.super Lkotlin/coroutines/jvm/internal/SuspendLambda;
+.source "SourceFile"
+
+# interfaces
+.implements Ldj3;
+
+
+# annotations
+.annotation runtime Lc32;
+    c = "com.lingq.feature.reader.preferences.ReaderPreferencesStateHolder$state$1"
+    f = "ReaderPreferencesStateHolder.kt"
+    l = {}
+    m = "invokeSuspend"
+    v = 0x2
+.end annotation
+
+.annotation system Ldalvik/annotation/Signature;
+    value = {
+        "Lkotlin/coroutines/jvm/internal/SuspendLambda;",
+        "Ldj3;"
+    }
+.end annotation
+
+
+# instance fields
+.field public synthetic a:Z
+
+.field public synthetic b:F
+
+.field public synthetic c:F
+
+.field public synthetic d:Z
+
+.field public synthetic e:Z
+
+
+# direct methods
+.method public constructor <init>(Lkotlin/coroutines/Continuation;)V
+    .locals 1
+
+    const/4 v0, 0x6
+
+    invoke-direct {p0, v0, p1}, Lkotlin/coroutines/jvm/internal/SuspendLambda;-><init>(ILkotlin/coroutines/Continuation;)V
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public final h(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+    .locals 0
+
+    check-cast p1, Ljava/lang/Boolean;
+
+    invoke-virtual {p1}, Ljava/lang/Boolean;->booleanValue()Z
+
+    move-result p0
+
+    check-cast p2, Ljava/lang/Number;
+
+    invoke-virtual {p2}, Ljava/lang/Number;->floatValue()F
+
+    move-result p1
+
+    check-cast p3, Ljava/lang/Number;
+
+    invoke-virtual {p3}, Ljava/lang/Number;->floatValue()F
+
+    move-result p2
+
+    check-cast p4, Ljava/lang/Boolean;
+
+    invoke-virtual {p4}, Ljava/lang/Boolean;->booleanValue()Z
+
+    move-result p3
+
+    check-cast p5, Ljava/lang/Boolean;
+
+    invoke-virtual {p5}, Ljava/lang/Boolean;->booleanValue()Z
+
+    move-result p4
+
+    check-cast p6, Lkotlin/coroutines/Continuation;
+
+    new-instance p5, Lcom/lingq/feature/reader/preferences/ReaderPreferencesStateHolder$state$1;
+
+    invoke-direct {p5, p6}, Lcom/lingq/feature/reader/preferences/ReaderPreferencesStateHolder$state$1;-><init>(Lkotlin/coroutines/Continuation;)V
+
+    iput-boolean p0, p5, Lcom/lingq/feature/reader/preferences/ReaderPreferencesStateHolder$state$1;->a:Z
+
+    iput p1, p5, Lcom/lingq/feature/reader/preferences/ReaderPreferencesStateHolder$state$1;->b:F
+
+    iput p2, p5, Lcom/lingq/feature/reader/preferences/ReaderPreferencesStateHolder$state$1;->c:F
+
+    iput-boolean p3, p5, Lcom/lingq/feature/reader/preferences/ReaderPreferencesStateHolder$state$1;->d:Z
+
+    iput-boolean p4, p5, Lcom/lingq/feature/reader/preferences/ReaderPreferencesStateHolder$state$1;->e:Z
+
+    sget-object p0, Lxfa;->a:Lxfa;
+
+    invoke-virtual {p5, p0}, Lcom/lingq/feature/reader/preferences/ReaderPreferencesStateHolder$state$1;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
+
+    move-result-object p0
+
+    return-object p0
+.end method
+
+.method public final invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
+    .locals 8
+
+    iget-boolean v1, p0, Lcom/lingq/feature/reader/preferences/ReaderPreferencesStateHolder$state$1;->a:Z
+
+    iget v2, p0, Lcom/lingq/feature/reader/preferences/ReaderPreferencesStateHolder$state$1;->b:F
+
+    iget v3, p0, Lcom/lingq/feature/reader/preferences/ReaderPreferencesStateHolder$state$1;->c:F
+
+    iget-boolean v4, p0, Lcom/lingq/feature/reader/preferences/ReaderPreferencesStateHolder$state$1;->d:Z
+
+    iget-boolean v5, p0, Lcom/lingq/feature/reader/preferences/ReaderPreferencesStateHolder$state$1;->e:Z
+
+    sget-object p0, Lkotlin/coroutines/intrinsics/CoroutineSingletons;->COROUTINE_SUSPENDED:Lkotlin/coroutines/intrinsics/CoroutineSingletons;
+
+    invoke-static {p1}, Lkotlin/b;->b(Ljava/lang/Object;)V
+
+    new-instance v0, Lly7;
+
+    const/4 v6, 0x0
+
+    const/16 v7, 0xe0
+
+    invoke-direct/range {v0 .. v7}, Lly7;-><init>(ZFFZZLjava/util/List;I)V
+
+    return-object v0
+.end method

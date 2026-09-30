@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_more" app:startDestination="@id/fragment_more"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_user_import" />
+    <include app:graph="@navigation/nav_graph_web_view" />
+    <include app:graph="@navigation/nav_graph_invite_friends" />
+    <include app:graph="@navigation/nav_graph_settings" />
+    <fragment android:label="Menu" android:name="com.lingq.feature.more.MoreFragment" android:id="@id/fragment_more">
+        <action android:id="@id/actionToInviteFriends" app:destination="@id/nav_graph_invite_friends" />
+        <action android:id="@id/actionToImport" app:destination="@id/nav_graph_user_import" />
+        <action android:id="@id/actionToWeb" app:destination="@id/nav_graph_web_view" />
+    </fragment>
+</navigation>

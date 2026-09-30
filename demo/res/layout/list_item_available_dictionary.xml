@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:paddingTop="@dimen/list_vertical_margin" android:paddingBottom="@dimen/list_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?selectableItemBackground" android:minHeight="50.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView android:id="@id/ivLocale" android:layout_width="30.0dp" android:layout_height="30.0dp" android:layout_centerVertical="true" android:layout_marginEnd="5.0dp" android:layout_alignParentStart="true" />
+    <ImageButton android:gravity="center" android:id="@id/btnAdd" android:background="@drawable/dr_round_bg" android:clickable="false" android:layout_width="30.0dp" android:layout_height="30.0dp" android:layout_centerVertical="true" android:layout_alignParentEnd="true" app:srcCompat="@drawable/ic_plus_s" />
+    <TextView android:id="@id/tvDictionary" android:padding="@dimen/spacing_small" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginStart="5.0dp" android:layout_toStartOf="@id/btnAdd" android:layout_toEndOf="@id/ivLocale" style="@style/BodyMedium" />
+</RelativeLayout>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_lesson_edit_parent" app:startDestination="@id/fragment_lesson_edit_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <dialog android:label="Lesson Edit" android:name="com.lingq.feature.edit.LessonEditParentFragment" android:id="@id/fragment_lesson_edit_parent">
+        <argument android:name="lessonId" app:argType="integer" />
+        <argument android:name="sentenceIndex" android:defaultValue="0" app:argType="integer" />
+        <argument android:name="hasAudio" app:argType="boolean" />
+    </dialog>
+    <action android:id="@id/actionToLessonEditParent" app:destination="@id/fragment_lesson_edit_parent" />
+</navigation>

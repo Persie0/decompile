@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_user_import_data" app:startDestination="@id/fragment_user_import"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_reader" />
+    <fragment android:label="Import Lesson" android:name="com.lingq.feature.imports.UserImportFragment" android:id="@id/fragment_user_import">
+        <argument android:name="url" android:defaultValue="" app:argType="string" />
+        <argument android:name="title" android:defaultValue="" app:argType="string" />
+        <argument android:name="fileUri" android:defaultValue="" app:argType="string" />
+        <argument android:name="fromExternal" android:defaultValue="false" app:argType="boolean" />
+        <argument android:name="type" app:argType="com.lingq.feature.imports.data.UserImportSourceType" />
+        <action android:id="@id/actionToSelection" app:destination="@id/fragment_user_import_selection" />
+        <action android:id="@id/actionToText" app:destination="@id/fragment_user_import_text" />
+        <action android:id="@id/actionToReader" app:destination="@id/nav_graph_reader" app:popUpTo="@id/fragment_user_import_type" app:popUpToInclusive="true" />
+    </fragment>
+    <fragment android:label="Selection" android:name="com.lingq.feature.imports.UserImportSelectionFragment" android:id="@id/fragment_user_import_selection">
+        <argument android:name="userImportDetailType" app:argType="com.lingq.feature.imports.data.UserImportDetailType" />
+        <action android:id="@id/actionToAddCourse" app:destination="@id/fragment_user_import_add_course" />
+    </fragment>
+    <dialog android:label="Add Course" android:name="com.lingq.feature.imports.UserImportAddCourseFragment" android:id="@id/fragment_user_import_add_course">
+        <argument android:name="userImportDetailType" app:argType="com.lingq.feature.imports.data.UserImportDetailType" />
+    </dialog>
+    <action android:id="@id/actionToImportData" app:destination="@id/fragment_user_import" />
+</navigation>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_token_parent" app:startDestination="@id/fragment_token_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <argument android:name="tokenData" app:argType="com.lingq.core.token.TokenPopupData" />
+    <argument android:name="lessonId" android:defaultValue="-1" app:argType="integer" />
+    <argument android:name="shouldPlayTts" android:defaultValue="true" app:argType="boolean" />
+    <argument android:name="fromVocabulary" android:defaultValue="false" app:argType="boolean" />
+    <argument android:name="isSentence" android:defaultValue="false" app:argType="boolean" />
+    <dialog android:label="Token" android:name="com.lingq.core.token.TokenParentFragment" android:id="@id/fragment_token_parent">
+        <argument android:name="tokenData" app:argType="com.lingq.core.token.TokenPopupData" />
+        <argument android:name="lessonId" android:defaultValue="-1" app:argType="integer" />
+        <argument android:name="shouldPlayTts" android:defaultValue="true" app:argType="boolean" />
+        <argument android:name="fromVocabulary" android:defaultValue="false" app:argType="boolean" />
+        <argument android:name="isSentence" android:defaultValue="false" app:argType="boolean" />
+    </dialog>
+    <action android:id="@id/actionToTokenParent" app:destination="@id/fragment_token_parent" />
+</navigation>

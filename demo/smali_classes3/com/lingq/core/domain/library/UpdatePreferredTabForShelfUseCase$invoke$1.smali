@@ -1,0 +1,66 @@
+.class final Lcom/lingq/core/domain/library/UpdatePreferredTabForShelfUseCase$invoke$1;
+.super Lkotlin/coroutines/jvm/internal/ContinuationImpl;
+.source "SourceFile"
+
+
+# annotations
+.annotation runtime Lc32;
+    c = "com.lingq.core.domain.library.UpdatePreferredTabForShelfUseCase"
+    f = "UpdatePreferredTabForShelf.kt"
+    l = {
+        0xd,
+        0xe
+    }
+    m = "invoke"
+    v = 0x2
+.end annotation
+
+
+# instance fields
+.field public a:Lcom/lingq/core/domain/model/library/LibraryShelf;
+
+.field public b:Lcom/lingq/core/domain/model/library/LibraryTab;
+
+.field public synthetic c:Ljava/lang/Object;
+
+.field public final synthetic d:Lcom/lingq/core/domain/library/a;
+
+.field public e:I
+
+
+# direct methods
+.method public constructor <init>(Lcom/lingq/core/domain/library/a;Lkotlin/coroutines/jvm/internal/ContinuationImpl;)V
+    .locals 0
+
+    iput-object p1, p0, Lcom/lingq/core/domain/library/UpdatePreferredTabForShelfUseCase$invoke$1;->d:Lcom/lingq/core/domain/library/a;
+
+    invoke-direct {p0, p2}, Lkotlin/coroutines/jvm/internal/ContinuationImpl;-><init>(Lkotlin/coroutines/Continuation;)V
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public final invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
+    .locals 1
+
+    iput-object p1, p0, Lcom/lingq/core/domain/library/UpdatePreferredTabForShelfUseCase$invoke$1;->c:Ljava/lang/Object;
+
+    iget p1, p0, Lcom/lingq/core/domain/library/UpdatePreferredTabForShelfUseCase$invoke$1;->e:I
+
+    const/high16 v0, -0x80000000
+
+    or-int/2addr p1, v0
+
+    iput p1, p0, Lcom/lingq/core/domain/library/UpdatePreferredTabForShelfUseCase$invoke$1;->e:I
+
+    iget-object p1, p0, Lcom/lingq/core/domain/library/UpdatePreferredTabForShelfUseCase$invoke$1;->d:Lcom/lingq/core/domain/library/a;
+
+    const/4 v0, 0x0
+
+    invoke-virtual {p1, v0, v0, p0}, Lcom/lingq/core/domain/library/a;->c(Lcom/lingq/core/domain/model/library/LibraryShelf;Lcom/lingq/core/domain/model/library/LibraryTab;Lkotlin/coroutines/jvm/internal/ContinuationImpl;)Ljava/lang/Object;
+
+    move-result-object p0
+
+    return-object p0
+.end method

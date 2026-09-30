@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:paddingTop="@dimen/list_vertical_margin" android:paddingBottom="@dimen/list_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="@dimen/list_sub_section_horizontal_margin" android:paddingEnd="@dimen/list_sub_section_horizontal_margin"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <RadioGroup android:orientation="vertical" android:id="@id/rg_settings" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <RadioButton android:id="@id/rb_option" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        <RadioButton android:id="@id/rb_option_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_small" />
+        <RadioButton android:id="@id/rb_option_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_small" />
+        <RadioButton android:id="@id/rb_option_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_small" />
+    </RadioGroup>
+</LinearLayout>

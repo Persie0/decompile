@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_search_fast" app:startDestination="@id/fragment_fast_search"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_search" />
+    <fragment android:label="Search" android:name="com.lingq.feature.search.fastsearch.FastSearchFragment" android:id="@id/fragment_fast_search">
+        <action android:id="@id/actionToSearch" app:destination="@id/nav_graph_search" />
+    </fragment>
+    <action android:id="@id/actionToFastSearch" app:destination="@id/fragment_fast_search" />
+</navigation>

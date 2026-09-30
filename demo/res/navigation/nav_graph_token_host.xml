@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_token_host" app:startDestination="@id/tokenPopupHostFragment"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <fragment android:label="TokenPopupHostFragment" android:name="com.lingq.core.token.TokenPopupHostFragment" android:id="@id/tokenPopupHostFragment">
+        <argument android:name="tokenData" android:defaultValue="@null" app:argType="com.lingq.core.token.TokenPopupData" app:nullable="true" />
+        <argument android:name="lessonId" android:defaultValue="-1" app:argType="integer" />
+        <argument android:name="shouldPlayTts" android:defaultValue="true" app:argType="boolean" />
+        <argument android:name="fromVocabulary" android:defaultValue="false" app:argType="boolean" />
+        <argument android:name="isSentence" android:defaultValue="false" app:argType="boolean" />
+    </fragment>
+    <action android:id="@id/actionToTokenPopupHostFragment" app:destination="@id/tokenPopupHostFragment" />
+</navigation>

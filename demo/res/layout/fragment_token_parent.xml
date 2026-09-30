@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:background="@color/transparent" android:layout_width="@dimen/token_should_fixed_tablet" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <androidx.fragment.app.FragmentContainerView android:name="androidx.navigation.fragment.NavHostFragment" android:id="@id/nav_host_fragment_token_container" android:background="@color/transparent" android:layout_width="match_parent" android:layout_height="match_parent" android:nestedScrollingEnabled="true" />
+</androidx.constraintlayout.widget.ConstraintLayout>

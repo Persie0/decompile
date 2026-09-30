@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:motion="http://schemas.android.com/apk/res-auto">
+    <Transition motion:constraintSetEnd="@id/endTransition" motion:constraintSetStart="@id/startTransition" motion:duration="600" motion:motionInterpolator="easeInOut">
+        <OnSwipe motion:dragDirection="dragUp" motion:touchAnchorId="@id/viewFlag" motion:touchAnchorSide="top" />
+    </Transition>
+    <ConstraintSet android:id="@id/startTransition">
+        <Constraint android:id="@id/viewFlag" android:layout_width="wrap_content" android:layout_height="wrap_content" android:scaleX="1.0" android:scaleY="1.0" android:layout_marginStart="@dimen/activity_horizontal_margin" motion:layout_constraintBottom_toBottomOf="parent" motion:layout_constraintStart_toStartOf="parent" motion:layout_constraintTop_toTopOf="parent" />
+        <Constraint android:gravity="start" android:id="@id/tvLanguage" android:layout_width="@dimen/match_constraints" android:layout_height="wrap_content" android:scaleX="1.0" android:scaleY="1.0" android:layout_marginStart="@dimen/toolbar_margin_to_title" motion:layout_constraintEnd_toStartOf="@id/btnSearch" motion:layout_constraintStart_toEndOf="@id/viewFlag" motion:layout_constraintTop_toTopOf="@id/viewFlag" />
+        <Constraint android:id="@id/btnSettings" android:layout_width="@dimen/toolbar_icon" android:layout_height="@dimen/toolbar_icon" android:scaleX="1.0" android:scaleY="1.0" android:layout_marginEnd="@dimen/activity_horizontal_margin" motion:layout_constraintBottom_toBottomOf="parent" motion:layout_constraintEnd_toEndOf="parent" motion:layout_constraintTop_toTopOf="parent" />
+        <Constraint android:id="@id/btnSearch" android:layout_width="@dimen/toolbar_icon" android:layout_height="@dimen/toolbar_icon" android:scaleX="1.0" android:scaleY="1.0" android:layout_marginEnd="@dimen/toolbar_icon_margin" motion:layout_constraintBottom_toBottomOf="parent" motion:layout_constraintEnd_toStartOf="@id/btnSettings" motion:layout_constraintTop_toTopOf="parent" />
+    </ConstraintSet>
+    <ConstraintSet android:id="@id/endTransition">
+        <Constraint android:id="@id/viewFlag" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/home_flag_top_margin" android:scaleX="0.7" android:scaleY="0.7" android:layout_marginStart="@dimen/activity_horizontal_margin" motion:layout_constraintBottom_toBottomOf="parent" motion:layout_constraintStart_toStartOf="parent" motion:layout_constraintTop_toTopOf="parent" />
+        <Constraint android:gravity="start" android:id="@id/tvLanguage" android:layout_width="@dimen/match_constraints" android:layout_height="wrap_content" android:scaleX="0.9" android:scaleY="0.9" motion:layout_constraintBottom_toBottomOf="@id/viewFlag" motion:layout_constraintEnd_toStartOf="@id/btnSearch" motion:layout_constraintStart_toEndOf="@id/viewFlag" motion:layout_constraintTop_toTopOf="@id/viewFlag" />
+        <Constraint android:id="@id/btnSettings" android:layout_width="@dimen/toolbar_icon" android:layout_height="@dimen/toolbar_icon" android:layout_marginTop="@dimen/home_flag_top_margin" android:layout_marginEnd="@dimen/activity_horizontal_margin" motion:layout_constraintBottom_toBottomOf="parent" motion:layout_constraintEnd_toEndOf="parent" motion:layout_constraintTop_toTopOf="parent" />
+        <Constraint android:id="@id/btnSearch" android:layout_width="@dimen/toolbar_icon" android:layout_height="@dimen/toolbar_icon" android:layout_marginTop="@dimen/home_flag_top_margin" android:layout_marginEnd="@dimen/spacing_high" motion:layout_constraintBottom_toBottomOf="parent" motion:layout_constraintEnd_toStartOf="@id/btnSettings" motion:layout_constraintTop_toTopOf="parent" />
+    </ConstraintSet>
+</MotionScene>

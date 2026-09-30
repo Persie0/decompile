@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_dictionary_locales" app:startDestination="@id/fragment_dictionaries_locale"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <dialog android:label="Dictionaries Locale" android:name="com.lingq.feature.dictionary.DictionariesLocaleFragment" android:id="@id/fragment_dictionaries_locale">
+        <argument android:name="term" app:argType="string" />
+        <argument android:name="termLocale" android:defaultValue="" app:argType="string" />
+        <argument android:name="tokenMeaning" app:argType="com.lingq.core.navigation.model.TokenMeaningNavArg" />
+    </dialog>
+    <action android:id="@id/actionToDictionaryLocales" app:destination="@id/fragment_dictionaries_locale" />
+</navigation>

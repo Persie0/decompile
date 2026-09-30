@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.fragment.app.FragmentContainerView android:name="androidx.navigation.fragment.NavHostFragment" android:id="@id/nav_host_fragment_top" android:layout_width="@dimen/match_constraints" android:layout_height="@dimen/match_constraints" app:defaultNavHost="true" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
+    <com.lingq.core.tooltips.TooltipContainer android:id="@id/tooltipContainer" android:layout_width="@dimen/match_constraints" android:layout_height="@dimen/match_constraints" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout android:gravity="center" android:orientation="vertical" android:id="@id/viewProgress" android:background="@color/fade_bg" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent">
+        <com.google.android.material.progressindicator.CircularProgressIndicator android:visibility="visible" android:layout_width="@dimen/progress_size" android:layout_height="@dimen/progress_size" style="@style/Widget.ProgressCircle" />
+        <TextView android:id="@id/tvSwitchLanguage" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/spacing_high" style="@style/BodyLarge" />
+    </LinearLayout>
+    <androidx.compose.ui.platform.ComposeView android:id="@id/viewOffer" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <androidx.compose.ui.platform.ComposeView android:id="@id/viewNotification" android:layout_width="match_parent" android:layout_height="wrap_content" app:layout_constraintTop_toTopOf="parent" />
+    <androidx.compose.ui.platform.ComposeView android:id="@id/viewUpgradeDialog" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <androidx.compose.ui.platform.ComposeView android:id="@id/viewRatingDialog" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <androidx.fragment.app.FragmentContainerView android:id="@id/fragment_top" android:layout_width="match_parent" android:layout_height="match_parent" android:elevation="@dimen/elevation_level_3" />
+    <androidx.compose.ui.platform.ComposeView android:id="@id/loadingCompose" android:layout_width="match_parent" android:layout_height="match_parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

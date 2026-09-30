@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView android:textSize="@dimen/sentence_builder_text_size" android:gravity="center" android:id="@id/tvWord" android:background="@drawable/dr_lesson_dictionary" android:layout_width="wrap_content" android:layout_height="@dimen/sentence_builder_word_height" android:maxLines="1" android:paddingStart="@dimen/spacing_standard" android:paddingEnd="@dimen/spacing_standard" app:autoSizeMaxTextSize="@dimen/sentence_builder_text_size" app:autoSizeTextType="uniform"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" />

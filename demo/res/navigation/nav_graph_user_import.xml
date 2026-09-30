@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_user_import" app:startDestination="@id/fragment_user_import_type"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_user_import_data" />
+    <include app:graph="@navigation/nav_graph_reader" />
+    <fragment android:label="Import Lesson" android:name="com.lingq.feature.imports.UserImportTypeFragment" android:id="@id/fragment_user_import_type">
+        <argument android:name="url" android:defaultValue="" app:argType="string" />
+        <argument android:name="title" android:defaultValue="" app:argType="string" />
+        <argument android:name="fileUri" android:defaultValue="" app:argType="string" />
+        <action android:id="@id/actionToImportData" app:destination="@id/nav_graph_user_import_data" />
+        <action android:id="@id/actionToReader" app:destination="@id/nav_graph_reader" app:popUpTo="@id/fragment_user_import_type" app:popUpToInclusive="true" />
+    </fragment>
+    <action android:id="@id/actionToImport" app:destination="@id/fragment_user_import_type" />
+</navigation>

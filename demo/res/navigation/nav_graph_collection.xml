@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_collection" app:startDestination="@id/fragment_collection"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_web_view" />
+    <include app:graph="@navigation/nav_graph_lesson_info" />
+    <include app:graph="@navigation/nav_graph_collection_playlist" />
+    <include app:graph="@navigation/nav_graph_reader" />
+    <include app:graph="@navigation/nav_graph_lesson_preview" />
+    <fragment android:label="Course" android:name="com.lingq.feature.collections.CollectionFragment" android:id="@id/fragment_collection">
+        <argument android:name="courseId" app:argType="integer" />
+        <argument android:name="lessonPath" app:argType="com.lingq.core.analytics.data.LqAnalyticsValues$LessonPath" app:nullable="true" />
+        <argument android:name="shelfCode" app:argType="string" />
+        <argument android:name="languageFromDeeplink" android:defaultValue="" app:argType="string" />
+        <action android:id="@id/actionToCollectionPlaylist" app:destination="@id/nav_graph_collection_playlist" />
+        <action android:id="@id/actionToLessonInfo" app:destination="@id/nav_graph_lesson_info" />
+        <action android:id="@id/actionToWeb" app:destination="@id/nav_graph_web_view" />
+        <action android:id="@id/actionToReaderCompose" app:destination="@id/nav_graph_reader" />
+        <action android:id="@id/actionToLessonPreview" app:destination="@id/nav_graph_lesson_preview" />
+    </fragment>
+    <action android:id="@id/actionToCollection" app:destination="@id/fragment_collection" app:launchSingleTop="true" app:popUpTo="@id/fragment_collection" app:popUpToInclusive="true" />
+</navigation>

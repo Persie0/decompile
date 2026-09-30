@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_settings" app:startDestination="@id/fragment_settings"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_settings_reader" />
+    <include app:graph="@navigation/nav_graph_settings_review" />
+    <include app:graph="@navigation/nav_graph_settings_notifications" />
+    <include app:graph="@navigation/nav_graph_web_view" />
+    <fragment android:label="Settings" android:name="com.lingq.core.settings.SettingsFragment" android:id="@id/fragment_settings">
+        <action android:id="@id/actionToLessonSettings" app:destination="@id/nav_graph_settings_reader" app:launchSingleTop="true" app:popUpTo="@id/nav_graph_settings_reader" app:popUpToInclusive="true" />
+        <action android:id="@id/actionToReviewSettings" app:destination="@id/nav_graph_settings_review" app:launchSingleTop="true" app:popUpTo="@id/nav_graph_settings_review" app:popUpToInclusive="true" />
+        <action android:id="@id/actionToNotificationsSettings" app:destination="@id/nav_graph_settings_notifications" app:launchSingleTop="true" app:popUpTo="@id/nav_graph_settings_notifications" app:popUpToInclusive="true" />
+        <action android:id="@id/actionToManageSubs" app:destination="@id/fragment_settings_manage_subs" />
+        <action android:id="@id/actionToWeb" app:destination="@id/nav_graph_web_view" />
+    </fragment>
+    <dialog android:label="Manage Subscriptions" android:name="com.lingq.core.settings.SettingsManageSubscriptionsFragment" android:id="@id/fragment_settings_manage_subs" />
+    <action android:id="@id/actionToSettings" app:destination="@id/fragment_settings" />
+</navigation>

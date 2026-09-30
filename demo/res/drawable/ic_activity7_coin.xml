@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector android:height="49.0dp" android:width="49.0dp" android:autoMirrored="true" android:viewportWidth="49.0" android:viewportHeight="49.0"
+  xmlns:aapt="http://schemas.android.com/aapt" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="#ffffff" android:pathData="M24.5,24.501m-23.716,0a23.716,23.716 0,1 1,47.432 0a23.716,23.716 0,1 1,-47.432 0" />
+    <path android:fillColor="@drawable/$ic_activity7_coin__0" android:pathData="M24.392,24.822m-20.576,0a20.576,20.576 0,1 1,41.151 0a20.576,20.576 0,1 1,-41.151 0" android:strokeAlpha="0.75" android:fillAlpha="0.75" />
+    <path android:fillColor="#00000000" android:pathData="M24.5,24.497m-21.74,0a21.74,21.74 0,1 1,43.48 0a21.74,21.74 0,1 1,-43.48 0" android:strokeColor="@drawable/$ic_activity7_coin__1" android:strokeWidth="3.9527" />
+    <group>
+        <clip-path android:pathData="M48.216,24.497C48.216,37.596 37.598,48.214 24.5,48.214C11.402,48.214 0.784,37.596 0.784,24.497C0.784,11.399 11.402,0.781 24.5,0.781C37.598,0.781 48.216,11.399 48.216,24.497ZM4.735,24.497C4.735,35.413 13.584,44.262 24.5,44.262C35.416,44.262 44.265,35.413 44.265,24.497C44.265,13.582 35.416,4.732 24.5,4.732C13.584,4.732 4.735,13.582 4.735,24.497Z" />
+        <path android:fillColor="#00000000" android:pathData="M48.216,24.497C48.216,37.596 37.598,48.214 24.5,48.214C11.402,48.214 0.784,37.596 0.784,24.497C0.784,11.399 11.402,0.781 24.5,0.781C37.598,0.781 48.216,11.399 48.216,24.497ZM4.735,24.497C4.735,35.413 13.584,44.262 24.5,44.262C35.416,44.262 44.265,35.413 44.265,24.497C44.265,13.582 35.416,4.732 24.5,4.732C13.584,4.732 4.735,13.582 4.735,24.497Z" android:strokeColor="@drawable/$ic_activity7_coin__2" android:strokeWidth="7.90541" />
+    </group>
+</vector>

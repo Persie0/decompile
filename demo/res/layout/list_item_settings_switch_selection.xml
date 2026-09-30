@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:background="?selectableItemBackground" android:paddingTop="@dimen/list_vertical_margin" android:paddingBottom="@dimen/list_vertical_margin" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="@dimen/activity_horizontal_margin" android:paddingEnd="@dimen/activity_horizontal_margin"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.appcompat.widget.AppCompatImageView android:id="@id/ivSelection" android:layout_width="wrap_content" android:layout_height="wrap_content" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" app:srcCompat="@drawable/ic_selection_chevron_right_s" app:tint="?colorOnSurface" />
+    <com.google.android.material.materialswitch.MaterialSwitch android:id="@id/switchState" android:layout_width="wrap_content" android:layout_height="15.0dp" android:layout_marginEnd="@dimen/spacing_standard" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toStartOf="@id/ivSelection" app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout android:orientation="vertical" android:layout_width="@dimen/match_constraints" android:layout_height="wrap_content" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toStartOf="@id/switchState" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+        <TextView android:id="@id/tvTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:textDirection="locale" style="@style/BodyLarge" />
+        <TextView android:id="@id/tvDescription" android:layout_width="match_parent" android:layout_height="wrap_content" android:textDirection="locale" app:layout_constraintEnd_toStartOf="@id/switchState" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/tvTitle" style="@style/BodyMedium" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

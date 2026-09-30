@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="daily_goal_view_margin">150.0dp</dimen>
+    <dimen name="home_screen_margin">36.0dp</dimen>
+    <dimen name="home_tv_title_language_top_margin">10.0dp</dimen>
+    <dimen name="lesson_token_margin_end">36.0dp</dimen>
+    <dimen name="lesson_token_margin_top">8.0dp</dimen>
+    <dimen name="listening_mode_lesson_image_size">140.0dp</dimen>
+    <dimen name="listening_time_slider_margin">40.0dp</dimen>
+    <dimen name="login_padding">150.0dp</dimen>
+    <dimen name="onboard_lingq_card_margin">150.0dp</dimen>
+    <dimen name="onboarding_button_margin">100.0dp</dimen>
+    <dimen name="onboarding_review_again_end_margin">30.0dp</dimen>
+    <dimen name="onboarding_review_buttons_margin">60.0dp</dimen>
+    <dimen name="onboarding_topics_button_margin">46.0dp</dimen>
+    <dimen name="onboarding_topics_recycler_margin">40.0dp</dimen>
+    <dimen name="playlist_sidebar_width">350.0dp</dimen>
+    <dimen name="playlists_recycler_top_margin">20.0dp</dimen>
+    <dimen name="playlists_title_top_margin">30.0dp</dimen>
+    <dimen name="review_header_margin">50.0dp</dimen>
+    <dimen name="scroll_single_column_full_width_margin">180.0dp</dimen>
+    <dimen name="streak_activity_level_size">90.0dp</dimen>
+    <dimen name="text_appearance_header_bold">20.0sp</dimen>
+    <dimen name="today_stats_text_max_size">20.0sp</dimen>
+    <dimen name="token_should_fixed_tablet">-1.0px</dimen>
+    <dimen name="youtube_player_height">200.0dp</dimen>
+</resources>

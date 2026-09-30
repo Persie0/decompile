@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_settings_reader" app:startDestination="@id/fragment_reader_settings"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <fragment android:label="Lesson Settings" android:name="com.lingq.core.settings.ReaderSettingsFragment" android:id="@id/fragment_reader_settings" />
+    <action android:id="@id/actionToReaderSettings" app:destination="@id/fragment_reader_settings" />
+</navigation>

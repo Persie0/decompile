@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:background="@drawable/dr_library_offline_round_bg" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="@dimen/activity_horizontal_margin" android:layout_marginEnd="@dimen/activity_horizontal_margin"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView android:id="@id/ivOffline" android:layout_width="24.0dp" android:layout_height="24.0dp" android:src="@drawable/ic_offline" android:layout_marginStart="@dimen/spacing_standard" android:layout_marginEnd="@dimen/spacing_standard" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" app:tint="?colorSecondaryVariant" />
+    <TextView android:padding="@dimen/spacing_standard" android:layout_width="0.0dp" android:layout_height="wrap_content" android:text="@string/feed_library_offline" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toEndOf="@id/ivOffline" app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

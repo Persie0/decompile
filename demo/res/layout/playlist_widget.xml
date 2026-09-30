@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@drawable/widget_preview_background" android:padding="16.0dp" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textSize="18.0sp" android:textStyle="bold" android:textColor="?android:textColorPrimary" android:id="@id/widget_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="12.0dp" android:text="LingQ Playlist" />
+    <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="8.0dp">
+        <ImageView android:background="@drawable/widget_image_placeholder" android:layout_width="48.0dp" android:layout_height="48.0dp" android:scaleType="centerCrop" android:contentDescription="Lesson Image" />
+        <LinearLayout android:orientation="vertical" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_weight="1.0" android:layout_marginStart="16.0dp">
+            <TextView android:textSize="16.0sp" android:textColor="?android:textColorPrimary" android:ellipsize="end" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="First Steps in Spanish" android:maxLines="1" />
+            <TextView android:textSize="14.0sp" android:textColor="?android:textColorSecondary" android:ellipsize="end" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Spanish 101" android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="8.0dp">
+        <ImageView android:background="@drawable/widget_image_placeholder" android:layout_width="48.0dp" android:layout_height="48.0dp" android:scaleType="centerCrop" android:contentDescription="Lesson Image" />
+        <LinearLayout android:orientation="vertical" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_weight="1.0" android:layout_marginStart="16.0dp">
+            <TextView android:textSize="16.0sp" android:textColor="?android:textColorPrimary" android:ellipsize="end" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ordering Coffee" android:maxLines="1" />
+            <TextView android:textSize="14.0sp" android:textColor="?android:textColorSecondary" android:ellipsize="end" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Everyday Conversations" android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="8.0dp">
+        <ImageView android:background="@drawable/widget_image_placeholder" android:layout_width="48.0dp" android:layout_height="48.0dp" android:scaleType="centerCrop" android:contentDescription="Lesson Image" />
+        <LinearLayout android:orientation="vertical" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_weight="1.0" android:layout_marginStart="16.0dp">
+            <TextView android:textSize="16.0sp" android:textColor="?android:textColorPrimary" android:ellipsize="end" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Greetings and Farewells" android:maxLines="1" />
+            <TextView android:textSize="14.0sp" android:textColor="?android:textColorSecondary" android:ellipsize="end" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Beginner's Guide" android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

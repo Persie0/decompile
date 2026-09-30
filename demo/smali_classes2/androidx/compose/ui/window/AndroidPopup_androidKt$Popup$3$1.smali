@@ -1,0 +1,71 @@
+.class final Landroidx/compose/ui/window/AndroidPopup_androidKt$Popup$3$1;
+.super Lkotlin/jvm/internal/Lambda;
+.source "SourceFile"
+
+# interfaces
+.implements Lui3;
+
+
+# annotations
+.annotation system Ldalvik/annotation/Signature;
+    value = {
+        "Lkotlin/jvm/internal/Lambda;",
+        "Lui3;"
+    }
+.end annotation
+
+
+# instance fields
+.field public final synthetic b:Landroidx/compose/ui/window/i;
+
+.field public final synthetic c:Lui3;
+
+.field public final synthetic d:Lqh7;
+
+.field public final synthetic e:Ljava/lang/String;
+
+.field public final synthetic f:Landroidx/compose/ui/unit/LayoutDirection;
+
+
+# direct methods
+.method public constructor <init>(Landroidx/compose/ui/window/i;Lui3;Lqh7;Ljava/lang/String;Landroidx/compose/ui/unit/LayoutDirection;)V
+    .locals 0
+
+    iput-object p1, p0, Landroidx/compose/ui/window/AndroidPopup_androidKt$Popup$3$1;->b:Landroidx/compose/ui/window/i;
+
+    iput-object p2, p0, Landroidx/compose/ui/window/AndroidPopup_androidKt$Popup$3$1;->c:Lui3;
+
+    iput-object p3, p0, Landroidx/compose/ui/window/AndroidPopup_androidKt$Popup$3$1;->d:Lqh7;
+
+    iput-object p4, p0, Landroidx/compose/ui/window/AndroidPopup_androidKt$Popup$3$1;->e:Ljava/lang/String;
+
+    iput-object p5, p0, Landroidx/compose/ui/window/AndroidPopup_androidKt$Popup$3$1;->f:Landroidx/compose/ui/unit/LayoutDirection;
+
+    const/4 p1, 0x0
+
+    invoke-direct {p0, p1}, Lkotlin/jvm/internal/Lambda;-><init>(I)V
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public final a()Ljava/lang/Object;
+    .locals 4
+
+    iget-object v0, p0, Landroidx/compose/ui/window/AndroidPopup_androidKt$Popup$3$1;->e:Ljava/lang/String;
+
+    iget-object v1, p0, Landroidx/compose/ui/window/AndroidPopup_androidKt$Popup$3$1;->f:Landroidx/compose/ui/unit/LayoutDirection;
+
+    iget-object v2, p0, Landroidx/compose/ui/window/AndroidPopup_androidKt$Popup$3$1;->b:Landroidx/compose/ui/window/i;
+
+    iget-object v3, p0, Landroidx/compose/ui/window/AndroidPopup_androidKt$Popup$3$1;->c:Lui3;
+
+    iget-object p0, p0, Landroidx/compose/ui/window/AndroidPopup_androidKt$Popup$3$1;->d:Lqh7;
+
+    invoke-virtual {v2, v3, p0, v0, v1}, Landroidx/compose/ui/window/i;->n(Lui3;Lqh7;Ljava/lang/String;Landroidx/compose/ui/unit/LayoutDirection;)V
+
+    sget-object p0, Lxfa;->a:Lxfa;
+
+    return-object p0
+.end method

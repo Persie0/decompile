@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="challenges_cup_banner_ends_in">
+        <item quantity="one">Termina em %1$d dia</item>
+        <item quantity="other">Termina em %1$d dias</item>
+    </plurals>
+    <plurals name="challenges_participants">
+        <item quantity="one">%s participante</item>
+        <item quantity="other">%s participantes</item>
+    </plurals>
+    <plurals name="cup_days_remaining">
+        <item quantity="one">%1$d dia restante</item>
+        <item quantity="other">%1$d dias restantes</item>
+    </plurals>
+    <plurals name="cup_days_until">
+        <item quantity="one">Começa em %1$d dia</item>
+        <item quantity="other">Começa em %1$d dias</item>
+    </plurals>
+    <plurals name="lingq_courses_count_Course">
+        <item quantity="one">%d curso</item>
+        <item quantity="many">%d cursos</item>
+        <item quantity="other">%d cursos</item>
+    </plurals>
+    <plurals name="lingq_lessons_count_Lessons">
+        <item quantity="one">%d aula</item>
+        <item quantity="many">%d aulas</item>
+        <item quantity="other">%d aulas</item>
+    </plurals>
+    <plurals name="lingq_likes_count_like">
+        <item quantity="one">%d curtida</item>
+        <item quantity="many">%d curtidas</item>
+        <item quantity="other">%d curtidas</item>
+    </plurals>
+    <plurals name="lingq_lingqs_count_LingQs">
+        <item quantity="one">%d LingQ</item>
+        <item quantity="many">%d LingQs</item>
+        <item quantity="other">%d LingQs</item>
+    </plurals>
+    <plurals name="mtrl_badge_content_description">
+        <item quantity="one">%d nova notificação</item>
+        <item quantity="other">%d novas notificações</item>
+    </plurals>
+    <plurals name="paging_move_known_action_button">
+        <item quantity="one">Eu conheço esta palavra</item>
+        <item quantity="many">Eu conheço estas %d palavras</item>
+        <item quantity="other">Eu conheço estas %d palavras</item>
+    </plurals>
+    <plurals name="settings_daily_streak_target_estimated_minutes">
+        <item quantity="one">Isso equivale a cerca de %d min de estudo por dia.</item>
+        <item quantity="other">Isso equivale a cerca de %d min de estudo por dia.</item>
+    </plurals>
+    <plurals name="stats_listen_for_n_more_minutes">
+        <item quantity="one">Ouça por mais %d minuto para atingir sua meta diária.</item>
+        <item quantity="many">Ouça por mais %d minutos para atingir sua meta diária.</item>
+        <item quantity="other">Ouça por mais %d minutos para atingir sua meta diária.</item>
+    </plurals>
+    <plurals name="stats_streak_days_count_day">
+        <item quantity="one">%d dia</item>
+        <item quantity="many">%d dias</item>
+        <item quantity="other">%d dias</item>
+    </plurals>
+</resources>

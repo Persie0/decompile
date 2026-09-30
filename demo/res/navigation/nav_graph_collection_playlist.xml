@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_collection_playlist" app:startDestination="@id/fragment_collection_playlist"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_karaoke" />
+    <include app:graph="@navigation/nav_graph_lesson_info" />
+    <include app:graph="@navigation/nav_graph_reader" />
+    <fragment android:label="Course Playlist" android:name="com.lingq.feature.playlist.CollectionPlaylistFragment" android:id="@id/fragment_collection_playlist">
+        <argument android:name="courseId" app:argType="integer" />
+        <argument android:name="courseTitle" app:argType="string" />
+        <argument android:name="shelfCode" app:argType="string" />
+        <action android:id="@id/actionToKaraoke" app:destination="@id/nav_graph_karaoke" />
+        <action android:id="@id/actionToLessonInfo" app:destination="@id/nav_graph_lesson_info" />
+        <action android:id="@id/actionToReaderCompose" app:destination="@id/nav_graph_reader" />
+    </fragment>
+    <action android:id="@id/actionToCollectionPlaylist" app:destination="@id/fragment_collection_playlist" />
+</navigation>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@id/nav_graph_library" app:startDestination="@id/fragment_library"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include app:graph="@navigation/nav_graph_search" />
+    <include app:graph="@navigation/nav_graph_search_fast" />
+    <include app:graph="@navigation/nav_graph_collection" />
+    <include app:graph="@navigation/nav_graph_challenges" />
+    <include app:graph="@navigation/nav_graph_lesson_info" />
+    <include app:graph="@navigation/nav_graph_stats" />
+    <include app:graph="@navigation/nav_graph_user_import" />
+    <include app:graph="@navigation/nav_graph_languages" />
+    <include app:graph="@navigation/nav_graph_challenges_prompt" />
+    <include app:graph="@navigation/nav_graph_user_import_data" />
+    <include app:graph="@navigation/nav_graph_year_in_review" />
+    <fragment android:label="Library" android:name="com.lingq.feature.library.LibraryUpdateFragment" android:id="@id/fragment_library">
+        <action android:id="@id/actionToFastSearch" app:destination="@id/nav_graph_search_fast" />
+        <action android:id="@id/actionToLessonPreview" app:destination="@id/nav_graph_lesson_preview" />
+        <action android:id="@id/actionToLessonInfo" app:destination="@id/nav_graph_lesson_info" />
+        <action android:id="@id/actionToCollection" app:destination="@id/nav_graph_collection" />
+        <action android:id="@id/actionToChallenges" app:destination="@id/nav_graph_challenges" />
+        <action android:id="@id/actionToStats" app:destination="@id/nav_graph_stats" />
+        <action android:id="@id/actionToSearch" app:destination="@id/nav_graph_search" />
+        <action android:id="@id/actionToImport" app:destination="@id/nav_graph_user_import" />
+        <action android:id="@id/actionToImportData" app:destination="@id/nav_graph_user_import_data" />
+        <action android:id="@id/actionToLanguageSelector" app:destination="@id/nav_graph_languages" />
+        <action android:id="@id/actionToChallengesPrompt" app:destination="@id/nav_graph_challenges_prompt" />
+        <action android:id="@id/actionToYearInReview" app:destination="@id/nav_graph_year_in_review" />
+    </fragment>
+    <action android:id="@id/actionToLibrary" app:destination="@id/fragment_library" />
+</navigation>

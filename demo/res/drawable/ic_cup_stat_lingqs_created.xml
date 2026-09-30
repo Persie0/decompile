@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector android:height="32.0dp" android:width="32.0dp" android:viewportWidth="32.0" android:viewportHeight="32.0"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt">
+    <path android:fillColor="@drawable/$ic_cup_stat_lingqs_created__0" android:pathData="M16,0C24.84,0 32,7.16 32,16C32,24.84 24.84,32 16,32C7.16,32 0,24.84 0,16C0,7.16 7.16,0 16,0Z" />
+    <group android:translateX="10.33" android:translateY="9.0">
+        <path android:fillColor="#ffffff" android:pathData="M0,6.72C0,4.48 0.51,2.8 1.54,1.68C2.57,0.56 4.06,0 6,0C7.94,0 9.43,0.56 10.46,1.68C11.49,2.8 12,4.48 12,6.72C12,8.06 11.79,9.22 11.36,10.18C11.09,10.8 10.75,11.33 10.33,11.76C10.1,12.01 10.21,12.54 10.51,12.69C10.83,12.85 11.06,13.02 11.2,13.22C11.37,13.44 11.45,13.67 11.45,13.91C11.45,14.2 11.35,14.46 11.14,14.67C10.94,14.89 10.68,15 10.37,15C10.08,15 9.83,14.89 9.61,14.67C9.29,14.35 9,14.11 8.74,13.94C8.48,13.79 8.13,13.66 7.69,13.56C7.25,13.47 6.69,13.42 6,13.41C4.06,13.41 2.58,12.85 1.54,11.72C0.51,10.59 0,8.93 0,6.72ZM2.27,6.72C2.27,9.85 3.51,11.42 6,11.42C8.48,11.42 9.73,9.85 9.73,6.72C9.73,5.13 9.42,3.94 8.8,3.17C8.18,2.38 7.25,1.99 6,1.99C3.51,1.99 2.27,3.56 2.27,6.72Z" />
+    </group>
+</vector>

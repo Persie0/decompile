@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:motion="http://schemas.android.com/apk/res-auto">
+    <Transition motion:constraintSetEnd="@id/largePlayerTransitionEnd" motion:constraintSetStart="@id/start" motion:duration="300" motion:motionInterpolator="@string/material_motion_easing_decelerated">
+        <OnSwipe motion:dragDirection="dragDown" motion:touchAnchorId="@id/main_view" motion:touchAnchorSide="top" />
+        <KeyFrameSet />
+    </Transition>
+    <ConstraintSet android:id="@id/start" />
+    <ConstraintSet android:id="@id/largePlayerTransitionEnd">
+        <Constraint android:id="@id/main_view" android:layout_width="match_parent" android:layout_height="match_parent" motion:layout_constraintBottom_toBottomOf="parent" motion:layout_constraintEnd_toEndOf="parent" motion:layout_constraintStart_toStartOf="parent" />
+    </ConstraintSet>
+</MotionScene>
