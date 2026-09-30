@@ -1,0 +1,129 @@
+name: Build fictional CTF APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag"
+        required: true
+        default: "ctf-v1"
+      publish_release:
+        description: "Attach signed APK to a GitHub Release"
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android build tools
+        run: |
+          set -euxo pipefail
+          sdkmanager "build-tools;36.0.0"
+
+      - name: Download and verify Apktool
+        run: |
+          set -euxo pipefail
+          curl -L --fail --retry 3 \
+            -o apktool.jar \
+            https://github.com/iBotPeaches/Apktool/releases/download/v3.0.3/apktool_3.0.3.jar
+          echo 'dbf930b076c6b9be08d57c449cacefc3bdd6b71ebd59b3066fc0e1f5b14f9423  apktool.jar' | sha256sum -c -
+          java -jar apktool.jar --version
+
+      - name: Verify this is the fictional CTF tree
+        run: |
+          set -euxo pipefail
+          test -f ctf-demo/apktool.yml
+          test -f ctf-demo/AndroidManifest.xml
+          grep -Eq 'package="ctf\.demo([."]|$)' ctf-demo/AndroidManifest.xml
+
+          if grep -Eq 'package="com\.linguist"' ctf-demo/AndroidManifest.xml; then
+            echo 'Refusing to build the real application tree.' >&2
+            exit 1
+          fi
+
+      - name: Rebuild with Apktool
+        run: |
+          set -euxo pipefail
+          rm -f ctf-unsigned.apk ctf-aligned.apk ctf-demo-signed.apk
+          java -jar apktool.jar b ctf-demo -o ctf-unsigned.apk
+          test -s ctf-unsigned.apk
+
+      - name: Generate ephemeral signing key
+        run: |
+          set -euxo pipefail
+          keytool -genkeypair \
+            -keystore ctf-debug.keystore \
+            -storepass ctfchallenge \
+            -keypass ctfchallenge \
+            -alias ctfdebug \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname 'CN=Demo CTF,O=CTF Challenge,C=AT'
+
+      - name: Align and sign
+        run: |
+          set -euxo pipefail
+          BUILD_TOOLS="$ANDROID_HOME/build-tools/36.0.0"
+
+          "$BUILD_TOOLS/zipalign" -p -f 4 \
+            ctf-unsigned.apk \
+            ctf-aligned.apk
+
+          "$BUILD_TOOLS/apksigner" sign \
+            --ks ctf-debug.keystore \
+            --ks-key-alias ctfdebug \
+            --ks-pass pass:ctfchallenge \
+            --key-pass pass:ctfchallenge \
+            --out ctf-demo-signed.apk \
+            ctf-aligned.apk
+
+          "$BUILD_TOOLS/apksigner" verify \
+            --verbose \
+            --print-certs \
+            ctf-demo-signed.apk
+
+          "$BUILD_TOOLS/zipalign" -c -p 4 ctf-demo-signed.apk
+          sha256sum ctf-demo-signed.apk
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ctf-demo-signed-apk
+          path: ctf-demo-signed.apk
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: ${{ inputs.publish_release }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euxo pipefail
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" ctf-demo-signed.apk --clobber
+          else
+            gh release create "$TAG" \
+              ctf-demo-signed.apk \
+              --title "Demo CTF $TAG" \
+              --notes "Signed fictional Demo CTF challenge APK built by GitHub Actions."
+          fi
