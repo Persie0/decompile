@@ -123,6 +123,7 @@
     move v6, v5
 
     :cond_4
+    const/4 v6, 0x1
     invoke-static {v6}, Ljava/lang/Boolean;->valueOf(Z)Ljava/lang/Boolean;
 
     move-result-object p1
