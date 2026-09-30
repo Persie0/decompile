@@ -1,12 +1,16 @@
-name: Build fictional CTF APK
+name: Build decoded APK folder
 
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: "Release tag"
+      source_dir:
+        description: "Repository folder containing apktool.yml + AndroidManifest.xml"
         required: true
-        default: "ctf-v1"
+        default: "ctf-demo"
+      tag:
+        description: "Optional release tag; leave blank to auto-generate"
+        required: false
+        default: ""
       publish_release:
         description: "Attach signed APK to a GitHub Release"
         required: true
@@ -30,17 +34,71 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - name: Verify this is the fictional CTF tree
+      - name: Detect and validate source folder
+        id: meta
+        env:
+          INPUT_SOURCE_DIR: ${{ inputs.source_dir }}
+          INPUT_TAG: ${{ inputs.tag }}
         run: |
-          set -euxo pipefail
-          test -f demo/apktool.yml
-          test -f demo/AndroidManifest.xml
-          grep -Eq 'package="ctf\.demo([."]|$)' demo/AndroidManifest.xml
+          set -euo pipefail
 
-          if grep -Eq 'package="com\.linguist"' demo/AndroidManifest.xml; then
-            echo 'Refusing to build the real application tree.' >&2
-            exit 1
+          SOURCE_DIR="${INPUT_SOURCE_DIR%/}"
+
+          case "$SOURCE_DIR" in
+            ""|/*|*".."*)
+              echo "Invalid source_dir: $SOURCE_DIR" >&2
+              exit 1
+              ;;
+          esac
+
+          test -d "$SOURCE_DIR"
+          test -f "$SOURCE_DIR/apktool.yml"
+          test -f "$SOURCE_DIR/AndroidManifest.xml"
+
+          PACKAGE="$(sed -n 's/.* package="\([^"]*\)".*/\1/p' "$SOURCE_DIR/AndroidManifest.xml" | head -n 1)"
+          test -n "$PACKAGE"
+
+          # This workflow is intentionally not usable for rebuilding the real LingQ app.
+          case "$PACKAGE" in
+            com.linguist|com.linguist.*)
+              echo "Refusing package $PACKAGE." >&2
+              exit 1
+              ;;
+          esac
+
+          VERSION_NAME="$(sed -n 's/^[[:space:]]*versionName:[[:space:]]*\(.*\)$/\1/p' "$SOURCE_DIR/apktool.yml" | head -n 1 | tr -d "'\"")"
+          VERSION_CODE="$(sed -n 's/^[[:space:]]*versionCode:[[:space:]]*\(.*\)$/\1/p' "$SOURCE_DIR/apktool.yml" | head -n 1 | tr -d "'\"")"
+
+          [ -n "$VERSION_NAME" ] || VERSION_NAME="unknown"
+          [ -n "$VERSION_CODE" ] || VERSION_CODE="unknown"
+
+          SAFE_PACKAGE="$(printf '%s' "$PACKAGE" | tr -cs 'A-Za-z0-9._-' '-' | sed 's/^-//;s/-$//')"
+          SAFE_VERSION="$(printf '%s' "$VERSION_NAME" | tr -cs 'A-Za-z0-9._-' '-' | sed 's/^-//;s/-$//')"
+          OUTPUT_BASE="${SAFE_PACKAGE}-${SAFE_VERSION}"
+          OUTPUT_APK="${OUTPUT_BASE}-signed.apk"
+
+          if [ -n "$INPUT_TAG" ]; then
+            RELEASE_TAG="$INPUT_TAG"
+          else
+            RELEASE_TAG="${OUTPUT_BASE}-run-${GITHUB_RUN_NUMBER}"
           fi
+
+          echo "Detected source: $SOURCE_DIR"
+          echo "Package:         $PACKAGE"
+          echo "Version name:    $VERSION_NAME"
+          echo "Version code:    $VERSION_CODE"
+          echo "Output APK:      $OUTPUT_APK"
+          echo "Release tag:     $RELEASE_TAG"
+
+          {
+            echo "SOURCE_DIR=$SOURCE_DIR"
+            echo "PACKAGE=$PACKAGE"
+            echo "VERSION_NAME=$VERSION_NAME"
+            echo "VERSION_CODE=$VERSION_CODE"
+            echo "OUTPUT_BASE=$OUTPUT_BASE"
+            echo "OUTPUT_APK=$OUTPUT_APK"
+            echo "RELEASE_TAG=$RELEASE_TAG"
+          } >> "$GITHUB_ENV"
 
       - name: Locate Android build tools
         run: |
@@ -68,68 +126,67 @@ jobs:
       - name: Rebuild with Apktool
         run: |
           set -euxo pipefail
-          rm -f ctf-unsigned.apk ctf-aligned.apk demo-signed.apk
-          java -jar apktool.jar b demo -o ctf-unsigned.apk
-          test -s ctf-unsigned.apk
+          rm -f unsigned.apk aligned.apk "$OUTPUT_APK"
+          java -jar apktool.jar b "$SOURCE_DIR" -o unsigned.apk
+          test -s unsigned.apk
 
       - name: Generate ephemeral signing key
         run: |
           set -euxo pipefail
-          rm -f ctf-debug.keystore
+          rm -f build-debug.keystore
           keytool -genkeypair \
-            -keystore ctf-debug.keystore \
-            -storepass ctfchallenge \
-            -keypass ctfchallenge \
-            -alias ctfdebug \
+            -keystore build-debug.keystore \
+            -storepass buildchallenge \
+            -keypass buildchallenge \
+            -alias builddebug \
             -keyalg RSA \
             -keysize 2048 \
             -validity 10000 \
-            -dname 'CN=Demo CTF,O=CTF Challenge,C=AT'
+            -dname "CN=${PACKAGE},O=Decoded APK Build,C=AT"
 
       - name: Align and sign
         run: |
           set -euxo pipefail
 
-          "$BUILD_TOOLS/zipalign" -p -f 4 \
-            ctf-unsigned.apk \
-            ctf-aligned.apk
+          "$BUILD_TOOLS/zipalign" -p -f 4 unsigned.apk aligned.apk
 
           "$BUILD_TOOLS/apksigner" sign \
-            --ks ctf-debug.keystore \
-            --ks-key-alias ctfdebug \
-            --ks-pass pass:ctfchallenge \
-            --key-pass pass:ctfchallenge \
-            --out demo-signed.apk \
-            ctf-aligned.apk
+            --ks build-debug.keystore \
+            --ks-key-alias builddebug \
+            --ks-pass pass:buildchallenge \
+            --key-pass pass:buildchallenge \
+            --out "$OUTPUT_APK" \
+            aligned.apk
 
           "$BUILD_TOOLS/apksigner" verify \
             --verbose \
             --print-certs \
-            demo-signed.apk
+            "$OUTPUT_APK"
 
-          "$BUILD_TOOLS/zipalign" -c -p 4 demo-signed.apk
-          sha256sum demo-signed.apk
+          "$BUILD_TOOLS/zipalign" -c -p 4 "$OUTPUT_APK"
+          sha256sum "$OUTPUT_APK"
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: demo-signed-apk
-          path: demo-signed.apk
+          name: ${{ env.OUTPUT_BASE }}-apk
+          path: ${{ env.OUTPUT_APK }}
           if-no-files-found: error
 
       - name: Publish GitHub Release
         if: ${{ inputs.publish_release }}
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ inputs.tag }}
         run: |
           set -euxo pipefail
 
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" demo-signed.apk --clobber
+          NOTES="Package: $PACKAGE\nVersion: $VERSION_NAME ($VERSION_CODE)\nSource folder: $SOURCE_DIR\nBuilt, aligned and signed by GitHub Actions."
+
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "$OUTPUT_APK" --clobber
           else
-            gh release create "$TAG" \
-              demo-signed.apk \
-              --title "Demo CTF $TAG" \
-              --notes "Signed fictional Demo CTF challenge APK built by GitHub Actions."
+            gh release create "$RELEASE_TAG" \
+              "$OUTPUT_APK" \
+              --title "$PACKAGE $VERSION_NAME" \
+              --notes "$NOTES"
           fi
