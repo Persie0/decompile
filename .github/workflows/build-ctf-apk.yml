@@ -1,4 +1,4 @@
-name: Build decoded APK folder
+name: Build decoded CTF APK folder
 
 on:
   workflow_dispatch:
@@ -7,6 +7,10 @@ on:
         description: "Repository folder containing apktool.yml + AndroidManifest.xml"
         required: true
         default: "ctf-demo"
+      original_package_url:
+        description: "Optional HTTPS URL to same-package CTF APK/XAPK/APKS/ZIP for split/resource merging"
+        required: false
+        default: ""
       tag:
         description: "Optional release tag; leave blank to auto-generate"
         required: false
@@ -34,21 +38,16 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - name: Detect and validate source folder
-        id: meta
+      - name: Detect and validate CTF source folder
         env:
           INPUT_SOURCE_DIR: ${{ inputs.source_dir }}
           INPUT_TAG: ${{ inputs.tag }}
         run: |
           set -euo pipefail
-
           SOURCE_DIR="${INPUT_SOURCE_DIR%/}"
 
           case "$SOURCE_DIR" in
-            ""|/*|*".."*)
-              echo "Invalid source_dir: $SOURCE_DIR" >&2
-              exit 1
-              ;;
+            ""|/*|*".."*) echo "Invalid source_dir: $SOURCE_DIR" >&2; exit 1 ;;
           esac
 
           test -d "$SOURCE_DIR"
@@ -58,9 +57,13 @@ jobs:
           PACKAGE="$(sed -n 's/.* package="\([^"]*\)".*/\1/p' "$SOURCE_DIR/AndroidManifest.xml" | head -n 1)"
           test -n "$PACKAGE"
 
+          case "$PACKAGE" in
+            ctf.*) ;;
+            *) echo "Target package must be fictional ctf.*; got $PACKAGE" >&2; exit 1 ;;
+          esac
+
           VERSION_NAME="$(sed -n 's/^[[:space:]]*versionName:[[:space:]]*\(.*\)$/\1/p' "$SOURCE_DIR/apktool.yml" | head -n 1 | tr -d "'\"")"
           VERSION_CODE="$(sed -n 's/^[[:space:]]*versionCode:[[:space:]]*\(.*\)$/\1/p' "$SOURCE_DIR/apktool.yml" | head -n 1 | tr -d "'\"")"
-
           [ -n "$VERSION_NAME" ] || VERSION_NAME="unknown"
           [ -n "$VERSION_CODE" ] || VERSION_CODE="unknown"
 
@@ -68,19 +71,7 @@ jobs:
           SAFE_VERSION="$(printf '%s' "$VERSION_NAME" | tr -cs 'A-Za-z0-9._-' '-' | sed 's/^-//;s/-$//')"
           OUTPUT_BASE="${SAFE_PACKAGE}-${SAFE_VERSION}"
           OUTPUT_APK="${OUTPUT_BASE}-signed.apk"
-
-          if [ -n "$INPUT_TAG" ]; then
-            RELEASE_TAG="$INPUT_TAG"
-          else
-            RELEASE_TAG="${OUTPUT_BASE}-run-${GITHUB_RUN_NUMBER}"
-          fi
-
-          echo "Detected source: $SOURCE_DIR"
-          echo "Package:         $PACKAGE"
-          echo "Version name:    $VERSION_NAME"
-          echo "Version code:    $VERSION_CODE"
-          echo "Output APK:      $OUTPUT_APK"
-          echo "Release tag:     $RELEASE_TAG"
+          RELEASE_TAG="${INPUT_TAG:-${OUTPUT_BASE}-run-${GITHUB_RUN_NUMBER}}"
 
           {
             echo "SOURCE_DIR=$SOURCE_DIR"
@@ -96,30 +87,92 @@ jobs:
         run: |
           set -euxo pipefail
           SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
-          test -d "$SDK_ROOT/build-tools"
-
           BUILD_TOOLS="$(find "$SDK_ROOT/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
-          test -n "$BUILD_TOOLS"
           test -x "$BUILD_TOOLS/zipalign"
           test -x "$BUILD_TOOLS/apksigner"
-
-          echo "Using Android build tools: $BUILD_TOOLS"
+          test -x "$BUILD_TOOLS/aapt"
           echo "BUILD_TOOLS=$BUILD_TOOLS" >> "$GITHUB_ENV"
 
       - name: Download and verify Apktool
         run: |
           set -euxo pipefail
-          curl -L --fail --retry 3 \
-            -o apktool.jar \
+          curl -L --fail --retry 3 -o apktool.jar \
             https://github.com/iBotPeaches/Apktool/releases/download/v3.0.3/apktool_3.0.3.jar
           echo 'dbf930b076c6b9be08d57c449cacefc3bdd6b71ebd59b3066fc0e1f5b14f9423  apktool.jar' | sha256sum -c -
-          java -jar apktool.jar --version
+
+      - name: Prepare temporary build tree
+        run: |
+          set -euxo pipefail
+          rm -rf .ctf-build-source
+          cp -a "$SOURCE_DIR" .ctf-build-source
+          echo "BUILD_SOURCE_DIR=.ctf-build-source" >> "$GITHUB_ENV"
+
+      - name: Merge same-package CTF split payloads
+        if: ${{ inputs.original_package_url != '' }}
+        env:
+          PACKAGE_URL: ${{ inputs.original_package_url }}
+        run: |
+          set -euo pipefail
+          case "$PACKAGE_URL" in
+            https://*) ;;
+            *) echo "original_package_url must use HTTPS" >&2; exit 1 ;;
+          esac
+
+          rm -rf .package-set .decoded-splits package-download.bin
+          mkdir -p .package-set .decoded-splits
+          curl -L --fail --retry 3 --retry-all-errors -o package-download.bin "$PACKAGE_URL"
+
+          if unzip -Z1 package-download.bin 2>/dev/null | grep -Eiq '\.apk$'; then
+            mkdir -p .package-set/unpacked
+            unzip -q package-download.bin -d .package-set/unpacked
+            find .package-set/unpacked -type f -iname '*.apk' -exec cp {} .package-set/ \;
+          else
+            cp package-download.bin .package-set/base.apk
+          fi
+
+          mapfile -d '' APK_FILES < <(find .package-set -maxdepth 1 -type f -iname '*.apk' -print0 | sort -z)
+          [ "${#APK_FILES[@]}" -gt 0 ] || { echo "No APKs found" >&2; exit 1; }
+
+          MERGED=0
+          SPLITS=0
+          idx=0
+          for apk in "${APK_FILES[@]}"; do
+            idx=$((idx + 1))
+            BADGING="$($BUILD_TOOLS/aapt dump badging "$apk" 2>/dev/null | head -n 1 || true)"
+            APK_PACKAGE="$(printf '%s\n' "$BADGING" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
+            SPLIT_NAME="$(printf '%s\n' "$BADGING" | sed -n "s/.* split='\([^']*\)'.*/\1/p")"
+
+            [ "$APK_PACKAGE" = "$PACKAGE" ] || {
+              echo "Package mismatch: expected $PACKAGE, got ${APK_PACKAGE:-unknown} in $(basename "$apk")" >&2
+              exit 1
+            }
+
+            decoded=".decoded-splits/$idx"
+            java -jar apktool.jar d -f -s "$apk" -o "$decoded" >/dev/null
+
+            for dir in lib assets res unknown; do
+              if [ -d "$decoded/$dir" ]; then
+                mkdir -p "$BUILD_SOURCE_DIR/$dir"
+                rsync -a --ignore-existing "$decoded/$dir/" "$BUILD_SOURCE_DIR/$dir/"
+              fi
+            done
+
+            MERGED=$((MERGED + 1))
+            [ -n "$SPLIT_NAME" ] && SPLITS=$((SPLITS + 1))
+          done
+
+          perl -0pi -e 's/\s+android:requiredSplitTypes="[^"]*"//g; s/\s+android:splitTypes="[^"]*"//g; s/<uses-split\b[^>]*\/>\s*//g; s/<meta-data\b(?=[^>]*android:name="com\.android\.vending\.splits(?:\.required)?")[^>]*\/>\s*//g; s/android:extractNativeLibs="false"/android:extractNativeLibs="true"/g' "$BUILD_SOURCE_DIR/AndroidManifest.xml"
+
+          echo "Merged $MERGED APK payload(s), including $SPLITS split APK(s)."
+          find "$BUILD_SOURCE_DIR/lib" -mindepth 1 -maxdepth 1 -type d -printf 'ABI: %f\n' 2>/dev/null | sort || true
+          echo "MERGED_APKS=$MERGED" >> "$GITHUB_ENV"
+          echo "MERGED_SPLITS=$SPLITS" >> "$GITHUB_ENV"
 
       - name: Rebuild with Apktool
         run: |
           set -euxo pipefail
           rm -f unsigned.apk aligned.apk "$OUTPUT_APK"
-          java -jar apktool.jar b "$SOURCE_DIR" -o unsigned.apk
+          java -jar apktool.jar b "$BUILD_SOURCE_DIR" -o unsigned.apk
           test -s unsigned.apk
 
       - name: Generate ephemeral signing key
@@ -134,27 +187,19 @@ jobs:
             -keyalg RSA \
             -keysize 2048 \
             -validity 10000 \
-            -dname "CN=${PACKAGE},O=Decoded APK Build,C=AT"
+            -dname "CN=${PACKAGE},O=CTF Build,C=AT"
 
       - name: Align and sign
         run: |
           set -euxo pipefail
-
           "$BUILD_TOOLS/zipalign" -p -f 4 unsigned.apk aligned.apk
-
           "$BUILD_TOOLS/apksigner" sign \
             --ks build-debug.keystore \
             --ks-key-alias builddebug \
             --ks-pass pass:buildchallenge \
             --key-pass pass:buildchallenge \
-            --out "$OUTPUT_APK" \
-            aligned.apk
-
-          "$BUILD_TOOLS/apksigner" verify \
-            --verbose \
-            --print-certs \
-            "$OUTPUT_APK"
-
+            --out "$OUTPUT_APK" aligned.apk
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$OUTPUT_APK"
           "$BUILD_TOOLS/zipalign" -c -p 4 "$OUTPUT_APK"
           sha256sum "$OUTPUT_APK"
 
@@ -171,14 +216,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euxo pipefail
-
-          NOTES="Package: $PACKAGE\nVersion: $VERSION_NAME ($VERSION_CODE)\nSource folder: $SOURCE_DIR\nBuilt, aligned and signed by GitHub Actions."
-
+          NOTES="Package: $PACKAGE\nVersion: $VERSION_NAME ($VERSION_CODE)\nSource folder: $SOURCE_DIR\nMerged APK payloads: ${MERGED_APKS:-0}\nMerged split APKs: ${MERGED_SPLITS:-0}"
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" "$OUTPUT_APK" --clobber
           else
-            gh release create "$RELEASE_TAG" \
-              "$OUTPUT_APK" \
-              --title "$PACKAGE $VERSION_NAME" \
-              --notes "$NOTES"
+            gh release create "$RELEASE_TAG" "$OUTPUT_APK" --title "$PACKAGE $VERSION_NAME" --notes "$NOTES"
           fi
