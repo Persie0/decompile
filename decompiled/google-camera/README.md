@@ -1,33 +1,34 @@
-# Pixel Camera 8.8.225 JADX sources
+# Pixel Camera decompiled sources
 
-Source-only JADX output for the Google/Pixel Camera APK attached to this repository's [`pho` release](https://github.com/Persie0/decompile/releases/tag/pho).
+Source-only JADX output for Google/Pixel Camera 8.8.225.510547499.09, sourced from this repository's pho release asset.
 
-- Package: `com.google.android.GoogleCamera`
-- Version: `8.8.225.510547499.09`
-- Version code: `66251366`
-- Input APK size: `272,584,431` bytes
-- Input APK SHA-256: `9ca2264cbf5680c8b5b740e53849c1586c53436a7e860616584c0349dba37c47`
-- JADX: `1.5.6`
-- Decompiled Java files: **11,855**
-- JADX reported errors: **41**
-- JADX exit code: `3`
-- Reconstructed source ZIP size: `12,693,451` bytes
-- Reconstructed source ZIP SHA-256: `deaf8103d63ba40f0480ee2dd5c91b71b6cb54c4f7fef2ebb86455bc6fbaa8b2`
-- Source workflow: [Playground run 37468402588](https://github.com/Persie0/Playground/actions/runs/37468402588)
-- Artifact ID: `11415453729`
+## Input
 
-JADX ran with automatic deobfuscation, source-name aliases where useful, bad-code retention, and source-only output, matching the LingQ workflow style. Original names removed by R8/ProGuard cannot be recovered without Google's original mapping file, so this is best-effort deobfuscation rather than restoration of Google's original identifiers.
+- Package: com.google.android.GoogleCamera
+- Version: 8.8.225.510547499.09
+- Version code: 66251366
+- APK SHA-256: 9ca2264cbf5680c8b5b740e53849c1586c53436a7e860616584c0349dba37c47
 
-The source ZIP is stored as concatenated base64 text split into 480 KiB Git blobs under `8.8.225.510547499.09/part-*`. Reconstruct all tracked source archives with:
+## JADX result
 
-```sh
-python3 tools/reassemble_sources.py
-```
+- JADX version: 1.5.6
+- Automatic deobfuscation: enabled
+- Decompiled Java files: 11,855
+- JADX reconstruction errors: 41
+- JADX exit code: 3 (recoverable output retained)
+- Android resources: excluded, matching the LingQ source-only workflow
+- Persistent source archive: 26 chunks of at most 480 KiB
+- Reconstructed ZIP bytes: 12693580
+- Reconstructed ZIP SHA-256: e3893733c41acc88442424bd6649a51f62f6ad0fcc176b78c155500ccbfd0b65
 
-The reconstructed Google Camera ZIP will be written to:
+Original R8/ProGuard names cannot be recovered without Google's mapping file, so this is deobfuscated JADX output rather than original source.
 
-```
-decompiled/google-camera/8.8.225.510547499.09/google-camera-8.8.225.510547499.09-jadx-sources.zip
-```
+## Reassemble
 
-The ZIP includes the recovered Java source tree, the JADX `.jobf` name map, and `jadx.log`. Android resources were intentionally excluded, matching the existing LingQ source-only workflow.
+From the repository root:
+
+    python3 tools/reassemble_sources.py
+
+This writes:
+
+    decompiled/google-camera/8.8.225.510547499.09/google-camera-8.8.225.510547499.09-jadx-sources.zip
