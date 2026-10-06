@@ -13,6 +13,6 @@ Reconstruct all archived source ZIPs with:
 python3 tools/reassemble_sources.py
 ```
 
-The LingQ archives are stored as binary split parts. The Google Camera archive is stored as concatenated base64 text split into small Git blobs; the same script handles both formats and verifies the reconstructed Google Camera archive SHA-256.
+All tracked source archives use the same LingQ-style storage format: raw binary ZIP data split into 480 KiB Git blobs. The reconstruction script concatenates the parts and verifies each reconstructed archive against its recorded SHA-256.
 
 JADX output is approximate. Automatic deobfuscation can improve invalid/short identifiers and apply source-name aliases, but original R8/ProGuard names cannot be recovered without the original mapping files.
