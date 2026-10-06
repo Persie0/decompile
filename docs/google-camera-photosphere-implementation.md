@@ -951,3 +951,225 @@ The highest-value next pass would be focused ARM64 analysis of these JNI functio
 6. `SetTargetHitAngleRadians` — verify how target tolerance interacts with visual overlap tests.
 
 That should be done against this exact `liblightcycle.so` SHA so offsets and findings remain reproducible.
+
+
+---
+
+## 25. Exact Java-side constants recovered in the second pass
+
+This section records values recovered directly from the reconstructed 8.8.225 Java code. These supersede earlier approximations where applicable.
+
+### Capture-mode IDs
+
+`foc.m8613D()` maps the UI modes exactly:
+
+| ID | Mode |
+| ---: | --- |
+| 1 | Photo Sphere |
+| 2 | Horizontal |
+| 3 | Vertical |
+| 4 | Wide angle |
+| 5 | Fisheye |
+
+Photo Sphere is the default value of the mode field.
+
+### Preview/still size selection
+
+`ewu.m7957a()` performs the size pairing.
+
+For each still size, it searches preview sizes whose aspect-ratio difference is **< 0.03**, whose preview width is **< 640 px**, and chooses the preview closest to **320 px wide**.
+
+If no aspect-ratio-matched preview exists for any still size, it globally chooses the preview width closest to **320 px**.
+
+Among usable still sizes it primarily chooses the width closest to **3000 px**, while preferring a still aspect ratio close to **4:3 (1.333333...)**. A secondary pass allows a materially better 4:3 ratio when the still width remains within **1050 px** of 3000.
+
+Therefore “~320 preview / ~3000 still” is an explicit policy in the client, not an empirical guess.
+
+### Preview frame-rate range
+
+`ewt.m7956a()` chooses a supported FPS range that contains **30 fps**:
+
+- upper bound >= 30000;
+- lower bound <= 30000;
+- first minimize the lower bound;
+- for that lower bound, maximize the upper bound.
+
+The Camera1-style values are in thousandths of fps.
+
+### JPEG quality
+
+The still-capture camera parameters explicitly set JPEG quality to **100** before Photo Sphere capture.
+
+### Preview pixel format
+
+The Photo Sphere setup does not explicitly replace the camera preview format. It inherits the Camera1 parameter object's current preview format and sizes callback buffers from `ImageFormat.getBitsPerPixel(format)`.
+
+On normal Android Camera1 devices this is commonly NV21, but **NV21 is not hard-coded by the recovered Photo Sphere setup**, so a compatible implementation should not rely on that assumption without querying the active format.
+
+### Sensor sampling
+
+`eyh.onLooperPrepared()` registers:
+
+- accelerometer (type 1): Android delay constant **1 / SENSOR_DELAY_GAME**;
+- gyroscope (type 4): **SENSOR_DELAY_GAME**;
+- magnetometer (type 2): Android delay constant **3 / SENSOR_DELAY_UI**.
+
+All three callbacks run on a dedicated `"sensor thread"`.
+
+### Accelerometer low-pass filter
+
+Before the acceleration vector is used for some capture-state calculations, Java applies:
+
+```text
+filtered = 0.85 * previous + 0.15 * current
+```
+
+on each axis.
+
+The unfiltered acceleration sample is separately passed into the orientation estimator.
+
+### Gyroscope integration timing guard
+
+The orientation estimator computes gyro `dt` from sensor timestamps.
+
+If the measured gap exceeds **40 ms**, it does not trust that long gap directly:
+
+- after enough history, it substitutes the running mean sample interval;
+- before the mean is established, it substitutes **10 ms**.
+
+The running mean uses approximately:
+
+```text
+mean_dt = 0.95 * old_mean + 0.05 * new_dt
+```
+
+and is considered established after more than 10 samples.
+
+This avoids a delayed sensor callback producing one very large erroneous rotation step.
+
+### Exact dynamic target-hit angle
+
+The target hit radius is computed from gyro magnitude:
+
+```text
+angular_speed = sqrt(gx^2 + gy^2 + gz^2)
+
+speed = clamp(angular_speed,
+              10 deg/s,
+              40 deg/s)
+
+extra = ((speed - 10 deg/s) / 30 deg/s) * 0.75 deg
+
+target_hit_angle = 2.75 deg + extra
+```
+
+Therefore the exact Java-selected native target radius is **2.75° .. 3.50°**.
+
+This is sent every render cycle through `SetTargetHitAngleRadians()`.
+
+### Target-dot visibility angles
+
+The target renderer uses two exact angular thresholds:
+
+- fully emphasized inside **12°**;
+- fades between **12° and 22°**;
+- outside **22°**, the normal target contribution is effectively transparent while a reduced auxiliary alpha remains.
+
+This visual threshold is separate from the much tighter 2.75°-3.50° native target-hit threshold.
+
+### Exposure-dependent motion rejection
+
+Java continuously sends the native engine a `SetSensorMovementTooFast(boolean)` signal.
+
+The input is the squared gyro magnitude:
+
+```text
+gyro_energy = gx^2 + gy^2 + gz^2
+```
+
+The threshold changes according to the EXIF exposure time of the most recently captured JPEG:
+
+| Exposure time | gyro-energy threshold |
+| --- | ---: |
+| > 25 ms | 0.0025000002 |
+| 10-25 ms | 0.16000001 |
+| < 10 ms | 1.0 |
+| unknown/invalid | 0.16000001 |
+
+For the legacy Nexus 5 special-case, the <10 ms threshold is approximately **0.01** instead of 1.0.
+
+Because this is squared angular speed, the corresponding approximate normal-device angular-speed limits are:
+
+- >25 ms exposure: **0.05 rad/s ≈ 2.86°/s**
+- 10-25 ms exposure: **0.40 rad/s ≈ 22.9°/s**
+- <10 ms exposure: **1.0 rad/s ≈ 57.3°/s**
+
+This shows that LightCycle deliberately becomes much stricter about movement during long exposures.
+
+### Full-resolution capture / autofocus behavior
+
+Before a selected source JPEG is captured, the controller computes camera pitch from the fused rotation matrix.
+
+When the device/config flag for this behavior is enabled and either:
+
+- pitch changed by more than **8°** since the last successful focus; or
+- an undo/reset condition was set,
+
+the app attempts autofocus before taking the still.
+
+It retries autofocus at most **3 times**. A successful focus stores the new pitch; a failed sequence still proceeds after the third attempt.
+
+### Orientation sidecar format
+
+For each completed full-resolution JPEG, `exk` writes one line to `orientations.txt`.
+
+The line contains:
+
+1. the nine values of the current 3x3 rotation matrix, space-separated;
+2. a tenth value equal to the **sum of those nine values**.
+
+The tenth value appears to be a simple integrity/sanity value rather than another pose component.
+
+Undo rewrites `orientations.txt` so that only the remaining captured-image lines are retained.
+
+### Compass heading attached to source captures
+
+At still-capture time, Java also computes an azimuth with Android's normal gravity + magnetic-field orientation functions:
+
+```text
+SensorManager.getRotationMatrix(...)
+SensorManager.remapCoordinateSystem(..., AXIS_X, AXIS_Z, ...)
+SensorManager.getOrientation(...)
+```
+
+The azimuth is converted to integer degrees and stored with the per-source capture record, together with wall-clock time and location when available.
+
+This compass heading is distinct from the high-rate gyro/gravity rotation used for visual alignment.
+
+### Exact GPano viewer decision
+
+After rendering, Java computes horizontal output coverage:
+
+```text
+coverage_deg =
+    cropped_area_width / full_pano_width * 360
+```
+
+For mode **1 / Photo Sphere**:
+
+- GPano metadata is written;
+- `IsPhotosphere = true`;
+- `UsePanoramaViewer = true` when horizontal coverage is **>= 70°**.
+
+For mode **2 / Horizontal panorama**:
+
+- the panorama is treated as a full GPano panorama only when computed coverage is exactly **360°**;
+- `IsPhotosphere = false`.
+
+The other capture types do not take the same normal GPano Photo Sphere branch.
+
+### Finish-capture flag
+
+Before finalization the UI always calls `SetOutputResolutionLarge()`.
+
+The first boolean passed to `FinishCapture()` is normally **false when at least one target was captured**. It becomes true for an empty/forced-special finish path. The final stitch is then scheduled asynchronously.
