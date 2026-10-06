@@ -1,23 +1,18 @@
-# Android decompilation archive
+# Android APK decompilation archives
 
-This repository stores source-only JADX output for selected Android APKs. Generated source archives are split into Git blobs so they can be persisted without committing tens of thousands of generated files directly.
+This repository stores source-only JADX output for reverse-engineering and static analysis.
 
-## LingQ
+Currently tracked:
 
-LingQ 5.5.9 and 6.2.0 are stored under [decompiled/lingq](decompiled/lingq). Reconstruct them with:
+- **LingQ Android 5.5.9 and 6.2.0** — split source archives under [decompiled/lingq](decompiled/lingq), with static-analysis notes in [docs/lingq-analysis](docs/lingq-analysis/README.md).
+- **Google/Pixel Camera 8.8.225.510547499.09** — split source archive under [decompiled/google-camera](decompiled/google-camera), generated from the APK attached to the [`pho` release](https://github.com/Persie0/decompile/releases/tag/pho).
 
-~~~sh
+Reconstruct all archived source ZIPs with:
+
+```sh
 python3 tools/reassemble_sources.py
-~~~
+```
 
-Detailed LingQ extraction notes and checksums are in [decompiled/lingq/README.md](decompiled/lingq/README.md). Static investigation findings are in [SECURITY_REVIEW.md](SECURITY_REVIEW.md) and [docs/lingq-analysis](docs/lingq-analysis/README.md).
+The LingQ archives are stored as binary split parts. The Google Camera archive is stored as concatenated base64 text split into small Git blobs; the same script handles both formats and verifies the reconstructed Google Camera archive SHA-256.
 
-## Pixel Camera / Google Camera
-
-Pixel Camera 8.8.225.510547499.09 from release `pho` is stored under [decompiled/google-camera](decompiled/google-camera). Reconstruct and verify the source archive with:
-
-~~~sh
-python3 tools/reassemble_google_camera.py
-~~~
-
-The archive includes source-only JADX output, the generated automatic-deobfuscation alias map, and the full JADX log. See [decompiled/google-camera/README.md](decompiled/google-camera/README.md) for hashes, source/error counts, and limitations.
+JADX output is approximate. Automatic deobfuscation can improve invalid/short identifiers and apply source-name aliases, but original R8/ProGuard names cannot be recovered without the original mapping files.
