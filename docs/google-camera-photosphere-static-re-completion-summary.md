@@ -1,6 +1,6 @@
 # Pixel Camera 8.8 Photo Sphere static reverse engineering — completion summary
 
-Updated through checkpoint 22, this document summarizes the current static reverse-engineering pass for the audited artifacts.
+Updated through checkpoint 25, this document summarizes the current static reverse-engineering pass for the audited artifacts.
 
 It does **not** claim that Google's proprietary C++ source code has been recovered. The audited native library is stripped. Several exact constants and object fields still require deeper decompilation or runtime instrumentation. The current work is an engineering reconstruction of the Photo Sphere architecture, Java/JNI control flow, native object boundaries, major algorithm families, and many exact constants.
 
@@ -42,6 +42,9 @@ Running / checkpoint documents:
 - `docs/google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md`
 - `docs/google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md`
 - `docs/google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md`
+- `docs/google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md`
+- `docs/google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md`
+- `docs/google-camera-photosphere-checkpoint-25-post-solve-output-validation.md`
 - this completion summary
 
 ## Recovered high-level architecture
@@ -374,3 +377,8 @@ The shared projection helper transfers points using two orientation blocks, an i
 ## Checkpoint 24 update — sensor-prior selection and Ceres termination
 
 For the traced GlobalFocalLength path, input-record `+0x30 = 1` chooses between a one-scalar pitch prior and a two-scalar pitch/roll prior using two 10° sample-spread predicates and a count threshold of 7. It does not remove sensor constraints. Input-record `+0x34 = 1` allows Ceres `NO_CONVERGENCE` through the first post-solve status gate; `FAILURE` remains rejected and downstream validation still runs. Source field names remain unknown. See [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
+
+
+## Checkpoint 25 update — post-solve output validation
+
+For the traced GlobalFocalLength path, the optimized focal parameter must be positive and the shared image center must remain within the returned image dimensions. With a nonzero count from the fourth argument, a separate nested-object scalar must lie in `[10, 150]`; its source-level name and units are unknown, and interpreting it as a view-angle/FOV value remains an inference. The passing path normalizes per-image quaternions and writes back transforms. The adjuster returns 1 for the accepted path and 0 for rejection. See [checkpoint 25](google-camera-photosphere-checkpoint-25-post-solve-output-validation.md).
