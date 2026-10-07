@@ -280,7 +280,7 @@ A clean-room implementation should follow this architecture:
 
 These remain unresolved after the current static pass:
 
-- configured FAST non-max radius and feature cap;
+- configured FAST non-max radius and requested feature-count value;
 - exact patch size / descriptor length in every configuration path;
 - `PatchPairwiseMatcher +0x130` maximum descriptor-distance default;
 - complete pyramid scale settings used per input image;
