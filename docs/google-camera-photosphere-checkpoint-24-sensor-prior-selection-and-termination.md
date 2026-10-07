@@ -49,7 +49,7 @@ The two builder branches load distinct cost-function vtables at `0x3fe0e0` and `
 
 ## `+0x34`: allow a nonconverged solution through the first status gate
 
-After the Ceres solve call at `0x129564`, the caller checks the summary termination value at `0x129628`. The summary object starts at caller `sp+176); the `termination_type` member is at `sp+180), matching the pinned public Ceres 2.2.0 `Summary` member order. The field `+0x34` is read as a byte at `0x12962c`.
+After the Ceres solve call at `0x129564`, the caller checks the summary termination value at `0x129628`. The summary object starts at caller `sp+176`; the `termination_type` member is at `sp+180`, matching the pinned public Ceres 2.2.0 `Summary` member order. The field `+0x34` is read as a byte at `0x12962c`.
 
 | Ceres termination value | `+0x34` | First status-gate result |
 | --- | ---: | --- |
@@ -72,6 +72,6 @@ The enum values are cross-checked against the pinned [Ceres Solver 2.2.0 `types.
 - `0x128f7c`..`0x1290c0`: one-scalar sensor-prior construction.
 - `0x1290c4`..`0x129208`: two-scalar pitch/roll prior construction.
 - `0x129620`..`0x129640`: post-solve termination gate reading `+0x34`.
-- `0x12cffc), `0x12d4c8), and their relocations/RTTI: residual evaluator identity and dimensions.
+- `0x12cffc`, `0x12d4c8`, and their relocations/RTTI: residual evaluator identity and dimensions.
 
 This is static analysis of the audited binary. Runtime behavior, exact source-level field names, residual-scale units, other bundle-adjuster paths, and the vendor Ceres option tail remain open.
