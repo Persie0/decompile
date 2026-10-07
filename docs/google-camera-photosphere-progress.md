@@ -371,7 +371,7 @@ Full trace: [checkpoint 19](google-camera-photosphere-checkpoint-19-matcher-limi
 
 ## 2026-10-07 — checkpoint 20: global focal-length bundle loss selection
 
-One traced BundleAdjusterGlobalFocalLength path initializes the robust-loss selector at options offset +0x20 to 1. Both loss-construction sites in that method read this field, and the native factory maps selector 1 to HuberLoss(35). RTTI also confirms the AutoDiffCostFunction dimensions for line matches, point matches, roll/pitch sensor terms, and sensor terms. This does not establish settings for other bundle-adjuster paths; residual equations/weights and Ceres solver options remain open.
+One traced BundleAdjusterGlobalFocalLength path initializes the robust-loss selector at options offset +0x20 to 1. Both loss-construction sites in that method read this field, and the native factory maps selector 1 to HuberLoss(35). RTTI also confirms the AutoDiffCostFunction dimensions for line matches, point matches, roll/pitch sensor terms, and sensor terms. The binary's embedded build fingerprint identifies Ceres 2.2.0 with Eigen 3.4.90, no LAPACK, SuiteSparse 4.5.4, and METIS 5.1.0. This does not establish settings for other bundle-adjuster paths; residual equations/weights and Ceres solver options remain open.
 
 Full trace: [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md).
 
