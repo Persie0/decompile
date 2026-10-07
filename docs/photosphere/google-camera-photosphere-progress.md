@@ -498,13 +498,21 @@ The strongest same-layout false positives are 3×3 rosette/camera matrices; othe
 
 ## 2026-10-07 — checkpoint 39: native backlog audit
 
-The parallel audit resolved the Photo Sphere full-ring target formula and the main evidence boundaries across features, optical flow, graph filtering, bundle adjustment, rendering, preview input, and session failure handling. Notable results: ring counts depend on camera FOV and latitude; flow rows use the recovered assignment-level equations and a caller-supplied `16.0` normalization; graph membership selects largest connected components; a separate line-alignment RANSAC exists but its tuning body is missing; `ProcessFrame` passes a byte array plus input code `1` while the GL preview output is RGB8; native session storage is path-oriented but its serialization and Java retry policy remain unknown. See [checkpoint 39](../google-camera-photosphere-checkpoint-39-native-backlog-audit.md).
+The parallel native audit resolved the Photo Sphere full-ring target formula and bounded evidence across features, optical flow, graph filtering, bundle adjustment, rendering, preview input, and session failure handling. It left native descriptor generation, graph adjacency insertion, line-RANSAC tuning, and selected rendering coefficients unresolved. The Java archive was subsequently recovered in checkpoint 40, which closes the Java preview-buffer, session-format, and retry-policy gaps. See [checkpoint 39](../google-camera-photosphere-checkpoint-39-native-backlog-audit.md) and [checkpoint 40](../google-camera-photosphere-checkpoint-40-java-preview-session-artifacts.md).
+
+## 2026-10-07 — checkpoint 40: Java preview and session artifacts
+
+The 26-chunk source archive reconstructs to a valid 12,693,580-byte ZIP (SHA-256 `e3893733c41acc88442424bd6649a51f62f6ad0fcc176b78c155500ccbfd0b65`). The Camera1 callback array reaches `ProcessFrame(bytes, width, height, boolean)` unchanged; Java supplies the configured preview dimensions and makes no stride, crop, rotation, or byte-format conversion. The callback format remains the Camera parameter for that device and only affects preview-buffer sizing.
+
+The `orientations.txt` line is nine selected sensor rotation-matrix floats plus their sum, newline-terminated and flushed per still. `session.meta` is read as comma-separated key/value rows, with panorama dimensions/crop, timestamps, photo count, pose heading, and yaw correction consumed for EXIF/GPano XMP. The writer is not present in Java. `LocalSessionStorage` implements `Serializable`, but no serialization use was found.
+
+The feature-gated autofocus path allows up to three trials after a pitch change greater than 8° or a forced retry; this is a camera autofocus loop, not a stitch retry/backoff. No Java retry around `AlignNextImage` was found.
+
+Focused native rerun [37693894574](https://github.com/Persie0/Playground/actions/runs/37693894574) is running with direct graph, line-RANSAC, seam-cost, and feature-pyramid focus.
 
 ### Next targets
 
-- Resolve patch-size/descriptor byte count, detector override/cap paths, and actual pyramid pixel generation.
-- Recover Java source to identify preview input layout, LocalSessionStorage serialization, and Java retry policy.
-- Decompile line RANSAC parameters and graph adjacency insertion/layout.
-- Trace point/line residual scalar units and other bundle-adjuster paths.
-- Finish selected blend levels, seam/gamma coefficients, and remaining output corrections.
-- Evaluate exact target totals for a specified camera model.
+- Read the focused Ghidra output for RANSAC, graph component, seam-cost, and feature-pyramid paths.
+- Resolve oriented-patch descriptor size and pyramid pixel-generation details.
+- Trace graph adjacency insertion, line-RANSAC tuning, residual scalar units, other bundle-adjuster paths, blend-level selection, and seam/gamma coefficients.
+- Compute target totals for a specified camera model and FOV.
