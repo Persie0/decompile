@@ -375,15 +375,20 @@ One traced BundleAdjusterGlobalFocalLength path initializes the robust-loss sele
 
 Full trace: [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md).
 
-## 2026-10-07 — checkpoint 21: Ceres solver-option handoff
+## 2026-10-07 — checkpoint 21: Ceres solver-option handoff and ABI correction
 
-The call path through `0x129564` and thunk `0x153900` indicates that the local record at `sp+0x2b0) is passed to the Ceres solve routine; the target saves its corresponding argument as `x23). Reads from that base at +4, +12, +24, +88, +92, +120, +208, +212, and +216 align with the version-matched Ceres 2.2.0 `Solver::Options` prefix fields. This identifies likely field names for the observed reads, but does not recover whether the caller changed any values from defaults.
+The call through `0x129564` and thunk `0x153900` passes the local record at `sp+0x2b0` to the Ceres solve target, which saves it as `x23`. Reads through +280 align with the Ceres 2.2.0 public prefix and a 40-byte Android libc++ subset container. Later reads at +304, +312 and +436/+440 do not follow the pinned upstream member sequence. In particular, the callee treats +312 as a pointer-backed ordering source, not as the public header's scalar max-SPSE field.
 
-Using the Android 64-bit libc++ layout, the reads at +264/+268/+272/+280/+304/+312 likely map to the dense/sparse solver libraries, ordering type and object, minimum linear-solver iterations, and max SPSE iterations. These later offsets remain ABI-derived pending confirmation against the exact build; +436/+440 are still unmapped. The caller's writes to its stack options object are still needed to determine effective solver settings. See [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md).
+Full trace: [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md).
+
+## 2026-10-07 — checkpoint 22: caller-written Ceres settings
+
+The caller's stack writes recover a strong core configuration for this GlobalFocalLength path: DENSE_SCHUR, DOGLEG with SUBSPACE_DOGLEG, one solver thread, trust-region radii `1e4 / 1e16 / 1e-8), function/gradient/parameter tolerances `1e-6 / 1e-10 / 1e-8`, and a runtime-supplied max-iteration value from input-record +44. The user ordering is null; dense algebra is EIGEN and the sparse-library enum is SUITE_SPARSE. The gradient-check flag is false.
+
+The caller also writes additional raw values at +64 and beyond +280, but those offsets do not consistently match the upstream header, so their field names remain open. The raw values, call-site offsets and confidence limits are recorded in [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md).
 
 ### Current next targets
-
-- Recover the caller's writes to the local Ceres Solver::Options object at 0x12924c–0x129564; confirm effective solver settings and map remaining option offsets.
+- Resolve the Google Camera Ceres tail ABI after +280, the semantics of raw writes at +64/+336/+432, and the input-record +44 iteration-limit source.
 - Recover residual equations/weights and semantic names/values of bundle-adjuster options +0x2c/+0x30.
 - Trace optical-flow weights and identify their effects on pose constraints.
 - Check whether other detector construction paths override the -1 non-max-radius sentinel, and recover image-pyramid filtering/downsampling.
