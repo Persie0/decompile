@@ -38,16 +38,16 @@ Notable solver choices on this path are therefore **DENSE_SCHUR with the DOGLEG/
 
 The local input record is initialized at `0x11ed64), passed from `sp+8` through `0x122fcc`, and reaches `BundleAdjusterGlobalFocalLength` as the pointer saved at `sp+1256` in `0x1287c0`.
 
-- Input-record `+0x2c) is 50. The adjuster loads it at `0x12939c) and writes it to Ceres options `+104), so this path uses `max_num_iterations = 50`.
-- Input-record `+0x30) is 1. At `0x128f04), the adjuster reads it as a branch flag before building residual data. Its exact configuration-field name remains unknown.
+- Input-record `+0x2c` is 50. The adjuster loads it at `0x12939c` and writes it to Ceres options `+104`, so this path uses `max_num_iterations = 50`.
+- Input-record `+0x30` is 1. At `0x128f04`, the adjuster reads it as a branch flag before building residual data. Its exact configuration-field name remains unknown.
 
-When `+0x30 == 1), the code skips the residual-construction branch if any of these conditions holds:
+When `+0x30 == 1`, the code skips the residual-construction branch if any of these conditions holds:
 
-1. `0x316b8c) returns true. That helper scans normalized dot products of stored 3D samples against a threshold of `0.9848077` (approximately `cos(10°)`).
-2. The helper result in `w25) is below 7.
-3. `0x316c8c) returns true. It compares `asin`-derived, pitch-like samples and returns true when the checked differences stay within `0.1745329` rad (10°).
+1. `0x316b8c` returns true. That helper scans normalized dot products of stored 3D samples against a threshold of `0.9848077` (approximately `cos(10°)`).
+2. The helper result in `w25` is below 7.
+3. `0x316c8c` returns true. It compares `asin`-derived, pitch-like samples and returns true when the checked differences stay within `0.1745329` rad (10°).
 
-The exact semantic name for this guard remains unknown. The observed behavior is that the path proceeds only when the first test is false, `w25 >= 7), and the third test is false.
+The exact semantic name for this guard remains unknown. The observed behavior is that the path proceeds only when the first test is false, `w25 >= 7`, and the third test is false.
 
 ## Raw tail writes and ABI boundary
 
