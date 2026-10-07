@@ -24,7 +24,9 @@ AlignmentEstimator::AddImage is at raw 0x11d570 (Ghidra 0x21d570). It constructs
 
 The estimator lazily builds component records at raw 0x1252d4 (Ghidra 0x2252d4); each record is 0x18 bytes, with its tree/root pointer at +8 and size at +0x10. The component cache occupies estimator offsets +0xb0..+0xb8. The largest-component filter at raw 0x11ef24 (Ghidra 0x21ef24) accepts tied largest components. Removal clears the cache at raw 0x11e3e4 (Ghidra 0x21e3e4).
 
-Photo Sphere reset creates the capture builder through the session manager’s virtual +0x10, stores it globally, then creates the preview processor. JNI AddImage dispatches through the builder’s virtual +0x538. The exact builder method that constructs or attaches AlignmentEstimator remains unresolved; no estimator constructor or RTTI/vtable entry was found in the generated inventory, and no numeric minimum-component threshold was established.
+Photo Sphere reset creates CaptureSessionBuilderImpl through the session manager’s virtual +0x10. Its constructor/factory at raw 0x10f310 allocates a 0x60-byte builder and constructs AlignmentEstimator through raw 0x11ccf4 → 0x11c86c with (mode, nullptr); the estimator pointer is passed to SessionImpl constructor/helper raw 0x11a204 and stored at SessionImpl +0x48. The estimator vptr/address point is raw 0x3fdca0; RTTI name is raw 0x6307b.
+
+JNI AddImage at raw 0x0ef720 calls builder vtable slot +0x18, relocated from raw vtable address point 0x3fd478 to AddImage raw 0x10f6c8. That method locks the builder, gets its SessionImpl child at builder +0x38, and calls SessionImpl vtable +0x10 at raw 0x11a75c to append the record. SessionImpl worker raw 0x11b18c dequeues records and calls per-record processor raw 0x11be38; on a successful file read, that processor dispatches through the estimator at SessionImpl +0x48, vtable slot +0x28. Vtable relocation at 0x3fdcc8 resolves the slot to AlignmentEstimator::AddImage raw 0x11d570 (Ghidra 0x21d570). The edge is reconstructed from slot math and relocation, since Ghidra's call graph does not resolve the virtual call; it is conditional on the queued file existing and reading successfully. The JNI +0x538 indirect call is through JNIEnv for string conversion, not the builder dispatch.
 
 ## Line alignment RANSAC
 
@@ -41,23 +43,31 @@ The line-alignment RANSAC body is raw 0x306fcc (Ghidra 0x406fcc), called from ra
 
 The loop is adaptive: it can stop at 150 inliers, otherwise runs to at least the 550 boundary once there are two supporting inliers, and can continue to 5,000 when support remains below two. The 50 retries are for finding a distinct, non-degenerate sample; they are not the outer hypothesis budget. A separate near-degenerate pair check uses cosine 0.99619472 (cos 5°). Another 1e-5 numeric guard is present, but its exact role is unresolved.
 
+## Optical-flow configuration
+
+Flow constraint construction at raw 0x0ff1c8 (Ghidra 0x1ff1c8) is called from the alignment tracker at raw 0x0f399c (Ghidra 0x1f399c). It applies the gradient gate |gradient1| + |gradient2| > tracker_threshold × 16.0. The tracker passes its runtime float at +0x50 and sample cap at +0x54; if eligible points exceed the cap, it selects evenly spaced indices. The 16.0 literal is a scaling factor, not the threshold value.
+
+GlobalFlowSolver::Solve at raw 0x0ffc30 (Ghidra 0x1ffc30) reads solver type at +8 (0 dense, 1 alternate iterative), maximum outer iterations at +0x0c, and minimum iteration count at +0x10. It stops early only when its configured metric is below the stop threshold and the loop index is strictly greater than the minimum. The numeric threshold, cap, solver type, and iteration values remain unresolved. The 0.03-radian gate in the tracker is a separate rotation-update filter.
+
 ## Feature pyramid
 
 The native pyramid downsampler at raw 0x3a4740 uses a separable five-tap binomial kernel [1, 4, 6, 4, 1], adds 8, and shifts right by 4. Output dimensions use ceil(input/2), and the backing allocation includes one pixel of padding. Scalar and NEON implementations are present; edge handling adjusts the weights, with first-edge taps [11, 4, 1]. This resolves the earlier unknown about pyramid pixel generation.
 
-The oriented-feature path validates that the number of collected records equals the number of valid points. The grid helper uses dimension/step + 3 cells and 24-byte cell records. Confirmed helpers at raw 0x3a54b4, 0x3a5718, and 0x3a5b34 build the grid, select candidates, and compact 12-byte point records; they do not reveal descriptor emission. The existing Ghidra artifacts omit the OrientedPatchExtractor implementation/method xrefs, so patch dimensions, sampling pattern, and bytes per keypoint remain unverified.
+The oriented-feature path validates that the number of collected records equals the number of valid points. Raw 0x3a54b4 buckets 12-byte point records using x/y floats at +4/+8, a 20-pixel cell size from orchestrator raw 0x3a5cb0, dimension/cell + 3 grid axes, and 24-byte cell records. Raw 0x3a5718 suppresses nearby points by squared distance and score at record +0; the orchestrator tries radii 3 through 20. Raw 0x3a5b34 compacts the selected 12-byte records. Adjacent raw 0x39ed48 samples six neighboring grayscale bytes for five iterations to estimate orientation. This shows candidate selection and orientation but not descriptor emission. Available artifacts identify OrientedPatchExtractor by RTTI name at raw 0x3fd1f8 but expose no extractor method xrefs; patch sampling layout, dimensions, and bytes per keypoint remain unverified.
 
 ## Bundle-adjustment residual
 
-RTTI and the vtable map identify LineMatchResidual as a four-residual AutoDiff cost with parameter blocks [4, 4, 2, 1]. Its evaluator projects both endpoint pairs in both directions and writes four signed line-equation values of the form c + a*y_projected - b*x_projected. Line coefficients are used as stored; the evaluator applies no separate scalar weight. The projection uses the same scale for coordinates, center, focal value, and projected coordinates, so the static body does not establish whether those values are pixels or normalized units. PointMatchResidual is a separate two-residual class with a different vtable.
+RTTI and the vtable map identify LineMatchResidual as a four-residual AutoDiff cost with parameter blocks [4, 4, 2, 1]. Its evaluator projects both endpoint pairs in both directions and writes four signed line-equation values of the form c + a*y_projected - b*x_projected. Line coefficients are used as stored; the evaluator applies no separate scalar weight. The projection uses the same scale for coordinates, center, focal value, and projected coordinates, so the static body does not establish whether those values are pixels or normalized units. PointMatchResidual is a separate two-residual class with a different vtable; its evaluator at raw 0x12cbe8 (Ghidra 0x22cbe8) multiplies both reprojection deltas by a per-functor scalar at state +0x20. The scalar initializer and its units were not found.
 
-The binary identifies BundleAdjusterGlobalFocalLength and its residual templates, but a direct Photo Sphere builder-to-estimator construction chain is not recovered. No alternative app-specific bundle-adjuster implementation surfaced in the inspected RTTI inventory.
+AlignmentEstimator finalization at raw 0x11ec84 passes 0.125 to helper raw 0x316420, which scales fields in pairwise match records of kinds 5 and 9 after LineAlignerImpl creates them. This is not evidence that 0.125 initializes the PointMatchResidual scalar. The LineAlignerImpl field +0x2c is 25.0 in the traced producer path, but its semantic name and units remain unknown. No direct dataflow from the scaled pairwise records to the GlobalFocalLength residual state was established.
+
+The binary identifies BundleAdjusterGlobalFocalLength and its residual templates. The CaptureSessionBuilderImpl-to-SessionImpl chain constructs and attaches AlignmentEstimator, but a direct chain from that estimator into BundleAdjusterGlobalFocalLength remains unproven. No alternative app-specific bundle-adjuster implementation surfaced in the inspected RTTI inventory.
 
 ## Seam costs and blend-level input
 
 LaplacianCbCrDiffComputer’s pairwise cost is |Y1−Y2| + sqrt((Cb1−Cb2)^2 + (Cr1−Cr2)^2). ExposureUnaryCostComputer computes L = 0.2989R + 0.5871G + 0.114B and cost min(L, 255−L). The YUV mask path fills U and V with 128 where all four corresponding mask bytes are zero.
 
-MonolithicMultibandBlender stores blend_levels_ at object +0x0c and asserts it is greater than zero. Its constructor copies the value from a runtime configuration object at +48 bytes (+0x30); the numeric initialization of that input is unresolved. This blender field is distinct from OptimalSeamMaskGenerator’s +0x0c dilation distance. The seam helper expands crop bounds by that dilation distance; a separate +0.5 averages graph-cut line-segment endpoints before normalization. No final seam feather or weight-normalization formula was recovered.
+MonolithicMultibandBlender stores blend_levels_ at object +0x0c and asserts it is greater than zero. Caller raw 0x31cae4 passes an int read from input-object +0x30 to the blender constructor; the input object's role and numeric initialization remain unresolved. A nearby SessionRenderer adapter branch does not reach that caller, which has no direct call or relocation xref. This blender field is distinct from OptimalSeamMaskGenerator’s +0x0c dilation distance. The seam helper expands crop bounds by that dilation distance; a separate +0.5 averages graph-cut line-segment endpoints before normalization. GammaAdjuster at raw 0x39a77c builds a 256-byte lookup table from a double gamma field at object +8. Each entry is trunc(pow(i / 255.0, gamma) × 255.0), for i from 0 through 255. The transfer function and application are recovered: raw 0x39a3a0 applies the table in place to each byte of 3-byte pixels. The vector-clone helper raw 0x39a19c constructs GammaAdjuster objects by copying each source double to object +8. Its only direct caller is raw 0x31c618, which obtains the vector through an indirect method on x22 and clones it when a flag is set. The caller of 0x31c618, the producer behind x22, numeric gamma values, and Photo Sphere provenance remain unresolved. No final seam feather or weight-normalization formula was recovered.
 
 ## session.meta writer/parser mismatch
 
@@ -81,12 +91,14 @@ If the file contains only the nine rows emitted by this native writer, Java’s 
 
 ## Analysis runs and remaining gaps
 
-Focused Ghidra runs 37693894574 and 37694151104 completed successfully. The parallel reviews closed the native frame-consumer, graph adjacency, line-RANSAC, pyramid filter, seam-cost, and metadata-writer gaps.
+Focused Ghidra runs 37693894574 and 37694151104 completed successfully. The parallel reviews closed the native frame-consumer, graph adjacency, line-RANSAC, pyramid filter, seam-cost, and metadata-writer gaps. They also identified optical-flow field roles, the GammaAdjuster transfer function/application, and the distinction between pairwise match-data scaling and bundle-adjustment residual scalars. A further queue-to-AddImage edge is confirmed by vtable relocation and is conditional on a successful queued-file read. The new focused descriptor run for commit c5bc8e99081d984788068dd8c61614ed2e8a01d3 is in progress.
 
 Remaining targets:
 - exact oriented descriptor patch size and byte count;
-- the AlignmentEstimator construction/attachment behind the builder’s virtual AddImage dispatch;
-- numeric default for multiband blend levels and upstream exposure/gamma configuration;
+- runtime behavior and timing for queued-file failure paths;
+- numeric default for multiband blend levels and upstream exposure configuration;
+- optical-flow runtime threshold, sample cap, solver type, and iteration values;
+- numeric gamma values and Photo Sphere provenance for the raw 0x31c618 vector path, graph-cut weights, and final seam feathering/normalization;
 - any additional native metadata write path and the runtime contents of session.meta;
-- unresolved optical-flow thresholds, graph-cut weights, source-resolution corrections, and point/line scalar units;
+- point/line coordinate units and residual scalar initialization;
 - exact frame byte format on the target device; NV21 remains an inference from the conversion routine.
