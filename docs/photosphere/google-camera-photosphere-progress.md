@@ -480,9 +480,17 @@ The caller object's `+44` field from checkpoint 35 is part of the `LineAlignerIm
 
 The Ghidra call-reference listing shows one direct caller of the line-record utility at raw VA `0x316154`: the `LineAlignerImpl` method at raw VA `0x303cf8`. Its first float argument comes from instance offset `+44`, initialized to **25.0** in checkpoint 36. This rules out another direct caller supplying a different scalar to this helper in the analyzed binary. It does not rule out other code constructing or editing 36-byte records independently, so 25.0 remains scoped to this producer. The field's name, units, and semantic role remain unknown. See [checkpoint 37](../google-camera-photosphere-checkpoint-37-line-record-helper-callsite-audit.md).
 
+### Status
+
+The line-record producer and rescaling checks are continued in checkpoint 38 below. Remaining work includes the point-record audit and the other listed processing targets.
+
+## 2026-10-07 — checkpoint 38: line-record candidate audit
+
+A broad non-stack `+32)-store scan retained 99 functions that also contain a literal `#0x24` or `#36`. The audit confirmed `FUN_00416154) as the only likely line-record producer among the candidates: it consumes paired 16-byte line inputs, writes a 36-byte record, and copies the caller's **25.0** scalar unchanged to `+32). The only direct caller remains `LineAlignerImpl) at `FUN_00403cf8).
+
+The strongest same-layout false positives are 3×3 rosette/camera matrices; other candidates are larger ImagePair records, nested containers, or SIMD array outputs. No additional line-domain rescaler was found in the audited path. The scan is heuristic and does not prove that every possible indirect or computed-address write has been ruled out. The field name and units remain unknown. See [checkpoint 38](../google-camera-photosphere-checkpoint-38-line-record-candidate-audit.md).
+
 ### Next targets
 
-- Search for all stores to offset `+32` across 36-byte line-record paths, including direct appends and postprocessing.
-- Check for additional rescaling between line-record ingestion and residual construction, beyond the direct line-triple multiplication established in checkpoint 23.
 - Compare remaining point-record producers and consumers.
 - Continue reviewing feature, pyramid, and low-level processing helpers.
