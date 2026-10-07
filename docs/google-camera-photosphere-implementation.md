@@ -2075,3 +2075,8 @@ For the traced GlobalFocalLength options object, candidate `+336/+340` is identi
 ### 2026-10-07 — Ceres inner-iteration ordering and logging fields
 
 The candidate `+312/+320` pair is the null `inner_iteration_ordering` shared pointer. The validator's `+304` boolean gates a nonnegative check of `+328`, whose error names it `inner_iteration_tolerance`; pinned Ceres 2.2.0 places the ordering pointer between those two fields. The caller sets `use_inner_iterations=false`, leaves the ordering null, and writes tolerance `0.001`. Candidate `+372=1` and byte `+376=0`, immediately before the known dump vector at `+384`, map to `logging_type=PER_MINIMIZER_ITERATION` and `minimizer_progress_to_stdout=false`. See [checkpoint 30](google-camera-photosphere-checkpoint-30-ceres-inner-iteration-and-logging-fields.md).
+
+
+### 2026-10-07 — Ceres SPSE and Jacobi option group
+
+For the traced GlobalFocalLength call, candidate fields `+344..+368) map to `max_num_spse_iterations=5), `use_spse_initialization=false), `spse_tolerance=0.1), `eta=0.1), and `jacobi_scaling=true). Target diagnostics name the four SPSE/eta fields; the final boolean maps by Ceres 2.2.0 member order and its use in the internal linear-solver options. These are the pinned Ceres defaults. Together with the already mapped `+372) logging type and `+376) stdout flag, this resolves the compact option group for this caller. See [checkpoint 32](google-camera-photosphere-checkpoint-32-ceres-spse-and-jacobi-options.md).
