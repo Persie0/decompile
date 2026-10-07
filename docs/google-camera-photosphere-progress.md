@@ -343,7 +343,7 @@ mean < 50: 0.1 + 0.9 * mean / 50
 
 Each scaled value is truncated to an integer and passed to FAST-9. The first three thresholds are skipped when they exceed either twice the sampled mean or the sampled intensity range; the final 15 threshold is the fallback. FAST-9 core use is confirmed at `0x39f560`.
 
-The detector also reads object field `+0x14` as its non-max radius and calls the suppression helper only when the field is at least 2. The configured radius and feature cap remain unknown. Full trace: [checkpoint 17](google-camera-photosphere-checkpoint-17-fast-threshold-schedule.md).
+The detector also reads object field `+0x14` as its non-max radius and calls the suppression helper only when the field is at least 2. The configured non-max radius and requested feature-count target remain unknown. The detector method passes object field `+0x0c` as that target to the threshold driver. Full trace: [checkpoint 17](google-camera-photosphere-checkpoint-17-fast-threshold-schedule.md).
 
 ## 2026-10-07 — checkpoint 18: rotation RANSAC configuration
 
