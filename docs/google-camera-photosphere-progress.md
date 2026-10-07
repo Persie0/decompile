@@ -431,8 +431,13 @@ Candidate `+312/+320` is a null `inner_iteration_ordering` shared pointer. The o
 
 ### Current next targets
 
-- Identify the nested model scalar's source-level name and units, and map its accessor/setter types.
+- Trace the source meaning and units of point- and line-residual scales; compare other bundle-adjuster paths.
 - Trace the origin and source meaning/units of point- and line-residual scales; compare other bundle-adjuster paths.
 - Compare other bundle-adjuster option constructors and resolve remaining vendor-tail differences.
 - Trace other RANSAC paths and graph-component pruning.
 - Continue renderer work on blend-level count, seam costs, and exposure coefficients.
+
+
+## 2026-10-07 — checkpoint 31: camera-model field of view
+
+The post-solve scalar read through CameraModel vtable slot `+0x40` is the camera's horizontal field of view in degrees. Linear and fisheye models read the stored radian value and convert it by 180/π; equirectangular models return 360°. Construction and the LinearCamera degree setter convert public degree inputs to internal radians. The solve's earlier slot `+0x58` call updates focal X/Y from the optimized focal scalar but leaves the FOV field unchanged, so the [10°, 150°] gate validates the camera model's own FOV. See [checkpoint 31](google-camera-photosphere-checkpoint-31-camera-model-field-of-view.md).
