@@ -300,21 +300,11 @@ This is a small but important usability feature: target acquisition is not based
 
 ## 8. Live preview processing and automatic capture decision
 
-The core per-frame method is `p000.exp.m8012h(``.
+The core per-frame method is p000.exp.m8012h. For every available low-resolution preview frame, Java calls ProcessFrame(previewBytes, width, height, boolean), then reads native tracking and capture-state results such as TakeNewPhoto, MovingTooFast, TargetHit, and PhotoSkippedTooFast.
 
-For every available low-resolution preview frame:
+The Java Camera1 callback array reaches JNI unchanged with the selected preview width and height. JNI ProcessFrame at raw ELF VA 0x0eeef4 calls PreviewFrameProcessorImpl with a constant selector value of 1; the Java boolean is retained separately for later JNI-side state gating. Selector bit 0 enables a native conversion to a width × height × 3 image using the Y plane and interleaved VU chroma, and the original input is also wrapped as a one-channel, 8-bit view. Android's preview format enum is configured and used for buffer sizing, but it is not forwarded to the native frame processor. The conversion layout strongly suggests NV21 / limited-range BT.601, but the binary does not prove that format name.
 
-```text
-ProcessFrame(previewBytes, width, height, calibrationFlag)
-        |
-        +--> estimated frame geometry / pose
-        +--> internal tracking update
-
-TakeNewPhoto()
-MovingTooFast()
-TargetHit()
-PhotoSkippedTooFast()
-```
+UpdateFrameTexture retrieves the converted ring-buffer image and uploads it with GL_RGB and GL_UNSIGNED_BYTE, tying the conversion output to the displayed preview. See checkpoint 41 for the function addresses and remaining format caveat.
 
 ### Capture condition
 
@@ -435,13 +425,7 @@ The sensor rotation supplied by Java is therefore used as an alignment prior, no
 
 ### 11.2 Image pyramids — confirmed
 
-Native components include:
-
-- `ImagePyramid`
-- Gaussian blur pyramids
-- fixed-point pyramids.
-
-Alignment and blending are multi-scale.
+Native components include ImagePyramid, Gaussian blur pyramids, and fixed-point pyramids. The traced downsampler at raw ELF VA 0x3a4740 uses the separable five-tap binomial kernel [1, 4, 6, 4, 1], adds 8, then shifts right by 4. Output dimensions are ceil(input/2); the allocation includes one pixel of padding. Scalar and NEON paths are present, with adjusted edge weights (first-edge taps [11, 4, 1]). Alignment and blending are multi-scale. See checkpoint 41.
 
 ### 11.3 Point features — confirmed
 
@@ -466,6 +450,8 @@ The detector wrapper reads its non-max radius from object offset `+0x14` and cal
 
 This strongly indicates the visual registration pipeline uses FAST-style corner detection and oriented image-patch descriptors/matching rather than a modern neural feature matcher.
 
+The feature backend uses oriented patch records and a spatial grid. The observed grid helper sizes each axis as dimension/step + 3 and uses 24-byte cell records; the oriented-feature path asserts that collected records equal the valid-point count. The exact descriptor patch dimensions and emitted byte count remain unknown. See checkpoint 41.
+
 ### 11.4 Line features — confirmed
 
 The library contains:
@@ -480,6 +466,8 @@ The library contains:
 Diagnostic strings explicitly mention RANSAC removing line matches.
 
 This gives LightCycle additional geometric constraints in scenes with strong straight structures, useful for reducing panorama bending/drift.
+
+The line-alignment RANSAC at raw ELF VA 0x306fcc is called from 0x303954. Its configuration is a two-line sample, 2.5° inlier threshold, 550 minimum-loop gate, 5,000 hard cap, 150-inlier early stop, and up to 50 retries to obtain a distinct non-degenerate sample. The loop is adaptive: it can stop at 150 support, otherwise reaches the 550 boundary once support is at least two, and can continue to 5,000 when support remains below two. A separate sample-degeneracy check uses cos(5°). These are line-alignment settings and must not be conflated with the rotation RANSAC settings above. See checkpoint 41.
 
 ### 11.5 Optical flow — confirmed
 
@@ -507,6 +495,12 @@ The traced `compute_rotation.cc` RANSAC caller passes these controls to the rota
 | angular inlier threshold | `0.04363323 rad = 2.5°` |
 
 The estimator draws two distinct correspondence indices to form a rotation candidate and scores the ray pairs using the cosine-form angular gate. Its branch structure can stop when support reaches 150 before the 550-trial boundary; otherwise it stops at that boundary once at least two correspondences support a model. When support stays below two, the search can continue to 5000 trials. This configuration is established for this call path; it should not be generalized to line alignment or every RANSAC use in the library without a separate trace.
+
+### Alignment-estimator image graph — confirmed
+
+AlignmentEstimator::AddImage at raw ELF VA 0x11d570 (Ghidra VA 0x21d570) creates a 0x30-byte node inline, storing the image ID at +8, adjacency-vector fields at +0x10/+0x18/+0x20, and a visited byte at +0x28. The node is appended to image_graph_ at estimator +0x98. Accepted pair edges are added in both directions through helper raw 0x122dbc. A lazy component cache at estimator +0xb0..+0xb8 stores 0x18-byte records; ties for the largest component are accepted. The constructor and exact builder-to-estimator attachment remain unresolved, and no numeric minimum-component threshold was recovered. See checkpoint 41.
+
+
 
 ### 11.7 Bundle adjustment — confirmed
 
@@ -545,6 +539,8 @@ For the call path documented in [checkpoint 20](google-camera-photosphere-checkp
 | RollPitchSensorResidual | 2 | [4, 2, 1] |
 | SensorResidual | 1 | [4, 2, 1] |
 
+The LineMatchResidual evaluator projects both endpoint pairs in both directions and writes four signed line-equation values of the form c + a*y_projected - b*x_projected. It uses coefficients as stored and applies no separate scalar weight. Coordinates, center, focal value, and projected coordinates share the same scale in the traced body; whether that scale is pixels or normalized units is unknown. PointMatchResidual is a distinct two-residual class with a different vtable. See checkpoint 41.
+
 Input-record +0x2c maps to `max_num_iterations=50`, though its source field name is unknown. Input-record +0x30=1 selects between the one-scalar pitch prior and two-scalar pitch/roll prior using 10° sample-spread tests and a count threshold of 7; it does not disable sensor constraints. Input-record +0x34=1 allows Ceres `NO_CONVERGENCE` through the first post-solve status gate, while `FAILURE` remains rejected and downstream checks still run. The source field names are unknown. This behavior is scoped to the observed GlobalFocalLength path. Checkpoint 22 recovers caller-written solver settings for that path: DENSE_SCHUR with DOGLEG/SUBSPACE_DOGLEG, one solver thread, trust-region radii, tolerances, and `max_num_iterations=50` from input-record `+0x2c`. Checkpoint 23 recovers the residual equations and scale placement. Checkpoint 33 pins the match-record offsets and per-image point-scale aggregation. Checkpoint 34 traces one pair-grid point-scale producer and a point-only rescale; its virtual inputs and source-level units remain unresolved. Checkpoint 35 traces the line-record `+32` scalar through `line_aligner_utils.cc` to the `LineAlignerImpl` object at `+44`; checkpoint 36 traces that field's initializer to rodata and establishes `25.0` as the value copied into records on this path. The field's source-level name and units remain unknown. The option tail after +280 does not fully match the pinned upstream header; checkpoint 26 corrects the vector/string offsets and leaves the raw +432 value unresolved. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md), and [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
 
 
@@ -579,60 +575,25 @@ These are extra projection utilities and are not the primary Java capture path t
 
 ### Confirmed / strong inference
 
-Native rendering code contains:
-
-- `RosetteImageAdjuster`;
-- diagnostic text for **gamma exposure matching**;
-- projection masks;
-- `OptimalSeamMaskGenerator`;
-- `SeamFinderGraphcut`;
-- `ExposureUnaryCostComputer`;
-- `LaplacianCbCrDiffComputer`;
-- seam selection code.
+Native rendering code contains RosetteImageAdjuster, diagnostic text for gamma exposure matching, projection masks, OptimalSeamMaskGenerator, SeamFinderGraphcut, ExposureUnaryCostComputer, LaplacianCbCrDiffComputer, and seam selection code.
 
 This is strong evidence of the following render stage:
 
-```text
-project overlapping source images
-        |
-        v
-photometric/exposure adjustment
-        |
-        v
-compute overlap costs
-        |
-        +--> color/chroma edge difference
-        +--> exposure-related unary cost
-        |
-        v
-graph-cut seam optimization
-        |
-        v
-per-image blending masks
-```
+- project overlapping source images;
+- photometric/exposure adjustment;
+- compute overlap costs from color/chroma differences and exposure-related unary cost;
+- graph-cut seam optimization;
+- produce per-image blending masks.
 
-It does not simply average all overlapping pixels.
-
----
+The traced pairwise seam cost is |Y1−Y2| + sqrt((Cb1−Cb2)^2 + (Cr1−Cr2)^2). The exposure unary cost uses L = 0.2989R + 0.5871G + 0.114B and min(L, 255−L). In the YUV mask path, U and V are set to 128 where all four corresponding mask bytes are zero. The final seam feather/weight-normalization equation remains unresolved. See checkpoint 41.
 
 ## 14. Multiband blending
 
 ### Confirmed
 
-Native RTTI contains:
+Native RTTI contains MonolithicMultibandBlender, YUVMonolithicMultibandBlender, PreviewBlender, and fixed-point image pyramid classes. Assertions reference multiple blend levels and pyramid sizes, confirming multiband/pyramid blending after seam selection. The binary has a YUV path and a generic/RGB path.
 
-- `MonolithicMultibandBlender`
-- `YUVMonolithicMultibandBlender`
-- `PreviewBlender`
-- fixed-point image pyramid classes.
-
-Assertions reference multiple blend levels and pyramid sizes.
-
-Therefore final seams are softened with **multiband/pyramid blending** after seam selection.
-
-The binary has a YUV path and a generic/RGB path.
-
----
+MonolithicMultibandBlender stores blend_levels_ at object +0x0c, set by its constructor from the first argument. The traced caller reads that argument from an upstream runtime configuration object at +48 bytes (+0x30); its numeric initialization remains unknown. This blender field is distinct from OptimalSeamMaskGenerator +0x0c, which is a crop-bound dilation distance. The seam helper expands crop bounds by that distance; its +0.5 arithmetic averages graph-cut segment endpoints before normalization. No final seam feather or weight-normalization equation was recovered. See checkpoint 41.
 
 ## 15. Final rendering and JPEG output
 
@@ -702,26 +663,21 @@ After that, `p000.eym` schedules `LightCycleStitchTask` and the native renderer 
 
 ## 17. Session metadata
 
-The native renderer writes `session.meta`.
+The native writer path at raw ELF VA 0x319b74 opens session.meta in append mode and emits nine rows, each newline-terminated:
 
-Java later reads at least these fields:
+| Key | Record field |
+| --- | --- |
+| version | string at +0 |
+| filepath | string at +24 |
+| full_pano_width | int32 at +48 |
+| full_pano_height | int32 at +52 |
+| cropped_area_width | int32 at +56 |
+| cropped_area_height | int32 at +60 |
+| cropped_area_left | int32 at +68 |
+| cropped_area_top | int32 at +64 |
+| yaw_correction_deg | int32 at +72 |
 
-- `full_pano_width`
-- `full_pano_height`
-- `cropped_area_width`
-- `cropped_area_height`
-- `cropped_area_top`
-- `cropped_area_left`
-- `first_photo_time`
-- `last_photo_time`
-- `source_photos_count`
-- `pose_heading`
-- `yaw_correction_deg`
-- location altitude/latitude/longitude/provider/time when available.
-
-Native strings independently confirm the crop/full-panorama fields, source photo count and yaw correction keys.
-
----
+The adjacent native parser recognizes those fields plus source_photos_count at +76, but the writer does not emit source_photos_count. Java reads the panorama dimensions/crop fields plus first_photo_time, last_photo_time, source_photos_count, pose_heading, and yaw_correction_deg. The Java source sets the session.meta path but does not pre-seed or write the missing rows. If the file contains only the nine rows from the traced native writer, Java's null-guarded XMP writer omits FirstPhotoDate, LastPhotoDate, SourcePhotosCount, and PoseHeadingDegrees. No second native writer was found in the analyzed library; an additional dynamic-path writer or external append is not ruled out. See checkpoint 40 for the Java reader and checkpoint 41 for the native writer/parser.
 
 ## 18. EXIF and GPano XMP
 
@@ -909,19 +865,14 @@ For a first compatible implementation, the highest-value pieces to reproduce are
 
 The current static analysis has bounded several items but has not closed their runtime/configuration inputs:
 
-- target placement is a confirmed FOV-dependent full-ring formula with per-latitude counts; an exact integer total needs the active camera dimensions, focal length, orientation, and latitude sequence;
-- `ProcessFrame` receives a Java byte array, dimensions, and native input code `1`; its precise byte-array pixel format/layout is unknown. The returned preview texture is uploaded as RGB unsigned bytes;
-- the oriented-patch descriptor is byte-valued with one byte per sampled patch point, but Photo Sphere patch size and exact descriptor byte count remain unknown;
-- the observed FastCornerDetector constructor sets `+0x14` to `-1`, and the observed matcher uses three levels with back-projection factors `[1,2,4]`; other detector overrides/caps and pyramid pixel-generation/filter/downsample settings remain open;
-- optical-flow assignments and the call-site `16.0` normalization/selection factor are known; the runtime threshold/sample-cap defaults and configured solver/iteration fields are not. No separate row weight was visible in the inspected solver builder;
-- a second line-alignment RANSAC path is identified, but its threshold, sample size, and trial count are not in the available dump;
-- largest-connected-component membership is established, including acceptance of tied largest components. Exact adjacency insertion/layout remains unknown; no numeric minimum component threshold was seen;
-- 28-byte point-match and 36-byte line-match record scalar paths are traced, but their source-level names/units remain unknown. The only concrete BA class found is GlobalFocalLength; the meaning of its scalar blocks and cross-path settings need more source coverage;
-- renderer output budgets, limiter formula, and two color/exposure cost formulas are known. Selected blend levels, exposure coefficient, graph-cut weights, gamma coefficients, and remaining source-resolution corrections remain unknown;
-- native session access is through `SessionStorage`, and Java `LocalSessionStorage` is path-oriented. The actual session serialization format and Java scheduling/retry policy are not exposed in native artifacts;
-- native queue draining and failure exits are mapped, but no native retry count/backoff or minimum-image threshold was found in the inspected paths.
-
----
+- The exact Camera preview byte format is not forwarded to JNI. Native selector 1 enables a three-channel conversion whose Y/VU layout and fixed-point coefficients strongly suggest NV21/limited-range BT.601; the format name remains an inference. The converted ring-buffer image is uploaded as GL_RGB unsigned bytes.
+- The oriented descriptor patch dimensions and exact byte count remain unknown; the observed three-level matcher schedule, detector cap, and five-tap pyramid downsampler are documented above.
+- Optical-flow runtime thresholds/sample caps and configured solver/iteration fields remain unknown. No separate row weight was visible in the inspected solver builder.
+- AlignmentEstimator node construction and symmetric adjacency insertion are recovered, but its constructor and attachment from the capture builder remain unresolved; no numeric minimum-component threshold was seen.
+- Point/line record scalar source units remain unknown. The concrete app-specific bundle adjuster found is BundleAdjusterGlobalFocalLength; its direct construction chain from the Photo Sphere builder and any additional indirect path remain open.
+- Renderer output budgets and limiter formula are traced. The numeric blend-level input, exposure coefficient, graph-cut weights, gamma coefficients, seam feathering/weight normalization, and remaining source-resolution corrections remain unresolved.
+- The native session.meta writer emits nine rows while its parser recognizes an extra source_photos_count key and Java also expects timestamps and pose_heading. No Java preseed/write was found; an unobserved dynamic-path writer is not ruled out.
+- Native queue draining and failure exits are mapped, but no native retry count/backoff or minimum-image threshold was found in the inspected paths.
 
 ## 23. Evidence paths
 
@@ -976,12 +927,13 @@ Native inspection workflow:
 
 ## 24. Next reverse-engineering steps
 
-1. Recover the Photo Sphere `patch_size`/descriptor length, all FastCornerDetector constructor overrides and point caps, and the image-pyramid filter/downsample path.
-2. Obtain the Java source/decompiled archive in a readable form to identify the `ProcessFrame` input format, LocalSessionStorage file layout, and Java retry/scheduling behavior.
-3. Decompile the full line-alignment RANSAC body and the graph adjacency insertion routine to resolve their parameters/layout.
-4. Trace point/line residual scalar origins and units; inspect any additional bundle-adjuster paths beyond the concrete GlobalFocalLength class found in this export.
-5. Trace the selected renderer blend-level count, exposure alpha, graph-cut weights, gamma coefficients, and remaining source-resolution/output corrections.
-6. For exact target totals, evaluate the recovered ring equations using a concrete device camera model and its full latitude sequence.
+1. Recover the oriented descriptor patch dimensions and exact byte count, plus remaining detector overrides.
+2. Trace the capture builder's virtual AddImage implementation to locate AlignmentEstimator construction and attachment.
+3. Resolve blend-level configuration, exposure/gamma setup, graph-cut weights, and final seam feathering/normalization.
+4. Determine the exact preview byte format on a target device and verify whether it is NV21; the binary alone does not prove the format label.
+5. Trace optical-flow runtime thresholds and the source units/meaning of point and line residual scalars.
+6. Check for any additional dynamic-path session.meta writer and characterize runtime values written during capture.
+7. For exact target totals, evaluate the recovered ring equations using a concrete device camera model and its full latitude sequence.
 
 ---
 
@@ -1032,9 +984,9 @@ The still-capture camera parameters explicitly set JPEG quality to **100** befor
 
 ### Preview pixel format
 
-The Photo Sphere setup does not explicitly replace the camera preview format. It inherits the Camera1 parameter object's current preview format and sizes callback buffers from `ImageFormat.getBitsPerPixel(format``.
+The Photo Sphere setup does not explicitly replace the camera preview format. It inherits the Camera1 parameter object's current preview format and sizes callback buffers from ImageFormat.getBitsPerPixel(format).
 
-On normal Android Camera1 devices this is commonly NV21, but **NV21 is not hard-coded by the recovered Photo Sphere setup**, so a compatible implementation should not rely on that assumption without querying the active format.
+The native conversion path uses Y plus interleaved VU chroma and fixed-point coefficients strongly consistent with NV21 / limited-range BT.601. JNI does not receive the Android format enum, so NV21 remains a layout inference rather than a confirmed runtime format. A compatible implementation should query the active Camera1 format.
 
 ### Sensor sampling
 
@@ -2101,10 +2053,14 @@ The target generator is now characterized as a full-ring, camera-FOV-dependent l
 
 ## Java preview and session artifacts (checkpoint 40)
 
-The source ZIP was reconstructed from 26 base64 chunks in the repository and passed ZIP integrity checking. The byte stream reaching native preview processing is now bounded at the Java side: Camera1's `bnf.onPreviewFrame` forwards the callback array unchanged through `bey` to `exp.m8012h`, which calls `LightCycleNative.ProcessFrame(bytes, width, height, boolean)`. Preview width and height come from the selected Camera preview size. The active Camera preview format is configured from the camera settings and determines callback-buffer sizing, but the Java JNI signature does not pass a format, row stride, crop, or rotation, and the Java path performs no byte conversion. Native-side input handling remains outside this conclusion.
+The source ZIP was reconstructed from 26 base64 chunks in the repository and passed ZIP integrity checking. Camera1's callback array reaches native preview processing unchanged, with dimensions from the selected Camera preview size. The active Camera preview format is configured separately and determines callback-buffer sizing, but the Java JNI signature does not pass the format, stride, crop, or rotation, and Java performs no byte conversion. Checkpoint 41 traces the native side: JNI passes selector 1 to the processor, the conversion resembles NV21 but does not prove that enum, and the converted ring-buffer image feeds the GL_RGB texture upload.
 
-Each `orientations.txt` row contains nine entries from the sensor rotation matrix (indices `[0,1,2,4,5,6,8,9,10]`) plus their sum as a tenth float, followed by a newline; the still callback flushes each row. Undo rewrites the file to the remaining row count. `LocalSessionStorage` declares `Serializable`, but the source tree has no custom serialization method or observed object-stream use for this class.
+Each orientations.txt row contains nine selected sensor rotation-matrix entries plus their sum as a tenth float, followed by a newline; the still callback flushes each row. Undo rewrites the file to the remaining row count. LocalSessionStorage declares Serializable, but the source tree has no custom serialization method or observed object-stream use for this class.
 
-`session.meta` is read as comma-separated key/value lines by the final stitch task. Java recognizes the full/cropped panorama dimensions and offsets, first/last photo times, source-photo count, pose heading, and yaw correction, then uses those values for EXIF/GPano XMP. Java has no writer; native generation is likely because the file is consumed after native finalization, but its writer was not directly traced.
+Java reads session.meta after native rendering and recognizes panorama dimensions/crop, first/last photo times, source-photo count, pose heading, and yaw correction. Checkpoint 41 traces the native append writer: it emits nine rows, omitting source_photos_count, both timestamps, and pose_heading. No Java preseed/writer was found. If no other append path supplies them, Java's null guards omit the corresponding EXIF/GPano XMP tags.
 
-A feature-gated capture path can perform up to three autofocus trials when pitch changes by more than 8 degrees or a retry is forced. This coordinates autofocus before capture metadata is recorded; no timed/backoff or native-stitch retry loop is visible in the Java sources. See [checkpoint 40](google-camera-photosphere-checkpoint-40-java-preview-session-artifacts.md).
+A feature-gated capture path can perform up to three autofocus trials when pitch changes by more than 8 degrees or a retry is forced; this is not evidence of a stitch retry/backoff. See checkpoints 40 and 41.
+
+## Native input, graph, renderer, and metadata (checkpoint 41)
+
+The focused native runs completed successfully and resolved the ProcessFrame dispatch, the RGB texture consumer, symmetric image-graph adjacency, line-alignment RANSAC controls, the fixed-point five-tap pyramid downsampler, the LineMatchResidual equation, and seam-cost equations. Native session.meta writer and parser paths were also traced; their key sets differ from each other and from Java's reader. The exact estimator construction path, descriptor size, numeric blend-level input, and several render/flow constants remain open. See [checkpoint 41](google-camera-photosphere-checkpoint-41-native-input-graph-renderer-and-metadata.md).
