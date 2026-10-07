@@ -205,7 +205,7 @@ RTTI recovers these AutoDiffCostFunction dimensions:
 | RollPitchSensorResidual | 2 | [4, 2, 1] |
 | SensorResidual | 1 | [4, 2, 1] |
 
-Checkpoint 23 recovers the residual equations and scale placement for the traced GlobalFocalLength path; the scales' source meanings and units remain open. Checkpoint 24 shows that input-record +0x30 selects the sensor-prior form and +0x34 permits NO_CONVERGENCE through the first post-solve gate. Their source-level field names remain open. Checkpoint 26 corrects the post-+280 vector/string offsets, while the raw +432 value and remaining vendor-specific ABI differences stay unresolved. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md), and [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
+Checkpoint 23 recovers the residual equations and scale placement for the traced GlobalFocalLength path; the scales' source meanings and units remain open. Checkpoint 24 shows that input-record +0x30 selects the sensor-prior form and +0x34 permits NO_CONVERGENCE through the first post-solve gate. Their source-level field names remain open. Checkpoint 26 corrects the post-+280 vector/string offsets and confirms +432 = TEXTFILE; the +256 value and remaining vendor-specific ABI differences stay unresolved. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md), and [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
 
 
 Confirmed residual families:
@@ -310,7 +310,7 @@ These remain unresolved after the current static pass:
 - complete image-pyramid pixel-generation and filter/downsample settings; the traced matcher uses three levels and coordinate factors `[1, 2, 4]`;
 - RANSAC settings outside the traced `compute_rotation.cc` call path;
 - exact graph-edge memory layout and graph-component pruning threshold;
-- source meaning/units of per-observation Ceres residual scales; the raw vendor-specific Ceres option value at +432 and remaining tail differences; source names of input `+0x30` and `+0x34`; and configurations of other bundle-adjuster paths;
+- source meaning/units of per-observation Ceres residual scales; the raw Ceres option value at +256, the extra slot at +376..+383, and remaining tail differences; source names of input `+0x30` and `+0x34`; and configurations of other bundle-adjuster paths;
 - exact blend pyramid level count;
 - exact seam cost weights;
 - exact exposure/gamma adjustment coefficients;
@@ -368,7 +368,7 @@ The caller writes a concrete Ceres configuration for the traced `BundleAdjusterG
 - function, gradient, and parameter tolerances `1e-6`, `1e-10`, and `1e-8`;
 - `max_num_iterations = 50`, copied from bundle-adjuster input-record +0x2c.
 
-This is a static caller trace, not runtime output. The binary's option tail after +280 does not fully match the pinned upstream Ceres 2.2.0 header. Checkpoint 26 corrects the integer-vector and string boundaries; the raw +432 value and other vendor-specific differences remain unresolved. See [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), and [checkpoint 26](google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md). Checkpoint 23 recovers the residual equations and scale placement for this path; the scale fields' source meaning and units remain unknown.
+This is a static caller trace, not runtime output. The binary's option tail after +280 does not fully match the pinned upstream Ceres 2.2.0 header. Checkpoint 26 corrects the integer-vector and string boundaries, confirms +432 = TEXTFILE, and identifies the `0x3f800000` write at +256; the extra slot at +376..+383 remains unresolved. See [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), and [checkpoint 26](google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md). Checkpoint 23 recovers the residual equations and scale placement for this path; the scale fields' source meaning and units remain unknown.
 
 ## Checkpoint 23 update — GlobalFocalLength residuals
 
@@ -386,4 +386,4 @@ For the traced GlobalFocalLength path, the optimized focal parameter must be pos
 
 ## Checkpoint 26 update — Ceres option-tail copy layout
 
-The options-copy helper confirms the integer vector at candidate +384..+407 and the dump-directory string at +408..+431, correcting checkpoint 22. The +436 gradient-check flag is false; the doubles at +440/+448 are 0.1; the callback vector at +464..+487 is empty. The +432 raw value 0x3f800000 positionally matches the public dump-format field but is not a public Ceres 2.2.0 enum value. The actual traced caller leaves the vector empty, so the conditional dump path is skipped. The caller writes one zero byte at +376; its role is unknown. See [checkpoint 26](google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md).
+The options-copy helper confirms the integer vector at candidate +384..+407 and the dump-directory string at +408..+431, correcting checkpoint 22. The +436 gradient-check flag is false; the doubles at +440/+448 are 0.1; the callback vector at +464..+487 is empty. The caller stores 1 at +432, matching public Ceres 2.2.0 TEXTFILE by position; the integer vector is empty, so the conditional dump path is skipped. Register-order tracing locates the 0x3f800000 write at +256 and confirms writes of 1 at +368/+372. The caller writes one zero byte at +376; its role is unknown. See [checkpoint 26](google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md).
