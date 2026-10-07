@@ -49,6 +49,7 @@ Running / checkpoint documents:
 - `docs/google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md`
 - `docs/google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md`
 - `docs/google-camera-photosphere-checkpoint-29-ceres-linear-solver-iteration-limits.md`
+- `docs/google-camera-photosphere-checkpoint-30-ceres-inner-iteration-and-logging-fields.md`
 - this completion summary
 
 ## Recovered high-level architecture
@@ -313,7 +314,7 @@ These remain unresolved after the current static pass:
 - complete image-pyramid pixel-generation and filter/downsample settings; the traced matcher uses three levels and coordinate factors `[1, 2, 4]`;
 - RANSAC settings outside the traced `compute_rotation.cc` call path;
 - exact graph-edge memory layout and graph-component pruning threshold;
-- source meaning/units of per-observation Ceres residual scales; the byte-sized field at +376, pointer-backed field at +312, and remaining vendor-tail differences; source names of input `+0x30` and `+0x34`; and configurations of other bundle-adjuster paths;
+- source meaning/units of per-observation Ceres residual scales, remaining vendor-tail differences, source names of input `+0x30` and `+0x34`, and configurations of other bundle-adjuster paths;
 - exact blend pyramid level count;
 - exact seam cost weights;
 - exact exposure/gamma adjustment coefficients;
@@ -405,3 +406,8 @@ The candidate options prefix at +0..+12 is initialized to `[1, 2, 1, 0]`. Pinned
 ## Checkpoint 29 update — Ceres linear-solver iteration limits
 
 The candidate qword at `+336/+340` is `[0, 500]`. The target's own Ceres options validator labels these as `min_linear_solver_iterations` and `max_linear_solver_iterations`, rejects negative values, and enforces minimum <= maximum. The check sequence matches pinned Ceres 2.2.0 trust-region validation, whose header defaults are also 0 and 500. The Google build places these members at different offsets than the pinned public header; the mapping is supported by binary diagnostics and control flow. The pointer-backed field at +312/+320 and byte at +376 remain unresolved. See [checkpoint 29](google-camera-photosphere-checkpoint-29-ceres-linear-solver-iteration-limits.md).
+
+
+## Checkpoint 30 update — Ceres inner-iteration ordering and logging fields
+
+Candidate `+312/+320` is the null `inner_iteration_ordering` shared pointer; the validator connects it to `use_inner_iterations` at `+304` and `inner_iteration_tolerance` at `+328`. The caller disables inner iterations and sets the tolerance to `0.001`. Candidate `+372=1` and `+376=0` map to `logging_type=PER_MINIMIZER_ITERATION` and `minimizer_progress_to_stdout=false`, immediately before the known dump vector at `+384`. The field names follow the target's pointer-copy and validator behavior plus the matching Ceres 2.2.0 member sequence and defaults. See [checkpoint 30](google-camera-photosphere-checkpoint-30-ceres-inner-iteration-and-logging-fields.md).

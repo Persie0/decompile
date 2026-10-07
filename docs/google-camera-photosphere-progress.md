@@ -424,10 +424,15 @@ The caller initializes solver options `+0..+12` from rodata as `[1, 2, 1, 0]`. A
 The caller's qword at candidate options `+336/+340` is `[0, 500]`. The options validator labels these positions `min_linear_solver_iterations` and `max_linear_solver_iterations`, checks each is nonnegative, and enforces minimum <= maximum. That validation sequence matches pinned Ceres 2.2.0 `TrustRegionOptionsAreValid`; the values also match its public defaults. The Google build uses different member offsets, so the field names are grounded in its diagnostics and checks rather than upstream offsets. The pointer-backed pair at +312/+320 and byte at +376 remain unresolved. See [checkpoint 29](google-camera-photosphere-checkpoint-29-ceres-linear-solver-iteration-limits.md).
 
 
+## 2026-10-07 — checkpoint 30: Ceres inner-iteration ordering and logging fields
+
+Candidate `+312/+320` is a null `inner_iteration_ordering` shared pointer. The options validator ties the surrounding fields together: `+304` is the `use_inner_iterations` gate, and when true it checks `+328` as `inner_iteration_tolerance`; the copied 16-byte pair at `+312/+320` is the `ParameterBlockOrdering` pointer between them. The caller sets the gate false, pointer null, and tolerance to `0.001`. The byte at `+376` is `minimizer_progress_to_stdout=false`; neighboring int `+372=1` is `logging_type=PER_MINIMIZER_ITERATION`, immediately before the previously mapped dump vector at `+384`. See [checkpoint 30](google-camera-photosphere-checkpoint-30-ceres-inner-iteration-and-logging-fields.md).
+
+
 ### Current next targets
 
 - Identify the nested model scalar's source-level name and units, and map its accessor/setter types.
 - Trace the origin and source meaning/units of point- and line-residual scales; compare other bundle-adjuster paths.
-- Identify the byte-sized field at +376 and the pointer-backed field at +312; compare other bundle-adjuster constructors.
+- Compare other bundle-adjuster option constructors and resolve remaining vendor-tail differences.
 - Trace other RANSAC paths and graph-component pruning.
 - Continue renderer work on blend-level count, seam costs, and exposure coefficients.
