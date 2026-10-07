@@ -494,3 +494,17 @@ The strongest same-layout false positives are 3×3 rosette/camera matrices; othe
 
 - Compare remaining point-record producers and consumers.
 - Continue reviewing feature, pyramid, and low-level processing helpers.
+
+
+## 2026-10-07 — checkpoint 39: native backlog audit
+
+The parallel audit resolved the Photo Sphere full-ring target formula and the main evidence boundaries across features, optical flow, graph filtering, bundle adjustment, rendering, preview input, and session failure handling. Notable results: ring counts depend on camera FOV and latitude; flow rows use the recovered assignment-level equations and a caller-supplied `16.0` normalization; graph membership selects largest connected components; a separate line-alignment RANSAC exists but its tuning body is missing; `ProcessFrame` passes a byte array plus input code `1` while the GL preview output is RGB8; native session storage is path-oriented but its serialization and Java retry policy remain unknown. See [checkpoint 39](../google-camera-photosphere-checkpoint-39-native-backlog-audit.md).
+
+### Next targets
+
+- Resolve patch-size/descriptor byte count, detector override/cap paths, and actual pyramid pixel generation.
+- Recover Java source to identify preview input layout, LocalSessionStorage serialization, and Java retry policy.
+- Decompile line RANSAC parameters and graph adjacency insertion/layout.
+- Trace point/line residual scalar units and other bundle-adjuster paths.
+- Finish selected blend levels, seam/gamma coefficients, and remaining output corrections.
+- Evaluate exact target totals for a specified camera model.
