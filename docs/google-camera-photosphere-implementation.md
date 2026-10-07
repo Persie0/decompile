@@ -405,6 +405,8 @@ Alignment did not converge.
 
 This confirms alignment is a persistent per-session process rather than a single batch operation at the very end.
 
+The builder/session path is now traced through the successful per-image path: CaptureSessionBuilderImpl constructs and attaches AlignmentEstimator to SessionImpl; the builder's +0x18 AddImage method enqueues the record; SessionImpl worker raw 0x11b18c calls per-record processor raw 0x11be38; and that processor dispatches through estimator vtable slot +0x28 to AlignmentEstimator::AddImage raw 0x11d570, resolved by relocation at 0x3fdcc8. This final call is conditional on the queued file existing and reading successfully. The virtual edge is reconstructed from slot math and relocation; Ghidra's call graph does not resolve it.
+
 ---
 
 ## 11. Native alignment algorithm
@@ -450,7 +452,7 @@ The detector wrapper reads its non-max radius from object offset `+0x14` and cal
 
 This strongly indicates the visual registration pipeline uses FAST-style corner detection and oriented image-patch descriptors/matching rather than a modern neural feature matcher.
 
-The feature backend uses oriented patch records and a spatial grid. The observed grid helper sizes each axis as dimension/step + 3 and uses 24-byte cell records; the oriented-feature path asserts that collected records equal the valid-point count. The exact descriptor patch dimensions and emitted byte count remain unknown. See checkpoint 41.
+The feature backend first buckets 12-byte point records: raw 0x3a54b4 reads x/y floats at +4/+8, uses cell size 20 from orchestrator raw 0x3a5cb0, and builds each grid axis as dimension/cell + 3 with 24-byte cell records. Raw 0x3a5718 suppresses nearby points using squared distance and the record's +0 strength/score; the orchestrator varies its suppression-radius parameter from 3 through 20 before raw 0x3a5b34 compacts selected 12-byte records. Adjacent raw 0x39ed48 samples six neighboring grayscale bytes over five iterations to estimate orientation. These are candidate selection and orientation stages, not descriptor encoding. The OrientedPatchExtractor RTTI name is present, but its sampling layout, patch dimensions and emitted byte count remain unknown. See checkpoint 41.
 
 ### 11.4 Line features — confirmed
 
@@ -480,6 +482,8 @@ The library contains:
 
 Therefore visual alignment is not based on sparse feature matches alone.
 
+Flow constraint construction at raw ELF VA 0x0ff1c8 is called from the alignment tracker at raw 0x0f399c (Ghidra 0x1f399c). It filters candidates using |gradient1| + |gradient2| > tracker_threshold × 16.0. The tracker passes its runtime threshold at +0x50 and sample cap at +0x54; if accepted points exceed the cap, it keeps evenly spaced indices. The literal 16.0 is a scale factor, not the threshold value. GlobalFlowSolver at raw 0x0ffc30 reads solver type at +8 (0 for dense, 1 for an alternate iterative path), maximum iterations at +0x0c, and minimum iteration count at +0x10. Its early stop requires the current metric to fall below its configured threshold and the iteration index to exceed the minimum. The numeric threshold, cap, solver type, iteration limit, and minimum remain unresolved. A separate 0.03-radian rotation-update gate is not the gradient threshold. See checkpoint 41.
+
 ### 11.6 Spherical pairwise registration — confirmed
 
 `spherical_pairwise_match.cc` is present. This matters because Photo Sphere matching occurs on camera rays/rotations rather than treating every pair as a flat translational panorama.
@@ -498,7 +502,9 @@ The estimator draws two distinct correspondence indices to form a rotation candi
 
 ### Alignment-estimator image graph — confirmed
 
-AlignmentEstimator::AddImage at raw ELF VA 0x11d570 (Ghidra VA 0x21d570) creates a 0x30-byte node inline, storing the image ID at +8, adjacency-vector fields at +0x10/+0x18/+0x20, and a visited byte at +0x28. The node is appended to image_graph_ at estimator +0x98. Accepted pair edges are added in both directions through helper raw 0x122dbc. A lazy component cache at estimator +0xb0..+0xb8 stores 0x18-byte records; ties for the largest component are accepted. The constructor and exact builder-to-estimator attachment remain unresolved, and no numeric minimum-component threshold was recovered. See checkpoint 41.
+AlignmentEstimator::AddImage at raw ELF VA 0x11d570 (Ghidra VA 0x21d570) creates a 0x30-byte node inline, storing the image ID at +8, adjacency-vector fields at +0x10/+0x18/+0x20, and a visited byte at +0x28. The node is appended to image_graph_ at estimator +0x98. Accepted pair edges are added in both directions through helper raw 0x122dbc. A lazy component cache at estimator +0xb0..+0xb8 stores 0x18-byte records; ties for the largest component are accepted. No numeric minimum-component threshold was recovered.
+
+The capture-construction chain is now mapped. CaptureSessionBuilderImpl constructor/factory raw 0x10f310 allocates a 0x60-byte object and constructs AlignmentEstimator through raw 0x11ccf4 → 0x11c86c with (mode, nullptr); it passes the estimator into SessionImpl constructor/helper raw 0x11a204, which stores it at SessionImpl +0x48. JNI AddImage raw 0x0ef720 calls the builder's vtable +0x18 method at raw 0x10f6c8; that method queues the image record through the child SessionImpl vtable +0x10 at raw 0x11a75c. SessionImpl's separate +0x18 method raw 0x11b18c processes the queue and checks the attached estimator's ImageCount. The JNI +0x538 load is a JNIEnv string-conversion call, not the builder dispatch. See checkpoint 41.
 
 
 
@@ -539,7 +545,7 @@ For the call path documented in [checkpoint 20](google-camera-photosphere-checkp
 | RollPitchSensorResidual | 2 | [4, 2, 1] |
 | SensorResidual | 1 | [4, 2, 1] |
 
-The LineMatchResidual evaluator projects both endpoint pairs in both directions and writes four signed line-equation values of the form c + a*y_projected - b*x_projected. It uses coefficients as stored and applies no separate scalar weight. Coordinates, center, focal value, and projected coordinates share the same scale in the traced body; whether that scale is pixels or normalized units is unknown. PointMatchResidual is a distinct two-residual class with a different vtable. See checkpoint 41.
+The LineMatchResidual evaluator projects both endpoint pairs in both directions and writes four signed line-equation values of the form c + a*y_projected - b*x_projected. It uses coefficients as stored and applies no separate scalar weight. Coordinates, center, focal value, and projected coordinates share the same scale in the traced body; whether that scale is pixels or normalized units is unknown. PointMatchResidual is a distinct two-residual class with a different vtable; its evaluator multiplies both reprojection deltas by a per-functor scalar stored at functor-state +0x20. The scalar's initializer and units were not found. AlignmentEstimator finalization also passes 0.125 to a helper that scales fields in pairwise match records of kinds 5 and 9 after LineAligner generation; this is not evidence that 0.125 initializes the PointMatchResidual scalar. No direct record-to-GlobalFocalLength residual-construction chain was established. LineAlignerImpl's +0x2c value is 25.0 on the traced path, but its source-level meaning and units remain unknown. See checkpoint 41 and checkpoints 33–37.
 
 Input-record +0x2c maps to `max_num_iterations=50`, though its source field name is unknown. Input-record +0x30=1 selects between the one-scalar pitch prior and two-scalar pitch/roll prior using 10° sample-spread tests and a count threshold of 7; it does not disable sensor constraints. Input-record +0x34=1 allows Ceres `NO_CONVERGENCE` through the first post-solve status gate, while `FAILURE` remains rejected and downstream checks still run. The source field names are unknown. This behavior is scoped to the observed GlobalFocalLength path. Checkpoint 22 recovers caller-written solver settings for that path: DENSE_SCHUR with DOGLEG/SUBSPACE_DOGLEG, one solver thread, trust-region radii, tolerances, and `max_num_iterations=50` from input-record `+0x2c`. Checkpoint 23 recovers the residual equations and scale placement. Checkpoint 33 pins the match-record offsets and per-image point-scale aggregation. Checkpoint 34 traces one pair-grid point-scale producer and a point-only rescale; its virtual inputs and source-level units remain unresolved. Checkpoint 35 traces the line-record `+32` scalar through `line_aligner_utils.cc` to the `LineAlignerImpl` object at `+44`; checkpoint 36 traces that field's initializer to rodata and establishes `25.0` as the value copied into records on this path. The field's source-level name and units remain unknown. The option tail after +280 does not fully match the pinned upstream header; checkpoint 26 corrects the vector/string offsets and leaves the raw +432 value unresolved. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md), and [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
 
@@ -587,13 +593,15 @@ This is strong evidence of the following render stage:
 
 The traced pairwise seam cost is |Y1−Y2| + sqrt((Cb1−Cb2)^2 + (Cr1−Cr2)^2). The exposure unary cost uses L = 0.2989R + 0.5871G + 0.114B and min(L, 255−L). In the YUV mask path, U and V are set to 128 where all four corresponding mask bytes are zero. The final seam feather/weight-normalization equation remains unresolved. See checkpoint 41.
 
+GammaAdjuster at raw ELF VA 0x39a77c builds a 256-byte lookup table from its double gamma field at +8. For input index i, the transfer is trunc(pow(i / 255.0, gamma) × 255.0) for i=0..255. The transfer formula and application are recovered: raw 0x39a3a0 applies the table in place to each byte of every 3-byte pixel. The vector-clone helper raw 0x39a19c constructs GammaAdjuster objects with each source double at +8; its only direct caller is raw 0x31c618, which obtains a vector through an indirect method on x22 and clones it when a flag is set. The caller of 0x31c618, the producer behind x22, actual gamma values, and Photo Sphere provenance remain unresolved. See checkpoint 41.
+
 ## 14. Multiband blending
 
 ### Confirmed
 
 Native RTTI contains MonolithicMultibandBlender, YUVMonolithicMultibandBlender, PreviewBlender, and fixed-point image pyramid classes. Assertions reference multiple blend levels and pyramid sizes, confirming multiband/pyramid blending after seam selection. The binary has a YUV path and a generic/RGB path.
 
-MonolithicMultibandBlender stores blend_levels_ at object +0x0c, set by its constructor from the first argument. The traced caller reads that argument from an upstream runtime configuration object at +48 bytes (+0x30); its numeric initialization remains unknown. This blender field is distinct from OptimalSeamMaskGenerator +0x0c, which is a crop-bound dilation distance. The seam helper expands crop bounds by that distance; its +0.5 arithmetic averages graph-cut segment endpoints before normalization. No final seam feather or weight-normalization equation was recovered. See checkpoint 41.
+MonolithicMultibandBlender stores blend_levels_ at object +0x0c, set by its constructor from the first argument. Caller raw 0x31cae4 passes *(int *)(x20 + 0x30) to the blender constructor; the input object's role and initializer remain unresolved. A nearby SessionRenderer adapter branch was checked but does not reach this raw 0x31c618 caller, which has no direct call or relocation xref. This blender field is distinct from OptimalSeamMaskGenerator +0x0c, which is a crop-bound dilation distance. The seam helper expands crop bounds by that distance; its +0.5 arithmetic averages graph-cut segment endpoints before normalization. No final seam feather or weight-normalization equation was recovered. See checkpoint 41.
 
 ## 15. Final rendering and JPEG output
 
@@ -867,10 +875,10 @@ The current static analysis has bounded several items but has not closed their r
 
 - The exact Camera preview byte format is not forwarded to JNI. Native selector 1 enables a three-channel conversion whose Y/VU layout and fixed-point coefficients strongly suggest NV21/limited-range BT.601; the format name remains an inference. The converted ring-buffer image is uploaded as GL_RGB unsigned bytes.
 - The oriented descriptor patch dimensions and exact byte count remain unknown; the observed three-level matcher schedule, detector cap, and five-tap pyramid downsampler are documented above.
-- Optical-flow runtime thresholds/sample caps and configured solver/iteration fields remain unknown. No separate row weight was visible in the inspected solver builder.
-- AlignmentEstimator node construction and symmetric adjacency insertion are recovered, but its constructor and attachment from the capture builder remain unresolved; no numeric minimum-component threshold was seen.
-- Point/line record scalar source units remain unknown. The concrete app-specific bundle adjuster found is BundleAdjusterGlobalFocalLength; its direct construction chain from the Photo Sphere builder and any additional indirect path remain open.
-- Renderer output budgets and limiter formula are traced. The numeric blend-level input, exposure coefficient, graph-cut weights, gamma coefficients, seam feathering/weight normalization, and remaining source-resolution corrections remain unresolved.
+- Optical-flow threshold, sample-cap, solver-type, and iteration fields are identified by offset, but their runtime values remain unknown. The gradient gate is (|gradient1| + |gradient2|) > threshold × 16.0; a separate 0.03-radian rotation gate is not a gradient threshold.
+- AlignmentEstimator construction, attachment to SessionImpl, and the successful queue-drain call into AddImage are recovered; the final file-read-dependent virtual edge is reconstructed from its vtable slot and relocation. No numeric minimum-component threshold was seen.
+- PointMatchResidual multiplies dx/dy by its functor-state +0x20 scalar, but the initializer and units remain unknown. The 0.125 post-pairwise match-record scale is not tied to that residual scalar; line coefficients have no separate line-evaluator multiplier. Their coordinate units/normalization and the direct GlobalFocalLength construction chain remain open.
+- Renderer output budgets and limiter formula are traced. The numeric blend-level input, exposure coefficient, graph-cut weights, upstream gamma values and Photo Sphere provenance for the native GammaAdjuster vector path, seam feathering/weight normalization, and remaining source-resolution corrections remain unresolved.
 - The native session.meta writer emits nine rows while its parser recognizes an extra source_photos_count key and Java also expects timestamps and pose_heading. No Java preseed/write was found; an unobserved dynamic-path writer is not ruled out.
 - Native queue draining and failure exits are mapped, but no native retry count/backoff or minimum-image threshold was found in the inspected paths.
 
@@ -927,11 +935,11 @@ Native inspection workflow:
 
 ## 24. Next reverse-engineering steps
 
-1. Recover the oriented descriptor patch dimensions and exact byte count, plus remaining detector overrides.
-2. Trace the capture builder's virtual AddImage implementation to locate AlignmentEstimator construction and attachment.
-3. Resolve blend-level configuration, exposure/gamma setup, graph-cut weights, and final seam feathering/normalization.
+1. Recover the oriented descriptor sampling layout, dimensions and byte count, plus remaining detector overrides.
+2. Characterize queue-processing failure behavior and per-image alignment timing in a runtime capture.
+3. Resolve blend-level configuration, exposure setup, upstream gamma values and Photo Sphere provenance for the native GammaAdjuster vector path, graph-cut weights, and final seam feathering/normalization.
 4. Determine the exact preview byte format on a target device and verify whether it is NV21; the binary alone does not prove the format label.
-5. Trace optical-flow runtime thresholds and the source units/meaning of point and line residual scalars.
+5. Recover optical-flow runtime field values and trace the source units/meaning of point and line residual scalars.
 6. Check for any additional dynamic-path session.meta writer and characterize runtime values written during capture.
 7. For exact target totals, evaluate the recovered ring equations using a concrete device camera model and its full latitude sequence.
 
@@ -1776,7 +1784,7 @@ The recovered blender initialization explicitly asserts:
 blend_levels_ > 0
 ```
 
-and creates one internal pyramid structure per configured blend level. The exact default number of levels is still being traced through the renderer/blender constructor.
+and creates one internal pyramid structure per configured blend level. The constructor copies its first argument to blend_levels_; caller raw 0x31cae4 reads an int at input-object +0x30, but that input object's role and the value's initializer/default remain unknown. See checkpoint 41.
 
 #### Graph-cut color-cost constants
 
@@ -1792,7 +1800,7 @@ Its chroma-related penalty is centered at neutral value **128** and introduces a
 abs(chroma - 128) >= 78
 ```
 
-The exact class-to-function mapping between this function and `ExposureUnaryCostComputer` / `LaplacianCbCrDiffComputer` is still being resolved before assigning the final semantic name.
+Checkpoint 41 maps LaplacianCbCrDiffComputer and ExposureUnaryCostComputer to their recovered formulas in section 13. This thresholded chroma helper is retained as a separate, not-yet-mapped cost path; it should not be conflated with either confirmed formula.
 
 
 ### 2026-10-07 — Target-manager state machine and exact overlap parameters
@@ -2063,4 +2071,4 @@ A feature-gated capture path can perform up to three autofocus trials when pitch
 
 ## Native input, graph, renderer, and metadata (checkpoint 41)
 
-The focused native runs completed successfully and resolved the ProcessFrame dispatch, the RGB texture consumer, symmetric image-graph adjacency, line-alignment RANSAC controls, the fixed-point five-tap pyramid downsampler, the LineMatchResidual equation, and seam-cost equations. Native session.meta writer and parser paths were also traced; their key sets differ from each other and from Java's reader. The exact estimator construction path, descriptor size, numeric blend-level input, and several render/flow constants remain open. See [checkpoint 41](google-camera-photosphere-checkpoint-41-native-input-graph-renderer-and-metadata.md).
+The focused native runs completed successfully and resolved the ProcessFrame dispatch, the RGB texture consumer, CaptureSessionBuilderImpl-to-SessionImpl queueing and AlignmentEstimator attachment, symmetric image-graph adjacency, line-alignment RANSAC controls, the fixed-point five-tap pyramid downsampler, residual equations and separate data scales, optical-flow configuration field roles, GammaAdjuster LUT/application, seam-cost equations, and native session.meta writer/parser. Runtime flow values, the exact per-image estimator call, descriptor size, numeric blend-level input, gamma source, graph-cut weights and final seam normalization remain open. See [checkpoint 41](google-camera-photosphere-checkpoint-41-native-input-graph-renderer-and-metadata.md).
