@@ -1490,3 +1490,127 @@ Therefore the target hit angle varies linearly from:
 
 The resulting value is converted to radians and passed into `SetTargetHitAngleRadians()`.
 
+
+
+### 2026-10-07 — Capture-state and output-resolution pass
+
+This pass resolves the native capture flags and the second rejection check used by `ProcessFrame()`.
+
+#### Exact `ProcessFrame()` capture-state logic
+
+The JNI function at `0x001eeef4` performs this sequence after processing the low-resolution frame:
+
+```text
+frame_pose = tracker.ProcessFrame(preview, width, height)
+target_hit = session_builder.TargetHit(frame_pose)
+
+PhotoSkippedTooFast = false
+TakeNewPhoto = false
+
+if capture_enabled && target_hit:
+    orientation_status = session_builder.DeviceOrientationStatus(frame_pose)
+
+    if sensor_movement_too_fast || orientation_status != 0:
+        PhotoSkippedTooFast = true
+    else:
+        TakeNewPhoto = true
+```
+
+The exported state accessors are thin reads of these native/global flags. In particular, `TakeNewPhoto()` is not another expensive analysis pass.
+
+#### `MovingTooFast()` is Java sensor state, not a second visual estimator
+
+`SetSensorMovementTooFast(boolean)` supplies the exposure-dependent gyroscope threshold result from Java to the native capture state. `MovingTooFast()` reflects that state.
+
+This corrects the earlier broad description that `MovingTooFast()` might represent an independent native visual-motion estimate.
+
+#### Exact `DeviceOrientationStatus()` identity and purpose
+
+The JNI wrapper `LightCycleNative.DeviceOrientationStatus()`:
+
+1. asks the frame/tracker object for the current 3x3 camera pose;
+2. calls the same `CaptureSessionBuilderImpl` vtable method at offset `+0x78` that `ProcessFrame()` uses as its second rejection test.
+
+The Java caller `p000.exh.m8000a()` forwards the result into `p000.exp`. Java interprets:
+
+- `-1` as **rotate counter-clockwise** guidance;
+- `+1` as **rotate clockwise** guidance;
+- `0` as acceptable device orientation.
+
+The UI resources are explicitly `ic_pano_rotate_error_ccw`, `ic_pano_rotate_error_cw`, `rotate_ccw_description`, and `rotate_cw_description`.
+
+Recovered native classification:
+
+```text
+pitch_deg = asin(pose component) * 180/pi
+
+if abs(pitch_deg) > 40:
+    return 0
+
+roll_deg = normalized roll/orientation angle in [0, 360)
+(optionally shifted by +90 degrees based on session/camera orientation)
+
+if 20 < roll_deg < 90 or 200 < roll_deg < 270:
+    return -1      // ask user to rotate CCW
+
+if 90 < roll_deg < 160 or 270 < roll_deg < 340:
+    return +1      // ask user to rotate CW
+
+return 0
+```
+
+Thus a target hit can be suppressed for either excessive gyroscope movement **or** a device-roll orientation that LightCycle considers unsuitable. Java intentionally suppresses the ordinary "too fast" text while the rotate-device warning is active.
+
+#### Output-resolution presets recovered exactly
+
+The three JNI setters only assign an enum:
+
+- `SetOutputResolutionSmall()` -> preset **1**
+- `SetOutputResolutionMedium()` -> preset **2**
+- `SetOutputResolutionLarge()` -> preset **3**
+
+`photosphere_parameters.cc` maps those presets to pixel budgets:
+
+| Preset | Pixel budget |
+| --- | ---: |
+| Small | 8,000,000 |
+| Medium | 26,000,000 |
+| Large | 70,000,000 |
+
+Photo Sphere Java calls `SetOutputResolutionLarge()` before final processing, so its requested native output ceiling is **70 MP**.
+
+A second native cap is then applied:
+
+```text
+effective_pixel_budget =
+    min(preset_pixel_budget,
+        ((x - 30) / 6.5) * 1,000,000)
+```
+
+The identity/units of `x` are not yet proven in this pass, so the document does not label it speculatively.
+
+For one camera/session type, the native parameter builder also derives:
+
+```text
+linear_output_dimension = floor(sqrt(effective_pixel_budget))
+```
+
+while other session types use a non-square/equirectangular sizing path.
+
+#### Capture-session builder vtable mapped
+
+The `CaptureSessionBuilderImpl` virtual interface is now partially mapped from JNI call sites:
+
+| Vtable offset | Recovered role |
+| ---: | --- |
+| +0x10 | initialize targets |
+| +0x18 | add accepted image / pose |
+| +0x20 | align next image |
+| +0x48 | evaluate target hit |
+| +0x50 | target currently in range |
+| +0x58 | return target vector |
+| +0x70 | set target-hit angle |
+| +0x78 | device-orientation status |
+| +0xa0 | release/finalize session ownership |
+
+The still-unnamed methods at +0x28..+0x40, +0x60..+0x68 and +0x80..+0x98 are being resolved in the next focused decompilation pass.
