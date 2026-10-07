@@ -1,0 +1,270 @@
+# Pixel Camera Photo Sphere reverse engineering — checkpoint 14
+
+This checkpoint continues after `google-camera-photosphere-checkpoint-13-bundle-adjustment-boundary.md`.
+
+Focus: final render, output sizing, seam selection, multiband blending, JPEG writing, and GPano metadata boundaries in the Pixel Camera 8.8 LightCycle pipeline.
+
+## Scope
+
+Audited binary:
+
+- package: `com.google.android.GoogleCamera`
+- version: `8.8.225.510547499.09`
+- native library: `lib/arm64-v8a/liblightcycle.so`
+- native SHA-256: `878feb4ab3912bc0a4c399d9eb14b6c615926e132b324ad8ea02d4988fd428d1`
+
+This checkpoint consolidates the render-side findings already recovered from Java, JNI, native strings, Ghidra output, and prior progress logs.
+
+## Render entry path
+
+The Java completion path calls:
+
+```text
+SetOutputResolutionLarge()
+FinishCapture(...)
+CreateNewStitchingSession()
+RenderNextSession(sessionId)
+```
+
+Recovered JNI behavior:
+
+- `SetOutputResolutionSmall()` writes native enum `1`.
+- `SetOutputResolutionMedium()` writes native enum `2`.
+- `SetOutputResolutionLarge()` writes native enum `3`.
+- normal Photo Sphere completion chooses `Large`.
+- `CreateNewStitchingSession()` returns/increments a monotonic native session ID.
+- `RenderNextSession()` constructs a render request with fixed float values `0.2` and `0.95` before dispatching into the native render queue.
+
+The semantic names of `0.2` and `0.95` are not proven. Their values and location are confirmed.
+
+## Output-resolution budgets
+
+Recovered preset pixel budgets:
+
+| preset | enum | nominal pixel budget |
+| --- | ---: | ---: |
+| Small | 1 | `8,000,000` px |
+| Medium | 2 | `26,000,000` px |
+| Large | 3 | `70,000,000` px |
+
+Photo Sphere requests `Large`, but the effective output can be capped by the memory budget.
+
+## Memory-dependent render cap
+
+Recovered memory cap formula:
+
+```text
+budget_bytes = min(300, configured_lightcycle_MB) * 1,000,000
+budget_MB = budget_bytes / 1,000,000
+
+memory_pixel_cap = ((budget_MB - 30) / 6.5) * 1,000,000
+render_pixel_budget = min(resolution_preset_pixels, memory_pixel_cap)
+```
+
+At the normal 300 MB internal cap:
+
+```text
+memory_pixel_cap ≈ 41.538 million pixels
+```
+
+Therefore `Large = 70 MP` is a request, not necessarily the actual output content size on the normal capped path.
+
+## Reference equirectangular geometry
+
+The render geometry is first evaluated in a reference equirectangular projection:
+
+```text
+reference_full_width = 2400 px
+```
+
+Then:
+
+```text
+reference_crop_pixels = crop_width_2400 * crop_height_2400
+scale = sqrt(render_pixel_budget / reference_crop_pixels)
+full_width = round_to_even(2400 * scale)
+full_height = projection_aspect_height * full_width
+scaled_crop_bounds = reference_crop_bounds * (full_width / 2400)
+```
+
+Additional corrections round dimensions for the blender and wrap seam. In particular, the mosaic width may be rounded down to a multiple of the blender blend distance to avoid a visible seam at the equirectangular left/right wrap boundary.
+
+Important consequence:
+
+- the GPano `FullPanoWidthPixels` / `FullPanoHeightPixels` can describe the virtual full sphere;
+- the actual JPEG can represent a cropped/rendered region inside that virtual sphere;
+- partial spheres can therefore have virtual dimensions larger than the actual image dimensions.
+
+## Confirmed render components
+
+Native render-side components recovered from symbols/strings/RTTI:
+
+- `SessionRenderer`
+- `SessionRendererQueue`
+- `IncrementalStitcher`
+- `Stitcher`
+- `FastPixelMapper`
+- `RosetteImageAdjuster`
+- `OptimalSeamMaskGenerator`
+- `SeamFinderGraphcut`
+- `ExposureUnaryCostComputer`
+- `LaplacianCbCrDiffComputer`
+- `MonolithicMultibandBlender`
+- `YUVMonolithicMultibandBlender`
+- `PreviewBlender`
+
+The render path is therefore not a simple average/overlay. It projects aligned cameras, chooses seams, and blends with pyramids.
+
+## Seam graph-cut cost details
+
+Recovered luminance conversion:
+
+```text
+Y = 0.2989 R + 0.5871 G + 0.114 B
+```
+
+Recovered unary/exposure cost detail:
+
+```text
+mid_luma = 128
+threshold/dead region = 78
+```
+
+The seam cost uses image-difference terms and an exposure/unary penalty so seams avoid visually bad areas, not just large RGB differences.
+
+The graph-cut implementation is backed by Google's IBFS max-flow code:
+
+```text
+research/bigml/mrf/maxflow/ibfs.cc
+```
+
+## Blending
+
+Recovered blender families:
+
+- multiband / pyramid blending;
+- YUV-specific multiband path;
+- preview blending path;
+- fixed-point image pyramid helpers.
+
+Interpretation:
+
+```text
+project aligned source images
+  -> adjust photometric differences
+  -> compute overlap/seam masks
+  -> graph-cut seam selection
+  -> build image/mask pyramids
+  -> multiband blend across seams
+  -> encode JPEG
+```
+
+The final renderer prefers a direct YUV path where possible:
+
+```text
+Failed WriteYUV420ToJPEG, will try create and write full RGB mosaic.
+```
+
+This confirms a memory-aware YUV-to-JPEG path before fallback to a larger RGB mosaic.
+
+## Session metadata and GPano
+
+Native writes `session.meta` with at least:
+
+- `full_pano_width`
+- `full_pano_height`
+- `cropped_area_width`
+- `cropped_area_height`
+- `cropped_area_top`
+- `cropped_area_left`
+- `first_photo_time`
+- `last_photo_time`
+- `source_photos_count`
+- `pose_heading`
+- `yaw_correction_deg`
+
+Java then writes EXIF + GPano XMP.
+
+Confirmed GPano fields include:
+
+- `UsePanoramaViewer`
+- `IsPhotosphere`
+- `ProjectionType` / equirectangular output path
+- `CroppedAreaImageWidthPixels`
+- `CroppedAreaImageHeightPixels`
+- `FullPanoWidthPixels`
+- `FullPanoHeightPixels`
+- `CroppedAreaTopPixels`
+- `CroppedAreaLeftPixels`
+- `FirstPhotoDate`
+- `LastPhotoDate`
+- `SourcePhotosCount`
+- `PoseHeadingDegrees`
+- largest valid interior rectangle fields
+
+For Photo Sphere mode:
+
+```text
+IsPhotosphere = true
+UsePanoramaViewer = true when horizontal coverage >= 70°
+```
+
+`PoseHeadingDegrees` is derived from native:
+
+```text
+pose_heading + yaw_correction_deg
+```
+
+normalized into the 0..359° range.
+
+## Clean-room render architecture
+
+A compatible independent renderer should use:
+
+```text
+aligned source rosette
+  -> equirectangular projection target
+  -> memory-aware output sizing
+  -> per-source projection masks
+  -> exposure / photometric adjustment
+  -> graph-cut seam selection
+  -> multiband blend
+  -> JPEG encode
+  -> GPano XMP metadata
+```
+
+Minimum practical implementation:
+
+1. compute virtual full equirectangular dimensions;
+2. compute crop bounds from valid projected pixels;
+3. project all aligned source images into the output coordinate space;
+4. compute overlap costs;
+5. choose seams;
+6. blend seams with a Laplacian pyramid;
+7. write GPano metadata.
+
+## Current confidence
+
+| item | state |
+| --- | --- |
+| output enum values | confirmed |
+| nominal pixel budgets | confirmed |
+| memory cap formula | confirmed |
+| 2400 px reference projection width | confirmed |
+| graph-cut seam family | confirmed |
+| luminance weights | confirmed |
+| unary threshold 78 | confirmed |
+| multiband blending family | confirmed |
+| exact blend pyramid levels | unresolved |
+| exact exposure model coefficients beyond recovered luma/unary terms | unresolved |
+| exact seam weights | unresolved |
+| exact YUV/RGB fallback thresholds | unresolved |
+
+## Remaining exact targets
+
+- number of pyramid levels for each output size;
+- blend-distance formula;
+- seam graph unary/pairwise weights;
+- exposure/gamma adjustment coefficients;
+- YUV path memory thresholds;
+- exact valid-crop and largest-interior-rectangle implementation.
