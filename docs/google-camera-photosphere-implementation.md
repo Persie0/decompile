@@ -1378,3 +1378,115 @@ Remaining work in the current pass:
 - name the session-builder vtable methods behind `ProcessFrame()`;
 - recover the exact criteria that set `TakeNewPhoto`, `TargetHit`, `MovingTooFast`, and `PhotoSkippedTooFast`;
 - map incremental-alignment option values and final-render blend/seam settings.
+
+
+### 2026-10-07 — `ProcessFrame` capture gate recovered
+
+The JNI state behind the four capture-status methods is now mapped exactly:
+
+| JNI getter | Native state byte |
+| --- | --- |
+| `TargetHit()` | `0x4170d8` |
+| `TakeNewPhoto()` | `0x4170d9` |
+| `MovingTooFast()` | `0x4170da` |
+| `PhotoSkippedTooFast()` | `0x4170db` |
+
+`SetSensorMovementTooFast(boolean)` directly writes `MovingTooFast`.
+
+The fourth argument passed by Java into `ProcessFrame(..., boolean allowCapture)` is:
+
+```text
+allowCapture =
+    gyroCalibrationCompleted &&
+    captureIsActive
+```
+
+The native logic is therefore:
+
+```text
+photoSkippedTooFast = false
+
+targetHit = targetManager.evaluateTarget(frameGeometry)
+TargetHit = targetHit
+
+takeNewPhoto = false
+
+if allowCapture && targetHit:
+    if MovingTooFast || targetManager.additionalMotionReject(frameGeometry):
+        PhotoSkippedTooFast = true
+    else:
+        TakeNewPhoto = true
+```
+
+So a target hit alone does not trigger a JPEG. Capture requires:
+
+1. valid processed frame geometry;
+2. target hit;
+3. completed gyro calibration;
+4. active capture state;
+5. sensor angular-speed gate passing;
+6. an additional native frame/geometry motion check passing.
+
+#### Exact sensor movement threshold
+
+Android gyroscope values are bias-corrected and Java computes:
+
+```text
+gyroSpeedSquared = wx² + wy² + wz²
+```
+
+in `rad²/s²`.
+
+The threshold is adapted using the exposure time of the previously written source JPEG:
+
+```text
+default / exposure unknown:
+    threshold² = 0.16000001
+    speed limit ≈ 0.4 rad/s ≈ 22.9°/s
+
+exposure > 25 ms:
+    threshold² = 0.0025000002
+    speed limit ≈ 0.05 rad/s ≈ 2.86°/s
+
+exposure < 10 ms:
+    normal devices:
+        threshold² = 1.0
+        speed limit = 1 rad/s ≈ 57.3°/s
+
+    Nexus 5 compatibility path:
+        threshold² = 0.010000001
+        speed limit ≈ 0.1 rad/s ≈ 5.73°/s
+
+10 ms <= exposure <= 25 ms:
+    threshold² = 0.16000001
+    speed limit ≈ 22.9°/s
+```
+
+This is a significant recovered detail: Google tightens allowable phone motion drastically for long exposures and relaxes it for very short exposures.
+
+#### Exact dynamic target-hit angle
+
+Java computes angular speed:
+
+```text
+omega = sqrt(wx² + wy² + wz²)
+```
+
+then:
+
+```text
+omegaClamped = clamp(omega, 10°/s, 40°/s)
+
+extraAngleDeg =
+    ((omegaClamped - 10°/s) / 30°/s) * 0.75°
+
+targetHitAngleDeg = 2.75° + extraAngleDeg
+```
+
+Therefore the target hit angle varies linearly from:
+
+- **2.75° at <=10°/s**
+- to **3.50° at >=40°/s**.
+
+The resulting value is converted to radians and passed into `SetTargetHitAngleRadians()`.
+
