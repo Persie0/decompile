@@ -74,7 +74,7 @@ The roll residual is set to zero when `abs(target_pitch) > 1.4137166941` radians
 
 The selected `HuberLoss(35)` applies to point- and line-match residual blocks. The two sensor-prior blocks use `TrivialLoss`. These equations and scales are static findings for this one GlobalFocalLength path; runtime execution was unavailable.
 
-The trace recovers how the stored match scales enter the residuals, but not the source-level meaning or units assigned to each scale. It also does not resolve the semantic name of bundle-adjuster input `+0x30`, the Ceres option-tail ABI after `+280`, or whether other bundle-adjuster paths use the same residuals.
+The trace recovers how the stored match scales enter the residuals, but not the source-level meaning or units assigned to each scale. Checkpoint 24 resolves the observed behavior of input-record `+0x30` and `+0x34`, though their source-level names remain unknown. The Ceres option-tail ABI after `+280` and whether other bundle-adjuster paths use the same residuals also remain open.
 
 ## Evidence
 
