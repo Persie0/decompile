@@ -24,7 +24,7 @@ The call path initializes its options record at stack address sp+8. The first wo
 
 The factory at 0x129e80 maps selector 1 to Ceres HuberLoss with delta 35. Therefore, both observed loss-construction sites in this BundleAdjusterGlobalFocalLength call path select HuberLoss(35).
 
-The same local record contains 50 at offset +0x2c and 1 at +0x30. Checkpoint 22 identifies +0x2c as the 50-iteration limit; +0x30 activates a residual-construction guard whose field name remains unresolved.
+The same local record contains 50 at +0x2c and 1 at +0x30. Checkpoint 22 identifies +0x2c as the 50-iteration limit; checkpoint 24 shows that +0x30 selects the one-scalar pitch prior or the two-scalar pitch/roll prior based on sample-spread tests and a count threshold. The source field name remains unresolved.
 
 ## Residual functor signatures from RTTI
 
@@ -41,7 +41,7 @@ Checkpoint 23 recovers the direct residual equations and scale placement for the
 
 ## Boundaries and next work
 
-This is one traced BundleAdjusterGlobalFocalLength call path. The evidence does not show that other BundleAdjuster implementations or callers use selector 1. Checkpoint 23 recovers this path's residual equations and scale placement; the scales' source meanings and units remain open. Input-record +0x2c is the 50-iteration limit; +0x30=1 enables a residual-construction guard whose field name remains open. [Checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md) recovers caller-written settings, including DENSE_SCHUR with DOGLEG/SUBSPACE_DOGLEG, but the option tail after +280 remains ABI-unresolved. [Checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md) records the handoff and offset caveat. Runtime testing was unavailable because no Android runtime or device is present in this environment.
+This is one traced BundleAdjusterGlobalFocalLength call path. The evidence does not show that other BundleAdjuster implementations or callers use selector 1. Checkpoint 23 recovers this path's residual equations and scale placement; the scales' source meanings and units remain open. Input-record +0x2c is the 50-iteration limit; +0x30=1 selects the sensor-prior form, and +0x34=1 permits NO_CONVERGENCE through the first post-solve status gate. Their source field names remain open; see [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md). [Checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md) recovers caller-written settings, including DENSE_SCHUR with DOGLEG/SUBSPACE_DOGLEG, but the option tail after +280 remains ABI-unresolved. [Checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md) records the handoff and offset caveat. Runtime testing was unavailable because no Android runtime or device is present in this environment.
 
 ## Evidence
 
