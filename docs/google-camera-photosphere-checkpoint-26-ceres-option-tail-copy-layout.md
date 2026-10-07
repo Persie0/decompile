@@ -16,6 +16,8 @@ Offsets below are relative to the candidate options base, not the function's sta
 | Offset | Observed bytes or operation | Interpretation |
 | ---: | --- | --- |
 | +256 | Float32 `1.0` (`0x3f800000`) | Internal load-factor word of the subset-preconditioner hash container rooted at +224; see evidence below |
+| +368 | Caller writes low byte 1 | Positional match for `LoggingType::PER_MINIMIZER_ITERATION` |
+| +372 | Caller writes 32-bit value 1 | `minimizer_progress_to_stdout = true` by public field position |
 | +376 | Caller writes zero; copy helper copies this byte with `ldrb`/`strb` | Extra byte-sized boolean-like field; name and semantics are unknown |
 | +384, +392, +400 | Three zero pointer-sized words | Empty vector header |
 | +384..+407 | Copy helper reads vector header; element stride is 4 bytes | Positional match for `std::vector<int> trust_region_minimizer_iterations_to_dump` |
@@ -37,6 +39,8 @@ The public Ceres 2.2.0 declaration sequence helps identify these members. With t
 | `sparse_linear_algebra_library_type` | +268 | +268 |
 | `linear_solver_ordering_type` | +272 | +272 |
 | `linear_solver_ordering` | +280 | +280..+295 |
+| `logging_type` | +368 | +368 |
+| `minimizer_progress_to_stdout` | +372 | +372 |
 | `trust_region_minimizer_iterations_to_dump` | +376 | +384 |
 | `trust_region_problem_dump_directory` | +400 | +408 |
 | `trust_region_problem_dump_format_type` | +424 | +432 |
@@ -56,7 +60,7 @@ The copy helper preserves the +432 value. A later path at `0x150cb8` checks whet
 
 ## Correction to checkpoint 22
 
-Checkpoint 22 previously placed the integer vector at `+376..+399` and the short string at `+400..+413`. The copy-helper trace corrects those entries: one zero byte is written at +376, the empty vector occupies +384..+407, and the string object begins at +408. The caller stores 1 at +368, +372, and +432. The `0x3f800000` value at +256 is float32 `1.0` for the hash container's load-factor word. The +432 value is the public `TEXTFILE` enum value.
+Checkpoint 22 previously placed the integer vector at `+376..+399` and the short string at `+400..+413`. The copy-helper trace corrects those entries: one zero byte is written at +376, the empty vector occupies +384..+407, and the string object begins at +408. The caller stores 1 at +368, +372, and +432. By public declaration order and enum values, +368 is `PER_MINIMIZER_ITERATION`, +372 enables progress-to-stdout, and +432 selects `TEXTFILE`. The `0x3f800000` value at +256 is float32 `1.0` for the hash container's load-factor word. The +432 value is the public `TEXTFILE` enum value.
 
 ## Evidence
 
