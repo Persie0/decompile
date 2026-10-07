@@ -462,7 +462,7 @@ The FAST-9 detector uses four base integer thresholds from rodata VA `0x625a0`:
 
 Before detection, it samples grayscale values on a grid with stride approximately `sqrt(width * height / 100)`. If the sampled mean is at least 50, the thresholds are unchanged. Below 50, the multiplier is `0.1 + 0.9 * mean / 50`; each threshold product is truncated to an integer. The first three candidates are skipped if their scaled threshold exceeds either `2 * mean` or the sampled intensity range. The fourth threshold is always the final fallback. The FAST-9 core receives the selected threshold at `0x39f560`.
 
-The detector reads its non-max radius from object offset `+0x14`; the suppression helper is called only when that field is at least 2. The detector's separate integer at object offset `+0x0c` is passed as a requested feature-count target to the threshold driver. Its configured value, the non-max radius, and the full scale-level configuration remain unresolved.
+The detector wrapper reads its non-max radius from object offset `+0x14` and calls suppression only when the field is at least 2. In the traced matcher setup, the detector constructor initializes this field to `-1` and the setup does not override it, so this construction skips radius-based suppression unless a later writer intervenes. The same setup sets the detector point cap to 3000; its three-level schedule is `[3000, 751, 189]`. See [checkpoint 19](google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md).
 
 This strongly indicates the visual registration pipeline uses FAST-style corner detection and oriented image-patch descriptors/matching rather than a modern neural feature matcher.
 
@@ -894,8 +894,8 @@ The current static analysis does not yet recover:
 - exact Photo Sphere target count and angular spacing for every field of view;
 - exact preview pixel format passed to `ProcessFrame`;
 - exact oriented-patch descriptor dimensions;
-- configured FAST non-max radius, requested feature-count value, and all scale-level settings;
-- the `PatchPairwiseMatcher +0x130` maximum descriptor-distance default;
+- whether detector construction paths beyond the traced matcher setup override the `-1` non-max-radius sentinel or use a different point cap;
+- complete image-pyramid pixel-generation and filter/downsample settings; the traced matcher consumes three levels and back-projects coordinates with factors `[1, 2, 4]`;
 - optical-flow weights;
 - additional RANSAC settings outside the traced `compute_rotation.cc` call path;
 - exact graph-edge memory layout and graph-component pruning threshold;
@@ -2024,3 +2024,7 @@ The four base FAST-9 thresholds are `[90, 55, 20, 15]`. The detector scales them
 ### 2026-10-07 — Rotation-estimation RANSAC values recovered
 
 The traced `compute_rotation.cc` call uses a 2.5° angular inlier threshold, two-sample hypotheses, support threshold 2, an early support cutoff of 150, and 550/5000 trial controls. This is scoped to that call path. See [checkpoint 18](google-camera-photosphere-checkpoint-18-rotation-ransac.md).
+
+### 2026-10-07 — PatchPairwiseMatcher limits and pyramid configuration
+
+The traced matcher construction paths set `+0x128 = 30`, `+0x12c = 3000`, and `+0x130 = 375.0`; `+0x134` remains 3. The matcher processes three levels, with detector point limits `[3000, 751, 189]` and a 30-entry match-index list cap per level. It squares the 375.0 field to obtain a 140625 maximum squared patch distance, then applies the 0.64000005 best/second-best squared-distance ratio gate. The detector constructor initializes `+0x14` to `-1`; its wrapper runs radius suppression only for values at least 2. These values are scoped to the observed matcher paths. See [checkpoint 19](google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md).
