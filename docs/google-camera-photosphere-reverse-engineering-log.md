@@ -990,22 +990,29 @@ The 1600-pixel value is explicitly passed into native session construction and m
 
 ### Caller-written solver choices — high confidence for the traced path
 
-The caller writes enum values for `DENSE_SCHUR`, `DOGLEG`, `SUBSPACE_DOGLEG`, `JACOBI`, `EIGEN`, `SUITE_SPARSE`, and `AMD`. It also writes one thread; radii `1e4`, `1e16`, `1e-8`; tolerances `1e-6`, `1e-10`, `1e-8`; and other prefix settings listed in checkpoint 22. The input record carries 50 at +0x2c, which becomes Ceres max_num_iterations; +0x30=1 enables the residual guard described below.
+The caller writes enum values for `DENSE_SCHUR`, `DOGLEG`, `SUBSPACE_DOGLEG`, `JACOBI`, `EIGEN`, `SUITE_SPARSE`, and `AMD`. It also writes one thread; radii `1e4`, `1e16`, `1e-8`; tolerances `1e-6`, `1e-10`, `1e-8`; and other prefix settings listed in checkpoint 22. The input record carries 50 at +0x2c, which becomes Ceres max_num_iterations. Checkpoint 24 resolves +0x30=1 as a sensor-prior model selector and +0x34=1 as the first post-solve NO_CONVERGENCE acceptance flag; their source names remain unknown.
 
 The callee reads the byte at +436 as a gradient-check switch and skips the gradient-check path when it is zero. The caller writes +436 as zero. Its double pair at +440/+448 is `0.1, 0.1`, but that pair is not used on this call because the switch is false.
 
 ### ABI caveat and remaining work
 
-The observed reads and caller writes agree with the public Ceres 2.2.0 layout through the solver-library fields. The tail after +280 diverges: +304 is read as a byte flag, +312 is treated as a pointer-backed ordering source, and +436/+440 follow a different tail offset than the upstream header. Keep those fields raw until the exact Google build layout is recovered. Input-record `+0x2c` is confirmed as the 50-iteration limit; the semantic name of `+0x30` remains open. Checkpoint 23 recovers residual equations and scale placement for this path.
+The observed reads and caller writes agree with the public Ceres 2.2.0 layout through the solver-library fields. The tail after +280 diverges: +304 is read as a byte flag, +312 is treated as a pointer-backed ordering source, and +436/+440 follow a different tail offset than the upstream header. Keep those fields raw until the exact Google build layout is recovered. Input-record `+0x2c` is confirmed as the 50-iteration limit. Checkpoint 23 recovers residual equations and scale placement, while checkpoint 24 resolves the behavior of input `+0x30` and `+0x34`; their source names remain open.
 
 Full trace: [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md) and [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md).
 
-### Bundle-adjuster input-record guard — behavior traced
+### Bundle-adjuster sensor-prior selector and solve-termination flag — behavior traced
 
-The record assembled at `0x11ed64` carries `+0x2c = 50` and `+0x30 = 1`. The first value feeds Ceres `max_num_iterations`. The second enables a guard before residual construction: skip when `0x316b8c` reports that all tested normalized 3D-sample dot products are at least `cos(10°)`; also skip when the adjuster result in `w25` is below 7; otherwise skip if `0x316c8c` reports all tested asin-derived pitch-like differences are at most 10°. The exact field name for `+0x30` remains unresolved.
+The record assembled at `0x11ed64` carries `+0x2c = 50`, `+0x30 = 1`, and `+0x34 = 1`. The first value feeds Ceres `max_num_iterations`. The `+0x30` value selects the sensor residual form. If it is 1, any of the following chooses the two-scalar `RollPitchSensorResidual`: `0x316b8c` reports all checked normalized 3D-sample dot products are at least `cos(10°)`; the computed count `w25` is below 7; or `0x316c8c` reports all checked asin-derived pitch-like differences are at most 10°. Otherwise, or when `+0x30` is not 1, the builder uses the one-scalar `SensorResidual`. Sensor residual creation is not skipped. After Ceres returns, `+0x34` allows termination type `NO_CONVERGENCE` through the first status gate; `FAILURE` is still rejected, and later validation can still fail. Source-level names for both fields remain unresolved. Full decision trace: [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
 
 ## Pass N6 — GlobalFocalLength residual equations
 
 The shared helper `0x12a97c` transfers image points between orientation quaternions using the shared center and focal blocks. `PointMatchResidual` `0x12cbe8` returns two scale-weighted reprojection errors. `LineMatchResidual` `0x129fb0` returns four scale-weighted line-incidence errors, two in each transfer direction. `RollPitchSensorResidual` `0x12cffc` returns pitch and roll errors, with the roll term gated above 81° absolute target pitch; `SensorResidual` `0x12d4c8` returns a pitch error with sine-over-cosine normalization. Match blocks use HuberLoss(35); sensor blocks use TrivialLoss.
 
 The per-record scales are applied directly, but their source field meanings and units are not identified. Full trace and equations: [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md).
+
+
+## Pass N7 — Sensor-prior model and termination behavior
+
+The record at `0x11ed64` initializes the 50-iteration setting and writes `+0x30 = 1`, `+0x34 = 1`. At `0x128f04`, `+0x30` selects a sensor-prior model: a count/spread predicate chooses either the two-scalar pitch/roll residual or the one-scalar pitch residual. Both branches instantiate sensor residuals. After the Ceres solve, `0x129620` rejects `NO_CONVERGENCE` only when `+0x34` is zero; it always rejects `FAILURE`. The observed caller sets `+0x34` to one, so a nonconverged result reaches later validation. The option names remain unknown.
+
+Full trace: [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
