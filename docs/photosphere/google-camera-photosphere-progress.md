@@ -461,7 +461,16 @@ The line-aligner utility now closes the immediate source of line-record `+32` fo
 
 ### Next targets
 
-- Trace writers and value derivation for the caller object's `+44` float.
+- Compare other line-record producers, rescalers, and GlobalFocalLength consumers.
+- Compare remaining point-record producers and consumers.
+- Continue reviewing feature, pyramid, and low-level processing helpers.
+
+## 2026-10-07 — checkpoint 36: line-record scalar initializer
+
+The caller object's `+44` field from checkpoint 35 is part of the `LineAlignerImpl` instance. Its allocation/initialization sequence at raw VA `0x303b08` writes a 16-byte constant from rodata VA `0x62260` to object offset `+32`. The four floats are `[0.25, 0.15, 1.5, 25.0]`, making the scalar read from `+44` equal to **25.0** in this path. The line-aligner method reads `this+44` immediately before calling `line_aligner_utils.cc`; that helper copies the value unchanged to each 36-byte record's `+32`. The source-level field name and units remain unknown, and this does not establish that other line-record producers use the same value. Full trace: [checkpoint 36](../google-camera-photosphere-checkpoint-36-line-record-scale-initializer.md).
+
+### Next targets
+
 - Compare other line-record producers, rescalers, and GlobalFocalLength consumers.
 - Compare remaining point-record producers and consumers.
 - Continue reviewing feature, pyramid, and low-level processing helpers.
