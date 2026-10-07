@@ -42,7 +42,7 @@ The cost builder widens all eight endpoint coordinates and uses `+32` to scale b
 
 The helper at `0x318990` grows a float output vector to cover the requested image count. For each 128-byte pairwise-edge record, it reads the two endpoint image indices at edge offsets `+68` and `+72`, then walks that edge's point records at edge offset `+80` with a 28-byte stride. For each point record it adds the float at `+24` to the accumulator slots for both endpoint images.
 
-Thus the point-record multiplier contributes directly to the GlobalFocalLength point residuals and is also summed across incident pairwise edges per image. The caller later compares those per-image totals with a threshold before continuing its pairwise-image bookkeeping. This additional use confirms the value is treated as a nonnegative-style support/weight contribution by that caller, but static code alone does not prove that all inputs are nonnegative or provide a human-readable semantic name.
+Thus the point-record multiplier contributes directly to the GlobalFocalLength point residuals and is also summed across incident pairwise edges per image. The caller uses those per-image totals in a thresholded pairwise-image bookkeeping step. This confirms the value is treated as an additive per-observation contribution in both paths. Static code does not identify its source-level name or units, or establish whether input values are constrained to be nonnegative.
 
 ## Remaining limits
 
