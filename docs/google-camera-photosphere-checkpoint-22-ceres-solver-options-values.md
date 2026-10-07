@@ -65,7 +65,7 @@ The code writes these bytes after the linear-ordering pointer. Names beyond the 
 | +344, +348 | 5; low byte 0 |
 | +352, +360 | 0.1, 0.1 |
 | +368, +372 | byte 1; 32-bit value 1 |
-| +376 | low byte 0; adjacent bytes are not classified by this caller |
+| +376 | zero byte, copied as a byte by the Ceres options copy helper | extra boolean-like field; name and semantics unknown |
 | +384..+407 | empty three-pointer vector storage |
 | +408..+431 | short-string object containing `"/tmp"` |
 | +432 | 32-bit value 1; public Ceres 2.2.0 `TEXTFILE` value at the dump-format position |
