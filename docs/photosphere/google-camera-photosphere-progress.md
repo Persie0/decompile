@@ -2,7 +2,7 @@
 
 This file is the running work log for the Google/Pixel Camera 8.8.225.510547499.09 Photo Sphere reverse-engineering effort.
 
-Consolidated, reviewed findings belong in [google-camera-photosphere-implementation.md](google-camera-photosphere-implementation.md). This file intentionally records intermediate milestones, hypotheses, failed approaches, and the next targets.
+Consolidated, reviewed findings belong in [google-camera-photosphere-implementation.md](../google-camera-photosphere-implementation.md). This file intentionally records intermediate milestones, hypotheses, failed approaches, and the next targets.
 
 ## Audited binary
 
@@ -29,8 +29,8 @@ The focused native decompilation shows that Photo Sphere target placement is gen
 Recovered behavior:
 
 - The generator derives horizontal and vertical camera FOV from the active camera dimensions and focal parameter.
-- A latitude band is collapsed to a single pole target when `cos(latitude`` becomes too small relative to the horizontal FOV.
-- Otherwise, the ring count is proportional to `cos(latitude``, inverse horizontal FOV, and inverse desired-overlap factor.
+- A latitude band is collapsed to a single pole target when `cos(latitude)` becomes too small relative to the horizontal FOV.
+- Otherwise, the ring count is proportional to `cos(latitude)`, inverse horizontal FOV, and inverse desired-overlap factor.
 - Ring counts are forced odd with `2*n + 1`.
 - Adjacent latitude rings are explicitly connected as a graph by nearest azimuth, while targets inside a ring connect to their immediate left/right neighbors.
 - Rings are generated in both positive and negative latitude directions, with a bounded number of bands.
@@ -49,12 +49,12 @@ The exact formulas/constants are being resolved by reading the referenced rodata
   - 5 = Calibration
 - Shared native reset path uses an internal processing/matching width of **1600**.
 - Photo Sphere and calibration activate a special shared boolean path.
-- `RenderNextSession(`` forwards fixed float parameters **0.2** and **0.95** into the render/session path.
+- `RenderNextSession()` forwards fixed float parameters **0.2** and **0.95** into the render/session path.
 
 ### Active next work
 
 1. Resolve target-generator rodata constants and turn the target layout into exact pseudocode.
-2. Recover `ProcessFrame(`` state updates and the exact `TakeNewPhoto` gating logic.
+2. Recover `ProcessFrame()` state updates and the exact `TakeNewPhoto` gating logic.
 3. Recover image preprocessing/alignment parameters behind `AddImage(`` and `AlignNextImage(``.
 4. Recover final renderer options, seam/blend levels and output-size formula.
 5. Promote verified results into the consolidated implementation document.
@@ -70,7 +70,7 @@ The exact formulas/constants are being resolved by reading the referenced rodata
 
 ### Exact native ProcessFrame flag logic
 
-The Ghidra capture-state pass resolved the four JNI status flags to concrete global bytes and showed that they are written by `LightCycleNative.ProcessFrame(``.
+The Ghidra capture-state pass resolved the four JNI status flags to concrete global bytes and showed that they are written by `LightCycleNative.ProcessFrame()`.
 
 Equivalent control flow:
 
@@ -108,7 +108,7 @@ Its recovered behavior:
    - **200° < angle < 340°**
 6. Allow capture in the complementary sectors around 0°/180°.
 
-This gate returns only a boolean/nonzero rejection decision to `ProcessFrame(``. Its precise semantic name is still unknown; it appears to be an orientation/session-validity gate, despite the Java-visible rejected-hit state being exposed as `PhotoSkippedTooFast`.
+This gate returns only a boolean/nonzero rejection decision to `ProcessFrame()`. Its precise semantic name is still unknown; it appears to be an orientation/session-validity gate, despite the Java-visible rejected-hit state being exposed as `PhotoSkippedTooFast`.
 
 ### Capture-session target generator parameters
 
@@ -180,9 +180,9 @@ This helper is selected by a generator configuration flag; the full Photo Sphere
 
 The JNI resolution setters are simple enum writes:
 
-- `SetOutputResolutionSmall(`` -> preset **1**
-- `SetOutputResolutionMedium(`` -> preset **2**
-- `SetOutputResolutionLarge(`` -> preset **3**
+- `SetOutputResolutionSmall()` -> preset **1**
+- `SetOutputResolutionMedium()` -> preset **2**
+- `SetOutputResolutionLarge()` -> preset **3**
 
 `photosphere_parameters.cc` maps these presets to target rendered-pixel budgets:
 
@@ -192,7 +192,7 @@ The JNI resolution setters are simple enum writes:
 | Medium | **26,000,000 px** |
 | Large | **70,000,000 px** |
 
-The Java Photo Sphere completion path always selects **Large** before `FinishCapture(``.
+The Java Photo Sphere completion path always selects **Large** before `FinishCapture()`.
 
 ### Memory-dependent output cap
 
@@ -252,7 +252,7 @@ scaled_crop_bounds =
     reference_crop_bounds * (full_width / 2400)
 ```
 
-There are additional corrections for per-source resolution limits and blender alignment. In particular, if required, the mosaic width is rounded down to a multiple of the blender's `BlendDistance(`` to prevent a seam at the left/right wrap boundary.
+There are additional corrections for per-source resolution limits and blender alignment. In particular, if required, the mosaic width is rounded down to a multiple of the blender's `BlendDistance()` to prevent a seam at the left/right wrap boundary.
 
 Important consequence: the budget applies to **rendered/cropped content**, so a partial sphere may have a virtual `full_pano_width/full_pano_height` substantially larger than the actual rendered JPEG pixel count.
 
@@ -285,8 +285,8 @@ Static Ceres RTTI + the exact native factory resolve the bundle-adjustment robus
 | enum | Ceres loss |
 | ---: | --- |
 | 0 | `TrivialLoss` |
-| 1 | `HuberLoss(35`` |
-| 2 | `SoftLOneLoss(35`` |
+| 1 | `HuberLoss(35)` |
+| 2 | `SoftLOneLoss(35)` |
 
 For Huber, the native object stores **35** and **35² = 1225**. For Soft-L1 it stores **1225** and **1/1225**, matching Ceres' internal parameterization.
 
@@ -306,12 +306,12 @@ Y = 0.2989 R + 0.5871 G + 0.114 B
 
 One unary term uses distance from mid-luma 128, with a dead/threshold region of **78** and a configurable multiplier. This biases seam placement away from problematic exposure/extreme-intensity areas rather than using RGB difference alone.
 
-The graph-cut implementation is backed by Google's IBFS max-flow code (`research/bigml/mrf/maxflow/ibfs.cc``.
+The graph-cut implementation is backed by Google's IBFS max-flow code (`research/bigml/mrf/maxflow/ibfs.cc`.
 
 ### Evidence
 
 - Output sizing: `FUN_0021874c`, `FUN_0041c5e0`, `FUN_0041df08`, `FUN_0041d3dc`.
-- Java memory budget: `gqm.mo9646a(``, `lbn(dhv``, `foa.handleMessage(``.
+- Java memory budget: `gqm.mo9646a()`, `lbn(dhv)`, `foa.handleMessage()`.
 - Patch matching: `FUN_00226614`.
 - Robust losses: `FUN_00229e80` plus Ceres RTTI/vtables.
 - Seam costs: `FUN_004390a8`, `FUN_00439600`.
@@ -328,7 +328,7 @@ Recovered from the existing native-analysis artifacts:
 - Line alignment has separate direct solvers for one and two line pairs; more than two pairs use robust/RANSAC rotation estimation.
 - The line RANSAC angular inlier threshold is exactly **0.04363323 rad = 2.5 degrees**.
 - The same options block contains integers **550, 5000, 2, 150**. The value 2 is consumed as the minimum sample/model size; names for the other three values are not yet proven and are intentionally left unlabeled.
-- `RenderNextSession(`` stores/clamps the JNI floats **0.2** and **0.95** as request parameters. Current evidence is consistent with progress/range parameters, not seam-energy weights, so the documentation no longer treats them as rendering-quality constants.
+- `RenderNextSession()` stores/clamps the JNI floats **0.2** and **0.95** as request parameters. Current evidence is consistent with progress/range parameters, not seam-energy weights, so the documentation no longer treats them as rendering-quality constants.
 
 Next targets: recover the upstream assignment of the final blend-level count, bundle-adjustment residual weights, optical-flow parameters, seam-cost defaults, and per-source output-resolution limiter.
 
@@ -343,7 +343,7 @@ mean < 50: 0.1 + 0.9 * mean / 50
 
 Each scaled value is truncated to an integer and passed to FAST-9. The first three thresholds are skipped when they exceed either twice the sampled mean or the sampled intensity range; the final 15 threshold is the fallback. FAST-9 core use is confirmed at `0x39f560`.
 
-The wrapper at `0x39f0d8` reads object field `+0x14` as its non-max radius and calls suppression only when the field is at least 2. In the traced matcher construction path, that field starts at `-1`, while the detector point cap is set to 3000 and scaled across the three levels to `[3000, 751, 189]`. See [checkpoint 17](google-camera-photosphere-checkpoint-17-fast-threshold-schedule.md` and [checkpoint 19](google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md).
+The wrapper at `0x39f0d8` reads object field `+0x14` as its non-max radius and calls suppression only when the field is at least 2. In the traced matcher construction path, that field starts at `-1`, while the detector point cap is set to 3000 and scaled across the three levels to `[3000, 751, 189]`. See [checkpoint 17](../google-camera-photosphere-checkpoint-17-fast-threshold-schedule.md) and [checkpoint 19](../google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md).
 
 ## 2026-10-07 — checkpoint 18: rotation RANSAC configuration
 
@@ -359,77 +359,77 @@ The rotation-estimation call near `0x3074e4` passes a five-field options record 
 
 The estimator draws two distinct correspondence samples to form a candidate rotation, scores ray correspondences using the cosine-form angular gate, and returns the support count. Its control flow can stop early at 150 support; otherwise it checks for at least 2 supported matches at the 550-trial boundary and keeps searching without support up to 5000. This resolves the pairwise-rotation RANSAC threshold and control values for this call path; it does not imply every RANSAC use shares them.
 
-Full trace: [checkpoint 18](google-camera-photosphere-checkpoint-18-rotation-ransac.md).
+Full trace: [checkpoint 18](../google-camera-photosphere-checkpoint-18-rotation-ransac.md).
 
 ## 2026-10-07 — checkpoint 19: matcher limits and three-level pyramid
 
 The traced `PatchPairwiseMatcher` setup writes a 375.0 maximum patch-distance value, a 3000-point FAST detector cap, and a 30-entry per-level match-index cap. The constructor leaves the matcher pyramid count at 3. Its matching path squares 375.0 to a maximum squared distance of 140625 and applies the existing 0.64000005 best/second-best squared-distance ratio gate.
 
-The detector cap decreases by `ceil(previous / 4` + 1` across the three levels, producing `[3000, 751, 189]`. The traced detector constructor sets its non-max-radius field `+0x14` to `-1`; the matcher setup does not override it, and the detector wrapper only runs radius suppression for values at least 2. Per-level coordinate back-projection uses factors `[1, 2, 4]`. This establishes the matcher level count and coordinate scales, not every pixel-pyramid generation detail.
+The detector cap decreases by `ceil(previous / 4) + 1` across the three levels, producing `[3000, 751, 189]`. The traced detector constructor sets its non-max-radius field `+0x14` to `-1`; the matcher setup does not override it, and the detector wrapper only runs radius suppression for values at least 2. Per-level coordinate back-projection uses factors `[1, 2, 4]`. This establishes the matcher level count and coordinate scales, not every pixel-pyramid generation detail.
 
-Full trace: [checkpoint 19](google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md).
+Full trace: [checkpoint 19](../google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md).
 
 ## 2026-10-07 — checkpoint 20: global focal-length bundle loss selection
 
 One traced BundleAdjusterGlobalFocalLength path initializes the robust-loss selector at options offset +0x20 to 1. Both match-loss construction sites read this field, and the native factory maps selector 1 to HuberLoss(35). RTTI confirms the AutoDiffCostFunction dimensions for line matches, point matches, roll/pitch sensor terms, and sensor terms. Checkpoint 23 recovers their direct residual equations and scale placement for this path; settings for other bundle-adjuster paths remain unverified. The embedded build fingerprint identifies Ceres 2.2.0 with Eigen 3.4.90, no LAPACK, SuiteSparse 4.5.4, and METIS 5.1.0.
 
-Full trace: [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md).
+Full trace: [checkpoint 20](../google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md).
 
 ## 2026-10-07 — checkpoint 21: Ceres solver-option handoff and ABI correction
 
 The call through `0x129564` and thunk `0x153900` passes the local record at `sp+0x2b0` to the Ceres solve target, which saves it as `x23`. Reads through +280 align with the Ceres 2.2.0 public prefix and a 40-byte Android libc++ subset container. Later reads at +304, +312 and +436/+440 do not follow the pinned upstream member sequence. In particular, the callee treats +312 as a pointer-backed ordering source, not as the public header's scalar max-SPSE field.
 
-Full trace: [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md).
+Full trace: [checkpoint 21](../google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md).
 
 ## 2026-10-07 — checkpoint 22: caller-written Ceres settings
 
 The caller's stack writes recover a strong core configuration for this GlobalFocalLength path: DENSE_SCHUR, DOGLEG with SUBSPACE_DOGLEG, one solver thread, trust-region radii `1e4 / 1e16 / 1e-8`, function/gradient/parameter tolerances `1e-6 / 1e-10 / 1e-8`, and a 50-iteration limit copied from input-record `+0x2c`. The user ordering is null; dense algebra is EIGEN and the sparse-library enum is SUITE_SPARSE. The gradient-check flag is false.
 
-Input-record +0x2c resolves to max_num_iterations=50. Input-record +0x30=1 selects the one-scalar pitch or two-scalar pitch/roll prior using a cos(10°) direction test, a count threshold of 7, and an asin-derived 10° pitch-like test. Input-record +0x34=1 allows NO_CONVERGENCE through the first post-solve status gate; FAILURE remains rejected. The qword at +64/+68 is now resolved as the line-search integer pair 20/5; +312 and +336 and later vendor-tail fields remain raw. See [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md) and [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
+Input-record +0x2c resolves to max_num_iterations=50. Input-record +0x30=1 selects the one-scalar pitch or two-scalar pitch/roll prior using a cos(10°) direction test, a count threshold of 7, and an asin-derived 10° pitch-like test. Input-record +0x34=1 allows NO_CONVERGENCE through the first post-solve status gate; FAILURE remains rejected. The qword at +64/+68 is now resolved as the line-search integer pair 20/5; +312 and +336 and later vendor-tail fields remain raw. See [checkpoint 27](../google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md) and [checkpoint 24](../google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
 
 
 ## 2026-10-07 — checkpoint 23: GlobalFocalLength residual equations
 
 The shared quaternion projection helper transfers 2D points between views using the image-center and focal blocks. Point matches use two weighted reprojection errors; line matches use four weighted, bidirectional line-incidence residuals. The sensor terms use pitch and roll differences, with an 81° gate for the roll residual. Point and line blocks use HuberLoss(35); sensor blocks use TrivialLoss.
 
-Full trace: [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md).
+Full trace: [checkpoint 23](../google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md).
 
 
 ## 2026-10-07 — checkpoint 24: sensor-prior selection and solve termination
 
-Input-record `+0x30 = 1` selects between the one-scalar pitch prior and two-scalar pitch/roll prior using the 10° sample-spread predicates and a count threshold of 7; both branches add sensor residuals. Input-record `+0x34 = 1` lets Ceres `NO_CONVERGENCE` pass the first status gate, while `FAILURE` remains rejected. Full trace: [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md`.
+Input-record `+0x30 = 1` selects between the one-scalar pitch prior and two-scalar pitch/roll prior using the 10° sample-spread predicates and a count threshold of 7; both branches add sensor residuals. Input-record `+0x34 = 1` lets Ceres `NO_CONVERGENCE` pass the first status gate, while `FAILURE` remains rejected. Full trace: [checkpoint 24](../google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
 
 ## 2026-10-07 — checkpoint 25: post-solve output validation
 
-After that first gate, the optimized focal must be positive and the center pair must be within the checked image dimensions. For a nonzero input-object count, a separate nested-object scalar must be in `[10, 150]`; a view-angle/FOV interpretation is plausible but unverified. Passing results normalize and write back the per-image rotations. The traced return bit is 1 for accepted paths and 0 for rejection. Full trace: [checkpoint 25](google-camera-photosphere-checkpoint-25-post-solve-output-validation.md`.
+After that first gate, the optimized focal must be positive and the center pair must be within the checked image dimensions. For a nonzero input-object count, a separate nested-object scalar must be in `[10, 150]`; a view-angle/FOV interpretation is plausible but unverified. Passing results normalize and write back the per-image rotations. The traced return bit is 1 for accepted paths and 0 for rejection. Full trace: [checkpoint 25](../google-camera-photosphere-checkpoint-25-post-solve-output-validation.md).
 
 ## 2026-10-07 — checkpoint 26: Ceres option-tail copy layout correction
 
 The copy helper at `0x153094` confirms the integer vector at candidate options offset `+384..+407` and the dump-directory string at `+408..+431`, correcting the earlier checkpoint 22 table. It copies vector elements with a 4-byte stride and invokes the string copy constructor with source `+408`. The callback vector at `+464..+487` uses 8-byte elements.
 
-The field at `+436` is the gradient-check flag; the doubles at `+440` and `+448` are each `0.1`. The caller stores 1 at `+432`, matching public Ceres 2.2.0 `TEXTFILE` at the dump-format position. Register-order tracing shows the `0x3f800000` constant is stored at options `+256`, inside the subset-preconditioner hash container at +224. The capacity helper reads it as the container's float load factor, set to 1.0. The caller also stores 1 at `+368` and `+372`. The traced integer vector is empty, so the conditional dump path is bypassed. The caller writes zero at `+376`, and the copy helper copies this byte separately before the vector at `+384`; it is likely a boolean-like field, but its name and meaning remain unknown. Full trace: [checkpoint 26](google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md`.
+The field at `+436` is the gradient-check flag; the doubles at `+440` and `+448` are each `0.1`. The caller stores 1 at `+432`, matching public Ceres 2.2.0 `TEXTFILE` at the dump-format position. Register-order tracing shows the `0x3f800000` constant is stored at options `+256`, inside the subset-preconditioner hash container at +224. The capacity helper reads it as the container's float load factor, set to 1.0. The caller also stores 1 at `+368` and `+372`. The traced integer vector is empty, so the conditional dump path is bypassed. The caller writes zero at `+376`, and the copy helper copies this byte separately before the vector at `+384`; it is likely a boolean-like field, but its name and meaning remain unknown. Full trace: [checkpoint 26](../google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md).
 
 ## 2026-10-07 — checkpoint 27: Ceres line-search integer pair
 
-The caller's 8-byte store at candidate options `+64` preserves two little-endian integers, 20 at `+64` and 5 at `+68`. Their positions and values match the pinned Ceres 2.2.0 line-search trial-limit and restart fields. This corrects the earlier interpretation of the qword as a double. The same review corrects `+336`: it receives raw qword `0x000001f400000000`, words 0 and 500 at `+336/+340`, with no source-level mapping established. The `+312/+320` null pair remains a pointer-backed field in the observed build. Full trace: [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md`.
+The caller's 8-byte store at candidate options `+64` preserves two little-endian integers, 20 at `+64` and 5 at `+68`. Their positions and values match the pinned Ceres 2.2.0 line-search trial-limit and restart fields. This corrects the earlier interpretation of the qword as a double. The same review corrects `+336`: it receives raw qword `0x000001f400000000`, words 0 and 500 at `+336/+340`, with no source-level mapping established. The `+312/+320` null pair remains a pointer-backed field in the observed build. Full trace: [checkpoint 27](../google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md).
 
 
 ## 2026-10-07 — checkpoint 28: Ceres trust-region mode and dispatch
 
-The caller initializes solver options `+0..+12` from rodata as `[1, 2, 1, 0]`. Against pinned Ceres 2.2.0 enums, this is `TRUST_REGION`, `LBFGS`, `WOLFE`, and `FLETCHER_REEVES`. The options copy helper preserves the prefix, and the solver's factory dispatches `minimizer_type=1` to the RTTI-identified `TrustRegionPreprocessor` (`0x1ad7f4``. This confirms trust-region mode for the path that explicitly selects `DOGLEG` / `SUBSPACE_DOGLEG`. The raw fields at +312/+320, +336/+340, and +376 remain unresolved; see [checkpoint 28](google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md`.
+The caller initializes solver options `+0..+12` from rodata as `[1, 2, 1, 0]`. Against pinned Ceres 2.2.0 enums, this is `TRUST_REGION`, `LBFGS`, `WOLFE`, and `FLETCHER_REEVES`. The options copy helper preserves the prefix, and the solver's factory dispatches `minimizer_type=1` to the RTTI-identified `TrustRegionPreprocessor` (`0x1ad7f4`). This confirms trust-region mode for the path that explicitly selects `DOGLEG` / `SUBSPACE_DOGLEG`. The raw fields at +312/+320, +336/+340, and +376 remain unresolved; see [checkpoint 28](../google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md).
 
 
 ## 2026-10-07 — checkpoint 29: Ceres linear-solver iteration limits
 
-The caller's qword at candidate options `+336/+340` is `[0, 500]`. The options validator labels these positions `min_linear_solver_iterations` and `max_linear_solver_iterations`, checks each is nonnegative, and enforces minimum <= maximum. That validation sequence matches pinned Ceres 2.2.0 `TrustRegionOptionsAreValid`; the values also match its public defaults. The Google build uses different member offsets, so the field names are grounded in its diagnostics and checks rather than upstream offsets. The pointer-backed pair at +312/+320 and byte at +376 remain unresolved. See [checkpoint 29](google-camera-photosphere-checkpoint-29-ceres-linear-solver-iteration-limits.md`.
+The caller's qword at candidate options `+336/+340` is `[0, 500]`. The options validator labels these positions `min_linear_solver_iterations` and `max_linear_solver_iterations`, checks each is nonnegative, and enforces minimum <= maximum. That validation sequence matches pinned Ceres 2.2.0 `TrustRegionOptionsAreValid`; the values also match its public defaults. The Google build uses different member offsets, so the field names are grounded in its diagnostics and checks rather than upstream offsets. The pointer-backed pair at +312/+320 and byte at +376 remain unresolved. See [checkpoint 29](../google-camera-photosphere-checkpoint-29-ceres-linear-solver-iteration-limits.md).
 
 
 ## 2026-10-07 — checkpoint 30: Ceres inner-iteration ordering and logging fields
 
-Candidate `+312/+320` is a null `inner_iteration_ordering` shared pointer. The options validator ties the surrounding fields together: `+304` is the `use_inner_iterations` gate, and when true it checks `+328` as `inner_iteration_tolerance`; the copied 16-byte pair at `+312/+320` is the `ParameterBlockOrdering` pointer between them. The caller sets the gate false, pointer null, and tolerance to `0.001`. The byte at `+376` is `minimizer_progress_to_stdout=false`; neighboring int `+372=1` is `logging_type=PER_MINIMIZER_ITERATION`, immediately before the previously mapped dump vector at `+384`. See [checkpoint 30](google-camera-photosphere-checkpoint-30-ceres-inner-iteration-and-logging-fields.md`.
+Candidate `+312/+320` is a null `inner_iteration_ordering` shared pointer. The options validator ties the surrounding fields together: `+304` is the `use_inner_iterations` gate, and when true it checks `+328` as `inner_iteration_tolerance`; the copied 16-byte pair at `+312/+320` is the `ParameterBlockOrdering` pointer between them. The caller sets the gate false, pointer null, and tolerance to `0.001`. The byte at `+376` is `minimizer_progress_to_stdout=false`; neighboring int `+372=1` is `logging_type=PER_MINIMIZER_ITERATION`, immediately before the previously mapped dump vector at `+384`. See [checkpoint 30](../google-camera-photosphere-checkpoint-30-ceres-inner-iteration-and-logging-fields.md).
 
 
-### Current next targets
+### Targets listed after checkpoint 30
 
 - Trace upstream assignments and units for point and line residual scales; compare all bundle-adjuster consumers and option constructors.
 - Trace other RANSAC paths and graph-component pruning.
@@ -439,24 +439,29 @@ Candidate `+312/+320` is a null `inner_iteration_ordering` shared pointer. The o
 
 ## 2026-10-07 — checkpoint 31: camera-model field of view
 
-The post-solve scalar read through CameraModel vtable slot `+0x40` is the camera's horizontal field of view in degrees. Linear and fisheye models read the stored radian value and convert it by 180/π; equirectangular models return 360°. Construction and the LinearCamera degree setter convert public degree inputs to internal radians. The solve's earlier slot `+0x58` call updates focal X/Y from the optimized focal scalar but leaves the FOV field unchanged, so the [10°, 150°] gate validates the camera model's own FOV. See [checkpoint 31](google-camera-photosphere-checkpoint-31-camera-model-field-of-view.md`.
+The post-solve scalar read through CameraModel vtable slot `+0x40` is the camera's horizontal field of view in degrees. Linear and fisheye models read the stored radian value and convert it by 180/π; equirectangular models return 360°. Construction and the LinearCamera degree setter convert public degree inputs to internal radians. The solve's earlier slot `+0x58` call updates focal X/Y from the optimized focal scalar but leaves the FOV field unchanged, so the [10°, 150°] gate validates the camera model's own FOV. See [checkpoint 31](../google-camera-photosphere-checkpoint-31-camera-model-field-of-view.md).
 
 
 ## 2026-10-07 — checkpoint 32: Ceres SPSE and Jacobi options
 
-The Ceres option tail after `min_linear_solver_iterations=0` and `max_linear_solver_iterations=500` now maps through candidate `+368`: `+344=5` is the maximum SPSE iteration count, `+348=false` disables SPSE initialization, `+352=0.1` is the SPSE tolerance, `+360=0.1` is eta, and `+368=true` enables Jacobi scaling. The target validator names the SPSE and eta fields; member order and bool consumption identify Jacobi scaling. These are the pinned Ceres 2.2.0 defaults. Checkpoint 30 already mapped `+372` and `+376` to logging type and progress-to-stdout. See [checkpoint 32](google-camera-photosphere-checkpoint-32-ceres-spse-and-jacobi-options.md`.
+The Ceres option tail after `min_linear_solver_iterations=0` and `max_linear_solver_iterations=500` now maps through candidate `+368`: `+344=5` is the maximum SPSE iteration count, `+348=false` disables SPSE initialization, `+352=0.1` is the SPSE tolerance, `+360=0.1` is eta, and `+368=true` enables Jacobi scaling. The target validator names the SPSE and eta fields; member order and bool consumption identify Jacobi scaling. These are the pinned Ceres 2.2.0 defaults. Checkpoint 30 already mapped `+372` and `+376` to logging type and progress-to-stdout. See [checkpoint 32](../google-camera-photosphere-checkpoint-32-ceres-spse-and-jacobi-options.md).
 
 
 ## 2026-10-07 — checkpoint 33: GlobalFocalLength match records and scale aggregation
 
-The traced GlobalFocalLength path reads point observations at a 28-byte stride: two 2D endpoints at offsets `+0..+12`, image-index fields at `+16/+20` (not read by this cost builder`, and the residual multiplier at `+24`. Line observations use a 36-byte stride with four 2D endpoints at `+0..+28` and the multiplier at `+32`. The `0x318990` helper also sums each point record's `+24` value into per-image totals for both endpoints of its pairwise edge; its caller uses those totals in thresholded image bookkeeping. See [checkpoint 33](google-camera-photosphere-checkpoint-33-global-focal-match-record-layouts.md`.
+The traced GlobalFocalLength path reads point observations at a 28-byte stride: two 2D endpoints at offsets `+0..+12`, image-index fields at `+16/+20` (not read by this cost builder), and the residual multiplier at `+24`. Line observations use a 36-byte stride with four 2D endpoints at `+0..+28` and the multiplier at `+32`. The `0x318990` helper also sums each point record's `+24` value into per-image totals for both endpoints of its pairwise edge; its caller uses those totals in thresholded image bookkeeping. See [checkpoint 33](../google-camera-photosphere-checkpoint-33-global-focal-match-record-layouts.md).
 
 ## 2026-10-07 — checkpoint 34: point-record multiplier source
 
-In one pair-grid matching path, a normalized angle-derived score below `0.9` selects point multiplier `0.25`; scores at or above the threshold (and unordered comparisons` select `0.125`. Successful matches append a 28-byte record with two coordinate pairs, the two image indices at `+16/+20`, and the selected multiplier at `+24`. A separate post-estimator pass supplies `0.125` to `0x316420`, which multiplies `+24` for point observations on type-5 graph edges that match type-9 edges by unordered image pair. The line-record multiplier source and score's class-level inputs remain unresolved. See [checkpoint 34](google-camera-photosphere-checkpoint-34-point-record-weight-source.md).
+In one pair-grid matching path, a normalized angle-derived score below `0.9` selects point multiplier `0.25`; scores at or above the threshold (and unordered comparisons) select `0.125`. Successful matches append a 28-byte record with two coordinate pairs, the two image indices at `+16/+20`, and the selected multiplier at `+24`. A separate post-estimator pass supplies `0.125` to `0x316420`, which multiplies `+24` for point observations on type-5 graph edges that match type-9 edges by unordered image pair. The line-record multiplier reaches `+32` from the caller object's `+44` field through the line-aligner utility; that field's source-level name, derivation, and units remain unresolved. The score's class-level inputs also remain unresolved. See [checkpoint 34](../google-camera-photosphere-checkpoint-34-point-record-weight-source.md).
+
+## 2026-10-07 — checkpoint 35: line-record multiplier handoff
+
+The line-aligner utility now closes the immediate source of line-record `+32` for the traced path. Ghidra places helper `FUN_00416154` in `line_aligner_utils.cc` and caller `FUN_00403cf8` in `line_aligner.cc`; ELF RTTI identifies the caller as a `LineAlignerImpl` vtable method. The caller passes `*(undefined4 *)(param_4 + 0x2c)` into the helper; it copies that float unchanged into record `+32` for each line pair, alongside the two endpoint-pair payloads at `+0..+31`, at a 36-byte stride. The source-level name, writer, value, and units of input-object `+0x2c` remain unknown. Full trace: [checkpoint 35](../google-camera-photosphere-checkpoint-35-line-record-multiplier-handoff.md).
 
 ### Next targets
 
-- Trace the producer and source of the line-record multiplier at `+32`.
+- Trace writers and value derivation for the caller object's `+44` float.
+- Compare other line-record producers, rescalers, and GlobalFocalLength consumers.
 - Compare remaining point-record producers and consumers.
 - Continue reviewing feature, pyramid, and low-level processing helpers.

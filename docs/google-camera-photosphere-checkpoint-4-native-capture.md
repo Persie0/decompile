@@ -2,7 +2,7 @@
 
 This is a dated progress checkpoint for the continuing reverse-engineering work on Google/Pixel Camera 8.8.225.510547499.09 Photo Sphere.
 
-The consolidated implementation map remains `docs/google-camera-photosphere-implementation.md`; the running log remains `docs/google-camera-photosphere-progress.md`. This checkpoint records the latest native/JNI findings without overwriting the existing log.
+The consolidated implementation map remains `docs/google-camera-photosphere-implementation.md`; the running log remains `docs/photosphere/google-camera-photosphere-progress.md`. This checkpoint records the latest native/JNI findings without overwriting the existing log.
 
 ## Scope of this pass
 

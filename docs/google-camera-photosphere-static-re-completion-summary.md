@@ -23,7 +23,7 @@ Main consolidated map:
 
 Running / checkpoint documents:
 
-- `docs/google-camera-photosphere-progress.md`
+- `docs/photosphere/google-camera-photosphere-progress.md`
 - `docs/google-camera-photosphere-checkpoint-4-native-capture.md`
 - `docs/google-camera-photosphere-checkpoint-5-align-next-image.md`
 - `docs/google-camera-photosphere-checkpoint-6-estimator-add-image.md`
@@ -415,4 +415,4 @@ Candidate `+312/+320` is the null `inner_iteration_ordering` shared pointer; the
 
 ## Checkpoint 32 update — Ceres SPSE and Jacobi options
 
-The traced GlobalFocalLength path's candidate options `+344=5), `+348=false), `+352=0.1), `+360=0.1), and `+368=true) map to `max_num_spse_iterations), `use_spse_initialization), `spse_tolerance), `eta), and `jacobi_scaling). The target validator names the first four fields; the final field matches Ceres 2.2.0 member order and is copied as a bool into linear-solver options. Checkpoint 30 maps the following `+372/+376) logging fields. These values match the pinned Ceres defaults. See [checkpoint 32](google-camera-photosphere-checkpoint-32-ceres-spse-and-jacobi-options.md).
+The traced GlobalFocalLength path's candidate options `+344=5`, `+348=false`, `+352=0.1`, `+360=0.1`, and `+368=true` map to `max_num_spse_iterations`, `use_spse_initialization`, `spse_tolerance`, `eta`, and `jacobi_scaling`. The target validator names the first four fields; the final field matches Ceres 2.2.0 member order and is copied as a bool into linear-solver options. Checkpoint 30 maps the following `+372/+376` logging fields. These values match the pinned Ceres defaults. See [checkpoint 32](google-camera-photosphere-checkpoint-32-ceres-spse-and-jacobi-options.md).
