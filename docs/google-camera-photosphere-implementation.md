@@ -532,7 +532,7 @@ A close reproduction should therefore model each source image as a camera orient
 
 #### Ceres solver settings — one traced path
 
-The caller writes `DENSE_SCHUR` with `DOGLEG` / `SUBSPACE_DOGLEG`, uses one solver thread, leaves the user ordering null, and supplies the maximum-iteration count from input-record +44. It also writes trust-region radii `1e4 / 1e16 / 1e-8` and tolerances `1e-6 / 1e-10 / 1e-8`. Several tail offsets after +280 diverge from the upstream Ceres 2.2.0 header and remain raw; see [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md).
+The caller writes `DENSE_SCHUR` with `DOGLEG` / `SUBSPACE_DOGLEG`, uses one solver thread, leaves the user ordering null, and sets `max_num_iterations=50` from input-record +0x2c. It also writes trust-region radii `1e4 / 1e16 / 1e-8` and tolerances `1e-6 / 1e-10 / 1e-8`. Several tail offsets after +280 diverge from the upstream Ceres 2.2.0 header and remain raw; see [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md).
 
 #### GlobalFocalLength loss selection — one traced path
 
@@ -987,7 +987,7 @@ The highest-value remaining static targets are:
 2. Recover the `PatchPairwiseMatcher +0x130` maximum descriptor-distance default and complete pyramid settings.
 3. Trace runtime optical-flow constraints and their weights.
 4. Separate the remaining line-alignment and other RANSAC call paths from the now-traced rotation estimator.
-5. Recover graph-edge insertion, graph-component pruning, and exact BA residual/solver options.
+5. Recover graph-edge insertion, graph-component pruning, and exact BA residual equations/weights and the semantic name of the +0x30 guard.
 6. Trace the renderer's selected blend-level count and remaining seam/exposure parameters.
 
 ---
