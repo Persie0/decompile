@@ -530,6 +530,10 @@ This means the final poses are globally optimized across images instead of only 
 
 A close reproduction should therefore model each source image as a camera orientation/projection and run a global nonlinear optimization over camera rotations and possibly focal length.
 
+#### Ceres solver settings — one traced path
+
+The caller writes `DENSE_SCHUR` with `DOGLEG` / `SUBSPACE_DOGLEG`, uses one solver thread, leaves the user ordering null, and supplies the maximum-iteration count from input-record +44. It also writes trust-region radii `1e4 / 1e16 / 1e-8` and tolerances `1e-6 / 1e-10 / 1e-8`. Several tail offsets after +280 diverge from the upstream Ceres 2.2.0 header and remain raw; see [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md).
+
 #### GlobalFocalLength loss selection — one traced path
 
 For the call path documented in [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), the options record's +0x20 robust-loss selector is 1 at both loss-construction sites. The selector factory maps 1 to HuberLoss(35). The binary's embedded build fingerprint identifies Ceres 2.2.0 with Eigen 3.4.90, no LAPACK, SuiteSparse 4.5.4, and METIS 5.1.0. RTTI confirms these AutoDiffCostFunction signatures:
@@ -541,7 +545,7 @@ For the call path documented in [checkpoint 20](google-camera-photosphere-checkp
 | RollPitchSensorResidual | 2 | [4, 2, 1] |
 | SensorResidual | 1 | [4, 2, 1] |
 
-The same options record has 50 at +0x2c and 1 at +0x30; the latter controls a branch, but neither field's semantic name is recovered. This configuration is scoped to the observed GlobalFocalLength path. Residual formulas/weights and effective solver settings remain unresolved. The solve-call trace likely identifies the local Ceres `Solver::Options` object and maps several prefix and ABI-derived fields, but does not recover caller-specific values. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md) and [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md).
+The same options record has 50 at +0x2c and 1 at +0x30; the latter controls a branch, but neither field's semantic name is recovered. This configuration is scoped to the observed GlobalFocalLength path. Checkpoint 22 recovers caller-written solver settings for that path: DENSE_SCHUR with DOGLEG/SUBSPACE_DOGLEG, one solver thread, trust-region radii, tolerances, and a runtime-supplied iteration limit. Residual formulas/weights remain unresolved, and the option tail after +280 does not fully match the pinned upstream header. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), and [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md).
 
 
 ---
