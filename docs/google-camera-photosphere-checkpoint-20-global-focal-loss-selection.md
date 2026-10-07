@@ -7,6 +7,7 @@ This checkpoint follows one observed Ceres bundle-adjustment call path for the n
 - APK SHA-256: 9ca2264cbf5680c8b5b740e53849c1586c53436a7e860616584c0349dba37c47
 - liblightcycle.so SHA-256: 878feb4ab3912bc0a4c399d9eb14b6c615926e132b324ad8ea02d4988fd428d1
 - Embedded source path: cityblock/portable/optimization/bundle_adjustment.cc
+- Embedded Ceres build fingerprint at rodata 0x657cb: 2.2.0-eigen-(3.4.90)-no_lapack-suitesparse-(4.5.4)-metis-(5.1.0)
 
 ## Observed class and dispatch path
 
