@@ -16,7 +16,7 @@ Offsets below are relative to the candidate options base, not the function's sta
 | Offset | Observed bytes or operation | Interpretation |
 | ---: | --- | --- |
 | +256 | Float32 `1.0` (`0x3f800000`) | Internal load-factor word of the subset-preconditioner hash container rooted at +224; see evidence below |
-| +376 | Caller writes one zero byte | Remaining bytes and field role are unresolved |
+| +376 | Caller writes zero; copy helper copies this byte with `ldrb`/`strb` | Extra byte-sized boolean-like field; name and semantics are unknown |
 | +384, +392, +400 | Three zero pointer-sized words | Empty vector header |
 | +384..+407 | Copy helper reads vector header; element stride is 4 bytes | Positional match for `std::vector<int> trust_region_minimizer_iterations_to_dump` |
 | +408..+431 | String copy constructor receives source address +408; caller writes SSO marker, `/tmp`, and a terminator | `std::string` object containing `/tmp` |
@@ -46,7 +46,7 @@ The public Ceres 2.2.0 declaration sequence helps identify these members. With t
 | `update_state_every_iteration` | +448 | +456 |
 | `callbacks` | +456 | +464 |
 
-Each listed member from the integer vector onward is shifted by 8 bytes relative to those expected public offsets. This is a positional comparison, not proof that the vendor build uses the exact public `Solver::Options` layout. The caller writes one zero byte at +376; the rest of that 8-byte slot and its field role are not resolved.
+Each listed member from the integer vector onward is shifted by 8 bytes relative to those expected public offsets. This is a positional comparison, not proof that the vendor build uses the exact public `Solver::Options` layout. The copy helper reads and writes a single byte at +376, then the next public-layout vector begins at +384. This supports an extra boolean-like field followed by alignment space, but its source-level name and semantics remain unknown.
 
 ## Dump format and caller register trace
 
@@ -64,6 +64,7 @@ Checkpoint 22 previously placed the integer vector at `+376..+399` and the short
 - `0x129330`..`0x129384`, `0x1293d0`..`0x1293dc`: string, vector, and adjacent caller writes.
 - `0x1530e8`..`0x153128`: subset-preconditioner hash-container copy rooted at +224, including the +256 float.
 - `0x1372d8`..`0x1372f0`: capacity calculation reads the container's float at offset +32.
+- `0x15317c`..`0x1531a0`: copies one byte at source +376 into destination +376.
 - `0x1531a4`..`0x1531ec`: vector header and 4-byte-element copy from source +384.
 - `0x1531f0`..`0x1531f8`: string copy constructor with source at +408.
 - `0x153204`..`0x153218`: copy of the +432..+456 region.
