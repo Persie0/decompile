@@ -1002,5 +1002,4 @@ Full trace: [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver
 
 ### Bundle-adjuster input-record guard — behavior traced
 
-The record assembled at `0x11ed64) carries `+0x2c = 50` and `+0x30 = 1). The first value feeds Ceres max_num_iterations. The second enables a guard before residual construction: skip when `0x316b8c) reports that all tested normalized 3D-sample dot products are at least `cos(10°)`; also skip when the adjuster result in `w25) is below 7; otherwise skip if `0x316c8c) reports all tested asin-derived pitch-like differences are at most 10°. The exact field name for +0x30 is unresolved.
-
+The record assembled at `0x11ed64` carries `+0x2c = 50` and `+0x30 = 1`. The first value feeds Ceres `max_num_iterations). The second enables a guard before residual construction: skip when `0x316b8c` reports that all tested normalized 3D-sample dot products are at least `cos(10°)); also skip when the adjuster result in `w25` is below 7; otherwise skip if `0x316c8c` reports all tested asin-derived pitch-like differences are at most 10°. The exact field name for +0x30 remains unresolved.
