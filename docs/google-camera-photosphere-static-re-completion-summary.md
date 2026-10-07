@@ -201,7 +201,7 @@ RTTI recovers these AutoDiffCostFunction dimensions:
 | RollPitchSensorResidual | 2 | [4, 2, 1] |
 | SensorResidual | 1 | [4, 2, 1] |
 
-Residual formulas and applied weights remain unresolved. Checkpoint 22 recovers a concrete caller-written Ceres configuration for one GlobalFocalLength path, but the vendor-specific option tail and input-dependent max-iteration value remain open. See [checkpoints 20–22](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md).
+Residual formulas and applied weights remain unresolved. Checkpoint 22 recovers a concrete caller-written Ceres configuration for one GlobalFocalLength path, but the vendor-specific option tail and input-dependent the name of the input-record +0x30 guard remain open. See [checkpoints 20–22](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md).
 
 
 Confirmed residual families:
@@ -362,6 +362,6 @@ The caller writes a concrete Ceres configuration for the traced `BundleAdjusterG
 - one solver thread and a null user ordering;
 - trust-region radii `1e4`, `1e16`, and `1e-8`;
 - function, gradient, and parameter tolerances `1e-6`, `1e-10`, and `1e-8`;
-- max iterations sourced from bundle-adjuster input-record +44.
+- `max_num_iterations = 50`, copied from bundle-adjuster input-record +0x2c.
 
 This is a static caller trace, not runtime output. The binary's option tail after +280 does not fully match the pinned upstream Ceres 2.2.0 header. Some later writes remain raw offsets; see [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md) and [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md). Residual equations and weights remain unresolved.
