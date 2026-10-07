@@ -454,6 +454,16 @@ The library contains:
 - `PatchPairwiseMatcher`
 - `spherical_pairwise_match.cc`.
 
+The FAST-9 detector uses four base integer thresholds from rodata VA `0x625a0`:
+
+```text
+[90, 55, 20, 15]
+```
+
+Before detection, it samples grayscale values on a grid with stride approximately `sqrt(width * height / 100)`. If the sampled mean is at least 50, the thresholds are unchanged. Below 50, the multiplier is `0.1 + 0.9 * mean / 50`; each threshold product is truncated to an integer. The first three candidates are skipped if their scaled threshold exceeds either `2 * mean` or the sampled intensity range. The fourth threshold is always the final fallback. The FAST-9 core receives the selected threshold at `0x39f560`.
+
+The detector reads its non-max radius from object offset `+0x14`; the suppression helper is called only when that field is at least 2. The configured radius, feature cap, and full scale-level configuration remain unresolved.
+
 This strongly indicates the visual registration pipeline uses FAST-style corner detection and oriented image-patch descriptors/matching rather than a modern neural feature matcher.
 
 ### 11.4 Line features — confirmed
@@ -484,9 +494,19 @@ Therefore visual alignment is not based on sparse feature matches alone.
 
 ### 11.6 Spherical pairwise registration — confirmed
 
-`spherical_pairwise_match.cc` is present.
+`spherical_pairwise_match.cc` is present. This matters because Photo Sphere matching occurs on camera rays/rotations rather than treating every pair as a flat translational panorama.
 
-This matters because Photo Sphere matching occurs on camera rays/rotations rather than treating every pair as a flat translational panorama.
+The traced `compute_rotation.cc` RANSAC caller passes these controls to the rotation estimator:
+
+| Control | Value |
+| --- | ---: |
+| trial boundary | 550 |
+| hard trial cap | 5000 |
+| minimum support | 2 correspondences |
+| early support threshold | 150 correspondences |
+| angular inlier threshold | `0.04363323 rad = 2.5°` |
+
+The estimator draws two distinct correspondence indices to form a rotation candidate and scores the ray pairs using the cosine-form angular gate. Its branch structure can stop when support reaches 150 before the 550-trial boundary; otherwise it stops at that boundary once at least two correspondences support a model. When support stays below two, the search can continue to 5000 trials. This configuration is established for this call path; it should not be generalized to line alignment or every RANSAC use in the library without a separate trace.
 
 ### 11.7 Bundle adjustment — confirmed
 
@@ -869,24 +889,24 @@ For a first compatible implementation, the highest-value pieces to reproduce are
 
 ## 22. What is still unknown
 
-The current static analysis does **not** yet recover:
+The current static analysis does not yet recover:
 
-- exact Photo Sphere target count and angular spacing for every FOV;
+- exact Photo Sphere target count and angular spacing for every field of view;
 - exact preview pixel format passed to `ProcessFrame`;
 - exact oriented-patch descriptor dimensions;
-- feature thresholds and pair-selection heuristics;
+- configured FAST non-max radius, feature cap, and all scale-level settings;
+- the `PatchPairwiseMatcher +0x130` maximum descriptor-distance default;
 - optical-flow weights;
-- RANSAC thresholds;
-- Ceres residual weights and robust losses;
-- exact bundle-adjustment variable locking strategy;
-- exposure/gamma model coefficients;
-- graph-cut seam energy weights;
+- additional RANSAC settings outside the traced `compute_rotation.cc` call path;
+- exact graph-edge memory layout and graph-component pruning threshold;
+- Ceres residual weights, remaining robust-loss choices, and solver settings;
+- exposure/gamma model coefficients and graph-cut seam-energy weights;
 - number of pyramid/blend levels;
-- exact full-resolution output sizing rules;
+- exact full-resolution output-sizing rules;
 - native session serialization format;
-- internal retry/failure thresholds.
+- internal retry/failure thresholds not covered by the traced paths.
 
-Those require ARM64 disassembly/decompilation or runtime instrumentation of `liblightcycle.so`.
+Those require focused ARM64 decompilation or runtime instrumentation of `liblightcycle.so`.
 
 ---
 
@@ -941,17 +961,14 @@ Native inspection workflow:
 
 ## 24. Next reverse-engineering steps
 
-The highest-value next pass would be focused ARM64 analysis of these JNI functions:
+The highest-value remaining static targets are:
 
-1. `ResetForPhotoSphereCapture` — recover target-generator parameters and target spacing.
-2. `ProcessFrame` / `TakeNewPhoto` — recover exact capture acceptance criteria.
-3. `AddImage` / `AlignNextImage` — recover image preprocessing and incremental alignment options.
-4. `FinishCapture` — recover session serialization.
-5. `RenderNextSession` — recover alignment/render option structs, blend levels and output sizing.
-6. `SetTargetHitAngleRadians` — verify how target tolerance interacts with visual overlap tests.
-
-That should be done against this exact `liblightcycle.so` SHA so offsets and findings remain reproducible.
-
+1. Trace the `FastCornerDetector` constructor/configuration to recover object field `+0x14` and any feature cap.
+2. Recover the `PatchPairwiseMatcher +0x130` maximum descriptor-distance default and complete pyramid settings.
+3. Trace runtime optical-flow constraints and their weights.
+4. Separate the remaining line-alignment and other RANSAC call paths from the now-traced rotation estimator.
+5. Recover graph-edge insertion, graph-component pruning, and exact BA residual/solver options.
+6. Trace the renderer's selected blend-level count and remaining seam/exposure parameters.
 
 ---
 
@@ -1996,3 +2013,12 @@ This confirms target acceptance is purely angular at the target-manager layer; m
 | +0xa0 | release/take session pointer |
 
 One surprising result: in this exact 8.8 build, JNI `ResetTargets()` is effectively a **no-op**; normal target reset/reinitialization happens through the session/target-manager lifecycle instead.
+
+
+### 2026-10-07 — FAST threshold schedule and brightness adaptation
+
+The four base FAST-9 thresholds are `[90, 55, 20, 15]`. The detector scales them down for dark inputs using the sampled mean rule documented in section 11.3. Its non-max radius is read from object offset `+0x14`, but the configured value and feature cap remain open. See [checkpoint 17](google-camera-photosphere-checkpoint-17-fast-threshold-schedule.md).
+
+### 2026-10-07 — Rotation-estimation RANSAC values recovered
+
+The traced `compute_rotation.cc` call uses a 2.5° angular inlier threshold, two-sample hypotheses, support threshold 2, an early support cutoff of 150, and 550/5000 trial controls. This is scoped to that call path. See [checkpoint 18](google-camera-photosphere-checkpoint-18-rotation-ransac.md).
