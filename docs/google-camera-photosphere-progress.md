@@ -316,3 +316,18 @@ The graph-cut implementation is backed by Google's IBFS max-flow code (`research
 - Robust losses: `FUN_00229e80` plus Ceres RTTI/vtables.
 - Seam costs: `FUN_004390a8`, `FUN_00439600`.
 - Analysis artifacts: runs `37518942026`, `37519726361`, `37491930779`.
+
+
+## 2026-10-07 — checkpoint 4: blender and line alignment
+
+Recovered from the existing native-analysis artifacts:
+
+- Final rendering uses a multiband-blender options field at offset `+0x30` as the actual pyramid depth. A value <= 0 selects the preview blender instead.
+- Multiband padding is derived as `1 << blend_levels` in the relevant mode, and output wrap/bounds logic uses the resulting blend distance.
+- The final blending path creates exactly `blend_levels` pyramid entries and reconstructs the mosaic from them.
+- Line alignment has separate direct solvers for one and two line pairs; more than two pairs use robust/RANSAC rotation estimation.
+- The line RANSAC angular inlier threshold is exactly **0.04363323 rad = 2.5 degrees**.
+- The same options block contains integers **550, 5000, 2, 150**. The value 2 is consumed as the minimum sample/model size; names for the other three values are not yet proven and are intentionally left unlabeled.
+- `RenderNextSession()` stores/clamps the JNI floats **0.2** and **0.95** as request parameters. Current evidence is consistent with progress/range parameters, not seam-energy weights, so the documentation no longer treats them as rendering-quality constants.
+
+Next targets: recover the upstream assignment of the final blend-level count, bundle-adjustment residual weights, optical-flow parameters, seam-cost defaults, and per-source output-resolution limiter.
