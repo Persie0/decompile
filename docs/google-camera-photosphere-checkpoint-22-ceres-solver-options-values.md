@@ -65,8 +65,8 @@ The caller does not write offsets +0, +4, or +12 in the audited initialization w
 
 - `0x129260`: sets candidate options base to `sp+0x2b0`.
 - `0x1292ac`, `0x1292b4`, `0x1292c4`, `0x1292d0`, and `0x1292ec`: writes the main double-valued trust-region defaults and preconditioner value.
-- `0x1292e8`, `0x12931c`, `0x12932c`, `0x129340), `0x12935c`, `0x12938c`, and `0x129400`: scalar stack writes.
-- `0x129348`, `0x12937c), `0x1293ac`..`0x129418`: container/string initialization and remaining fields.
+- `0x1292e8`, `0x12931c`, `0x12932c`, `0x129340`, `0x12935c`, `0x12938c`, and `0x129400`: scalar stack writes.
+- `0x129348`, `0x12937c`, `0x1293ac`..`0x129418`: container/string initialization and remaining fields.
 - `0x152634`..`0x1526e4`: callee copies enum/flag fields and checks the gradient flag.
 - `0x1527ac`: callee loads the +440/+448 double pair.
 - Pinned Ceres 2.2.0 `solver.h` and `types.h`: reference names and enum values, not proof of the vendor fork's full tail layout.
