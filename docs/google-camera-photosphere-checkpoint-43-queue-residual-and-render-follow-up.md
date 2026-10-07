@@ -41,7 +41,7 @@ Initializer raw 0x3a1808 constructs the extractor's object+32 vector with 16 pat
 
 ## Seam receiver vtable candidate
 
-The direct callsites in raw SeamFinderGraphcut body 0x33ad54 trace to four distinct incoming polymorphic pointers. Receivers at stack slots +0x48/+0x38 dispatch through vtable byte offset +0x58 with argument 100 (raw 0x33b804/0x33b81c). Receivers at +0x20/+0x10 dispatch through +0x50 after labels are applied (raw 0x33b958/0x33b96c). The RTTI export has a primary address point at Ghidra 0x50d8c8 with slot-compatible entries +0x50 -> FUN_00439a6c and +0x58 -> FUN_00439abc. The incoming receiver vptrs were not recovered, so these functions are only candidates. The separately identified ExposureUnaryCostComputer callback at raw 0x339600 does not prove these receiver mappings.
+The direct callsites in raw SeamFinderGraphcut body 0x33ad54 trace to four distinct incoming polymorphic pointers. Receivers at stack slots +0x48/+0x38 dispatch through vtable byte offset +0x58 with argument 100 (raw 0x33b804/0x33b81c). Receivers at +0x20/+0x10 dispatch through +0x50 with mask pointers in x1 after labels are applied (raw 0x33b958/0x33b96c); those callsites do not load a literal 80. The RTTI export has a primary address point at Ghidra 0x50d8c8 with slot-compatible entries +0x50 -> FUN_00439a6c and +0x58 -> FUN_00439abc. The incoming receiver vptrs were not recovered, so these functions are only candidates. The separately identified ExposureUnaryCostComputer callback at raw 0x339600 does not prove these receiver mappings.
 
 After the receiver callbacks, helper raw 0x33bd94 converts each score into a signed integer update by multiplying it by −1,000,000 or +1,000,000. It then queries the graph state and fills an integer output mask with 0/1 labels. This establishes score quantization and binary mask extraction after the graph calls, but not a later seam feather or normalized blend-weight stage.
 
@@ -53,7 +53,7 @@ AlignmentTracker processing raw 0x0f399c reads this+0x50 as a float threshold an
 
 - Whether the JNI caller repeats AlignNextImage when a missing path remains at queue head; no explicit Java retry/backoff was found.
 - Runtime AlignmentTracker and GlobalFlowSolver constructor/default values. The inspected artifacts show reads at tracker +0x50/+0x54 and solver +0x08/+0x0c/+0x10, but no corresponding writers.
-- Concrete receiver types and semantics for SeamFinderGraphcut calls at +0x58/100 and +0x50/80, plus any final mask feathering/weight normalization.
+- Concrete receiver types and semantics for SeamFinderGraphcut calls at +0x58/100 and +0x50 with mask pointers, plus any final mask feathering/weight normalization.
 - Upstream point/line row producers, coordinate calibration/units, and the point residual scalar's units.
 - Whether another path writes session.meta keys consumed by Java but omitted by the native nine-row writer; runtime capture would settle this.
 - The Android preview format on a target device; native conversion is NV21-compatible, but JNI does not receive the format enum.
