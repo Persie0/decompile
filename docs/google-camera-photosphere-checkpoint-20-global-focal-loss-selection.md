@@ -41,7 +41,7 @@ These signatures recover the template dimensions, not the residual equations or 
 
 ## Boundaries and next work
 
-This is one traced BundleAdjusterGlobalFocalLength call path. The evidence does not show that other BundleAdjuster implementations or callers use selector 1. Residual equations and weights, effective solver option values, and the meaning of options +0x2c/+0x30 remain open. [Checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md) maps the likely Solver::Options handoff and several field offsets without establishing caller-specific values. Runtime testing was unavailable because no Android runtime or device is present in this environment.
+This is one traced BundleAdjusterGlobalFocalLength call path. The evidence does not show that other BundleAdjuster implementations or callers use selector 1. Residual equations and weights and the meaning of options +0x2c/+0x30 remain open. [Checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md) recovers caller-written settings for this path, including DENSE_SCHUR with DOGLEG/SUBSPACE_DOGLEG, but the option tail after +280 remains ABI-unresolved. [Checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md) records the handoff and offset caveat. Runtime testing was unavailable because no Android runtime or device is present in this environment.
 
 ## Evidence
 
