@@ -433,7 +433,7 @@ Candidate `+312/+320` is a null `inner_iteration_ordering` shared pointer. The o
 
 - Trace the source meaning and units of point- and line-residual scales; compare other bundle-adjuster paths.
 - Trace the origin and source meaning/units of point- and line-residual scales; compare other bundle-adjuster paths.
-- Compare other bundle-adjuster option constructors and resolve remaining vendor-tail differences.
+- Compare other bundle-adjuster option constructors and verify whether any Ceres option fields differ by path.
 - Trace other RANSAC paths and graph-component pruning.
 - Continue renderer work on blend-level count, seam costs, and exposure coefficients.
 
@@ -441,3 +441,8 @@ Candidate `+312/+320` is a null `inner_iteration_ordering` shared pointer. The o
 ## 2026-10-07 — checkpoint 31: camera-model field of view
 
 The post-solve scalar read through CameraModel vtable slot `+0x40` is the camera's horizontal field of view in degrees. Linear and fisheye models read the stored radian value and convert it by 180/π; equirectangular models return 360°. Construction and the LinearCamera degree setter convert public degree inputs to internal radians. The solve's earlier slot `+0x58` call updates focal X/Y from the optimized focal scalar but leaves the FOV field unchanged, so the [10°, 150°] gate validates the camera model's own FOV. See [checkpoint 31](google-camera-photosphere-checkpoint-31-camera-model-field-of-view.md).
+
+
+## 2026-10-07 — checkpoint 32: Ceres SPSE and Jacobi options
+
+The Ceres option tail after `min_linear_solver_iterations=0` and `max_linear_solver_iterations=500` now maps through candidate `+368`: `+344=5) max SPSE iterations, `+348=false) SPSE initialization, `+352=0.1) SPSE tolerance, `+360=0.1) eta, and `+368=true) Jacobi scaling. The target validator names the SPSE and eta fields; member order and bool consumption identify Jacobi scaling. These are the pinned Ceres 2.2.0 defaults. Checkpoint 30 already mapped `+372) and `+376) to logging type and progress-to-stdout. See [checkpoint 32](google-camera-photosphere-checkpoint-32-ceres-spse-and-jacobi-options.md).
