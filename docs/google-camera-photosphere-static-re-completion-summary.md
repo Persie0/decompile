@@ -35,6 +35,9 @@ Running / checkpoint documents:
 - `docs/google-camera-photosphere-checkpoint-12-pairwise-graph-edge-boundary.md`
 - `docs/google-camera-photosphere-checkpoint-13-bundle-adjustment-boundary.md`
 - `docs/google-camera-photosphere-checkpoint-14-render-seam-blend-output.md`
+- `docs/google-camera-photosphere-checkpoint-16-corrected-static-extraction.md`
+- `docs/google-camera-photosphere-checkpoint-17-fast-threshold-schedule.md`
+- `docs/google-camera-photosphere-checkpoint-18-rotation-ransac.md`
 - this completion summary
 
 ## Recovered high-level architecture
