@@ -385,7 +385,7 @@ Full trace: [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver
 
 The caller's stack writes recover a strong core configuration for this GlobalFocalLength path: DENSE_SCHUR, DOGLEG with SUBSPACE_DOGLEG, one solver thread, trust-region radii `1e4 / 1e16 / 1e-8`, function/gradient/parameter tolerances `1e-6 / 1e-10 / 1e-8`, and a 50-iteration limit copied from input-record `+0x2c`. The user ordering is null; dense algebra is EIGEN and the sparse-library enum is SUITE_SPARSE. The gradient-check flag is false.
 
-Input-record +0x2c resolves to max_num_iterations=50. Input-record +0x30=1 selects the one-scalar pitch or two-scalar pitch/roll prior using a cos(10°) direction test, a count threshold of 7, and an asin-derived 10° pitch-like test. Input-record +0x34=1 allows NO_CONVERGENCE through the first post-solve status gate; FAILURE remains rejected. The source names and raw Ceres option writes at +64 and after +280 remain open; see [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
+Input-record +0x2c resolves to max_num_iterations=50. Input-record +0x30=1 selects the one-scalar pitch or two-scalar pitch/roll prior using a cos(10°) direction test, a count threshold of 7, and an asin-derived 10° pitch-like test. Input-record +0x34=1 allows NO_CONVERGENCE through the first post-solve status gate; FAILURE remains rejected. The qword at +64/+68 is now resolved as the line-search integer pair 20/5; +312 and +336 and later vendor-tail fields remain raw. See [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md) and [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
 
 
 ## 2026-10-07 — checkpoint 23: GlobalFocalLength residual equations
@@ -409,11 +409,15 @@ The copy helper at `0x153094` confirms the integer vector at candidate options o
 
 The field at `+436` is the gradient-check flag; the doubles at `+440` and `+448` are each `0.1`. The caller stores 1 at `+432`, matching public Ceres 2.2.0 `TEXTFILE` at the dump-format position. Register-order tracing shows the `0x3f800000` constant is stored at options `+256`, inside the subset-preconditioner hash container at +224. The capacity helper reads it as the container's float load factor, set to 1.0. The caller also stores 1 at `+368` and `+372`. The traced integer vector is empty, so the conditional dump path is bypassed. The caller writes zero at `+376`, and the copy helper copies this byte separately before the vector at `+384`; it is likely a boolean-like field, but its name and meaning remain unknown. Full trace: [checkpoint 26](google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md).
 
+## 2026-10-07 — checkpoint 27: Ceres line-search integer pair
+
+The caller's 8-byte store at candidate options `+64` preserves two little-endian integers, 20 at `+64` and 5 at `+68`. Their positions and values match the pinned Ceres 2.2.0 line-search trial-limit and restart fields. This corrects the earlier interpretation of the qword as a double. The same review corrects `+336`: it receives raw qword `0x000001f400000000`, words 0 and 500 at `+336/+340`, with no source-level mapping established. The `+312/+320` null pair remains a pointer-backed field in the observed build. Full trace: [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md).
+
 
 ### Current next targets
 
 - Identify the nested model scalar's source-level name and units, and map its accessor/setter types.
 - Trace the origin and source meaning/units of point- and line-residual scales; compare other bundle-adjuster paths.
-- Identify the byte-sized boolean-like field at +376 and its meaning; resolve remaining raw fields at +64, +312, and +336; compare other bundle-adjuster constructors.
+- Identify the byte-sized field at +376 and its meaning; resolve raw fields at +312 and +336; compare other bundle-adjuster constructors.
 - Trace other RANSAC paths and graph-component pruning.
 - Continue renderer work on blend-level count, seam costs, and exposure coefficients.

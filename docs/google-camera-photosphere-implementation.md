@@ -532,7 +532,7 @@ A close reproduction should therefore model each source image as a camera orient
 
 #### Ceres solver settings — one traced path
 
-The caller writes `DENSE_SCHUR` with `DOGLEG` / `SUBSPACE_DOGLEG`, uses one solver thread, leaves the user ordering null, and sets `max_num_iterations=50` from input-record +0x2c. It also writes trust-region radii `1e4 / 1e16 / 1e-8` and tolerances `1e-6 / 1e-10 / 1e-8`. Several tail offsets after +280 diverge from the upstream Ceres 2.2.0 header and remain raw; see [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md).
+The caller writes `DENSE_SCHUR` with `DOGLEG` / `SUBSPACE_DOGLEG`, uses one solver thread, leaves the user ordering null, and sets `max_num_iterations=50` from input-record +0x2c. It also writes trust-region radii `1e4 / 1e16 / 1e-8` and tolerances `1e-6 / 1e-10 / 1e-8`. The qword at +64 decomposes into line-search integers 20 and 5 at +64/+68, matching public Ceres 2.2.0 fields; later offsets after +280 still include unresolved vendor-layout differences. See [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md) and [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md).
 
 #### GlobalFocalLength loss selection — one traced path
 
@@ -2055,3 +2055,8 @@ The traced solve path checks that the optimized focal scalar is positive and tha
 ### 2026-10-07 — Ceres option-tail offsets corrected
 
 For the traced GlobalFocalLength options object, the copy helper confirms an empty integer vector at `+384..+407`, a `"/tmp"` string object at `+408..+431`, a gradient-check flag at `+436`, doubles `0.1` at `+440` and `+448`, and an empty callback vector at `+464..+487`. The byte at `+376` is zero and copied separately before the vector at `+384`; it appears boolean-like, but its field name and semantics are unknown. The caller stores 1 at `+432`, matching public Ceres 2.2.0 `TEXTFILE` at the dump-format position; because the iteration vector is empty, the traced dump path is skipped. The `0x3f800000` constant at options `+256` is float32 1.0 inside the subset-preconditioner hash container; helper `0x137294` reads it as the load-factor word during capacity calculation. Checkpoint 26 records the evidence and limits.
+
+
+### 2026-10-07 — Ceres line-search integer pair
+
+The caller loads rodata qword `0x0000000500000014` and stores it at solver options `+64`, yielding little-endian int32 values 20 at +64 and 5 at +68. Those positions and values match the Ceres 2.2.0 line-search iteration and direction-restart members. The qword stored at +336 is `0x000001f400000000` (words 0 and 500 at +336/+340) and remains unmapped. Full evidence is in [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md).

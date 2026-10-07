@@ -1,6 +1,6 @@
 # Pixel Camera 8.8 Photo Sphere static reverse engineering — completion summary
 
-Updated through checkpoint 26, this document summarizes the current static reverse-engineering pass for the audited artifacts.
+Updated through checkpoint 27, this document summarizes the current static reverse-engineering pass for the audited artifacts.
 
 It does **not** claim that Google's proprietary C++ source code has been recovered. The audited native library is stripped. Several exact constants and object fields still require deeper decompilation or runtime instrumentation. The current work is an engineering reconstruction of the Photo Sphere architecture, Java/JNI control flow, native object boundaries, major algorithm families, and many exact constants.
 
@@ -310,7 +310,7 @@ These remain unresolved after the current static pass:
 - complete image-pyramid pixel-generation and filter/downsample settings; the traced matcher uses three levels and coordinate factors `[1, 2, 4]`;
 - RANSAC settings outside the traced `compute_rotation.cc` call path;
 - exact graph-edge memory layout and graph-component pruning threshold;
-- source meaning/units of per-observation Ceres residual scales; the boolean-like field at +376 and remaining tail differences; source names of input `+0x30` and `+0x34`; and configurations of other bundle-adjuster paths;
+- source meaning/units of per-observation Ceres residual scales; the byte-sized field at +376, raw words at +336/+340, pointer-backed field at +312, and remaining vendor-tail differences; source names of input `+0x30` and `+0x34`; and configurations of other bundle-adjuster paths;
 - exact blend pyramid level count;
 - exact seam cost weights;
 - exact exposure/gamma adjustment coefficients;
@@ -387,3 +387,8 @@ For the traced GlobalFocalLength path, the optimized focal parameter must be pos
 ## Checkpoint 26 update — Ceres option-tail copy layout
 
 The options-copy helper confirms the integer vector at candidate +384..+407 and the dump-directory string at +408..+431, correcting checkpoint 22. The +436 gradient-check flag is false; the doubles at +440/+448 are 0.1; the callback vector at +464..+487 is empty. The caller stores 1 at +432, matching public Ceres 2.2.0 TEXTFILE by position; the integer vector is empty, so the conditional dump path is skipped. Register-order tracing places the 0x3f800000 float32 1.0 load-factor word at +256 inside the subset-preconditioner hash container and confirms writes of 1 at +368/+372. The caller writes zero at +376 and the copy helper copies it as a single byte before the vector at +384; it appears boolean-like, but its name and meaning are unknown. See [checkpoint 26](google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md).
+
+
+## Checkpoint 27 update — Ceres line-search integer pair
+
+The candidate options qword at +64 is `0x0000000500000014`; the little-endian words are 20 at +64 and 5 at +68. These match the public Ceres 2.2.0 line-search trial-limit and direction-restart fields and defaults. The caller uses a 64-bit load/store to copy these integers, not a floating-point value. This corrects checkpoint 22. The separate qword at +336 is `0x000001f400000000` (words 0 and 500 at +336/+340) and remains semantically unnamed. The pointer-backed null pair at +312/+320 also remains a Google-build ABI difference. See [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md).

@@ -61,7 +61,8 @@ The code writes these bytes after the linear-ordering pointer. Names beyond the 
 | +304 | low byte 0; the callee reads this byte as a flag |
 | +312, +320 | two zero 64-bit words; the value at +312 is passed to the ordering-copy helper |
 | +328 | 1e-3 |
-| +336 | binary64 `0.6931471805599453` |
+| +64, +68 | One 64-bit store; little-endian 32-bit words 20 and 5 | Positional match for public Ceres 2.2.0 `max_num_line_search_step_size_iterations` and `max_num_line_search_direction_restarts` |
+| +336, +340 | One 64-bit store; little-endian 32-bit words 0 and 500 | Raw values; field names and semantics unresolved |
 | +344, +348 | 5; low byte 0 |
 | +352, +360 | 0.1, 0.1 |
 | +368 | low byte 1; positionally `PER_MINIMIZER_ITERATION` |
@@ -75,7 +76,7 @@ The code writes these bytes after the linear-ordering pointer. Names beyond the 
 | +456 | false |
 | +464, +472, +480 | empty callback-vector storage |
 
-Two writes remain outside a clean upstream field mapping: a binary64 `0.6931471805599453` at +64, and a 64-bit zero at +312 that the callee passes to an ordering-copy helper. The public 2.2.0 header places two line-search integers at +64 and scalar SPSE controls at +312. The tail vector and string boundaries are +384 and +408; +432 stores 1, matching the public `TEXTFILE` dump-format value by position. Register-order review also corrects the values at +368 and +372 to 1. The `0x3f800000` constant at +256 is float32 1.0 inside the subset-preconditioner hash container rooted at +224; its capacity helper reads the corresponding float at container offset +32. See [checkpoint 26](google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md). The write at +436 is independently identified as the gradient-check switch by the callee's branch; the two doubles at +440/+448 are loaded only after that branch is enabled.
+The qword written at +64 is not a floating-point setting: the load/store preserves `0x0000000500000014`, which is two little-endian 32-bit values, 20 at +64 and 5 at +68. These positionally match public Ceres 2.2.0 `max_num_line_search_step_size_iterations` and `max_num_line_search_direction_restarts`, whose defaults are 20 and 5. The qword written at +336 is `0x000001f400000000`, or words 0 at +336 and 500 at +340; its field names and semantics remain unresolved. At +312/+320 the caller writes a null 16-byte pair, and the callee passes the first word through a shared-pointer ordering-copy helper; this does not match the public header's scalar SPSE field at +312. The tail vector and string boundaries are +384 and +408; +432 stores 1, matching the public `TEXTFILE` dump-format value by position. Register-order review also corrects the values at +368 and +372 to 1. The `0x3f800000` constant at +256 is float32 1.0 inside the subset-preconditioner hash container rooted at +224; its capacity helper reads the corresponding float at container offset +32. See [checkpoint 26](google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md) and [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md). The write at +436 is independently identified as the gradient-check switch by the callee's branch; the two doubles at +440/+448 are loaded only after that branch is enabled.
 
 The caller does not write offsets +0, +4, or +12 in the audited initialization window, although the Ceres target reads them. The input record feeding +104 is initialized with 50, so the traced solver call uses a 50-iteration limit. The input-record +0x30 selector and +0x34 nonconvergence flag have unresolved source names; checkpoint 24 documents their observed behavior.
 
@@ -83,6 +84,8 @@ The caller does not write offsets +0, +4, or +12 in the audited initialization w
 
 - `0x129260`: sets candidate options base to `sp+0x2b0`.
 - `0x1292ac`, `0x1292b4`, `0x1292c4`, `0x1292d0`, and `0x1292ec`: writes the main double-valued trust-region defaults and preconditioner value.
+- `0x129398` and `0x12940c`: loads the qword at rodata address `0x61b80` (`0x0000000500000014`) and stores it at options `+64`; its little-endian words map to +64=20 and +68=5.
+- `0x1292f0` and `0x129314`: loads the qword at rodata address `0x61a60` (`0x000001f400000000`) and stores it at options `+336`; it splits into words 0 and 500 at +336/+340.
 - `0x1292e8`, `0x12931c`, `0x12932c`, `0x129340`, `0x12935c`, `0x12938c`, and `0x129400`: scalar stack writes.
 - `0x11ed64` and `0x12939c`: input-record `+0x2c` value 50 copied to Ceres max iterations.
 - `0x128f04`..`0x129208`, `0x316b8c`, and `0x316c8c`: +0x30 sensor-prior selection and its angle/count predicates.
@@ -97,3 +100,6 @@ Runtime verification remains unavailable in the audited environment.
 Checkpoint 23 follows the cost-function vtables and recovers the four residual equations, their per-observation scales, and the Huber-versus-Trivial loss choices for this path.
 
 Checkpoint 26 later traces the options-copy helper and corrects the tail vector/string boundaries.
+
+
+Checkpoint 27 corrects the earlier double interpretation of the +64 and +336 stores using their exact rodata words and the instruction-level load/store sequence.
