@@ -92,7 +92,7 @@ The important architectural point is that Google does **not** continuously captu
 
 | Decompiled class | Role | Evidence |
 | --- | --- | --- |
-| `com.google.android.apps.lightcycle.panorama.LightCycleNative` | JNI facade for the entire LightCycle engine | Native method declarations and `System.loadLibrary("lightcycle")` |
+| `com.google.android.apps.lightcycle.panorama.LightCycleNative` | JNI facade for the entire LightCycle engine | Native method declarations and `System.loadLibrary("lightcycle"`` |
 | `p000.foc` | Photo Sphere mode/module lifecycle, session creation, start/stop | Creates session directories, initializes LightCycle, finishes capture |
 | `p000.exm` | Camera/LightCycle bridge | Selects capture type, requests stills, writes orientation records |
 | `p000.exp` | GL renderer + per-frame capture state machine | Calls `ProcessFrame`, `TakeNewPhoto`, `AddImage`, target APIs |
@@ -116,7 +116,7 @@ Because R8/ProGuard mappings are unavailable, names such as `exp`, `exm`, and `e
 
 ### Confirmed
 
-`p000.ewu.m7957a()` chooses two camera sizes:
+`p000.ewu.m7957a(`` chooses two camera sizes:
 
 1. a **small preview** size with approximately the same aspect ratio as the chosen still size;
 2. a **full-resolution still** size.
@@ -169,7 +169,7 @@ LightCycle is initialized once with:
 LightCycleNative.Init(previewWidth, previewHeight, fieldOfView, progressCallback)
 ```
 
-For the standard Photo Sphere mode, `p000.exm.m8010h()` calls:
+For the standard Photo Sphere mode, `p000.exm.m8010h(`` calls:
 
 ```text
 ResetForPhotoSphereCapture(sessionDirectory, fieldOfView)
@@ -217,7 +217,7 @@ The magnetometer is not part of the main high-frequency `eas` update visible in 
 
 ### Rotation handed to LightCycle
 
-`p000.eyi.m8046f()` returns a 4x4 filtered rotation matrix. It applies coordinate-system corrections for camera/display orientation.
+`p000.eyi.m8046f(`` returns a 4x4 filtered rotation matrix. It applies coordinate-system corrections for camera/display orientation.
 
 During rendering, `p000.exp` executes:
 
@@ -236,9 +236,9 @@ Therefore the native engine receives a continuously updated sensor pose even bef
 
 LightCycle performs a short gyro calibration sequence around target acquisition:
 
-- `StartGyroCalibration(fov)`
+- `StartGyroCalibration(fov``
 - Java accumulates integrated gyro values, sample count, and elapsed time.
-- `EndGyroCalibration(integratedGyro, sampleCount, elapsedMs)`
+- `EndGyroCalibration(integratedGyro, sampleCount, elapsedMs``
 
 The native method returns a three-element bias vector. The recovered Java UI logs/displays this result; the native engine retains its own calibration state.
 
@@ -252,14 +252,14 @@ This calibration is separate from the normal orientation estimator.
 
 The native engine exposes:
 
-- `InitTargets(rotation)`
-- `GetTargets()`
-- `GetTargetInRange()`
-- `GetNumCapturedTargets()`
-- `GetNumTotalTargets()`
-- `TargetHit()`
-- `ResetTargets()`
-- `SetTargetHitAngleRadians()`
+- `InitTargets(rotation``
+- `GetTargets(``
+- `GetTargetInRange(``
+- `GetNumCapturedTargets(``
+- `GetNumTotalTargets(``
+- `TargetHit(``
+- `ResetTargets(``
+- `SetTargetHitAngleRadians(``
 
 The returned `NewTarget` object contains:
 
@@ -281,11 +281,11 @@ Therefore target positions are not hard-coded in Java. LightCycle creates the co
 
 ### Initial anchoring
 
-When capture begins, Java resets its heading and calls `InitTargets()` with the current filtered rotation. This anchors the target lattice to the user's starting camera orientation.
+When capture begins, Java resets its heading and calls `InitTargets(`` with the current filtered rotation. This anchors the target lattice to the user's starting camera orientation.
 
 ### Adaptive target hit angle
 
-The Java renderer adjusts `SetTargetHitAngleRadians()` based on gyroscope speed.
+The Java renderer adjusts `SetTargetHitAngleRadians(`` based on gyroscope speed.
 
 Recovered range:
 
@@ -300,7 +300,7 @@ This is a small but important usability feature: target acquisition is not based
 
 ## 8. Live preview processing and automatic capture decision
 
-The core per-frame method is `p000.exp.m8012h()`.
+The core per-frame method is `p000.exp.m8012h(``.
 
 For every available low-resolution preview frame:
 
@@ -320,7 +320,7 @@ PhotoSkippedTooFast()
 
 Java only starts a real still capture if:
 
-- `TakeNewPhoto()` is true;
+- `TakeNewPhoto(`` is true;
 - the frame returned a valid tracking result;
 - a photo is not already being captured;
 - the module is in an allowed state.
@@ -331,8 +331,8 @@ This means target selection, motion gating, overlap/tracking quality, and captur
 
 The native engine exposes two different movement signals:
 
-- `MovingTooFast()`
-- `PhotoSkippedTooFast()`
+- `MovingTooFast(``
+- `PhotoSkippedTooFast(``
 
 Java uses these to show the "too fast" warning and to cancel/end calibration or target-hit state when motion becomes unsuitable.
 
@@ -344,7 +344,7 @@ This is one of the most important recovered sequences.
 
 ### Step 1: preserve pose
 
-When `TakeNewPhoto()` fires, `p000.exp` copies the current native frame transform/pose.
+When `TakeNewPhoto(`` fires, `p000.exp` copies the current native frame transform/pose.
 
 ### Step 2: tell LightCycle an image is coming
 
@@ -354,7 +354,7 @@ Java calls:
 LightCycleNative.AddImage(pose)
 ```
 
-`AddImage()` returns a **file path** where the corresponding full-resolution JPEG is expected to be stored.
+`AddImage(`` returns a **file path** where the corresponding full-resolution JPEG is expected to be stored.
 
 ### Step 3: request a full-resolution camera still
 
@@ -364,7 +364,7 @@ It also records capture-time state such as pitch and location/heading informatio
 
 ### Step 4: camera JPEG callback
 
-`p000.exk.mo2774a(byte[] jpeg)` receives the actual JPEG bytes.
+`p000.exk.mo2774a(byte[] jpeg`` receives the actual JPEG bytes.
 
 At this point Java:
 
@@ -376,7 +376,7 @@ At this point Java:
 
 `p000.ewo`, case 2:
 
-- removes the next destination path returned by `AddImage()`;
+- removes the next destination path returned by `AddImage(``;
 - writes the JPEG bytes to that file;
 - associates the file with the capture metadata;
 - queues the completed file path for incremental alignment.
@@ -460,9 +460,9 @@ The FAST-9 detector uses four base integer thresholds from rodata VA `0x625a0`:
 [90, 55, 20, 15]
 ```
 
-Before detection, it samples grayscale values on a grid with stride approximately `sqrt(width * height / 100)`. If the sampled mean is at least 50, the thresholds are unchanged. Below 50, the multiplier is `0.1 + 0.9 * mean / 50`; each threshold product is truncated to an integer. The first three candidates are skipped if their scaled threshold exceeds either `2 * mean` or the sampled intensity range. The fourth threshold is always the final fallback. The FAST-9 core receives the selected threshold at `0x39f560`.
+Before detection, it samples grayscale values on a grid with stride approximately `sqrt(width * height / 100``. If the sampled mean is at least 50, the thresholds are unchanged. Below 50, the multiplier is `0.1 + 0.9 * mean / 50`; each threshold product is truncated to an integer. The first three candidates are skipped if their scaled threshold exceeds either `2 * mean` or the sampled intensity range. The fourth threshold is always the final fallback. The FAST-9 core receives the selected threshold at `0x39f560`.
 
-The detector wrapper reads its non-max radius from object offset `+0x14` and calls suppression only when the field is at least 2. In the traced matcher setup, the detector constructor initializes this field to `-1` and the setup does not override it, so this construction skips radius-based suppression unless a later writer intervenes. The same setup sets the detector point cap to 3000; its three-level schedule is `[3000, 751, 189]`. See [checkpoint 19](google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md).
+The detector wrapper reads its non-max radius from object offset `+0x14` and calls suppression only when the field is at least 2. In the traced matcher setup, the detector constructor initializes this field to `-1` and the setup does not override it, so this construction skips radius-based suppression unless a later writer intervenes. The same setup sets the detector point cap to 3000; its three-level schedule is `[3000, 751, 189]`. See [checkpoint 19](google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md`.
 
 This strongly indicates the visual registration pipeline uses FAST-style corner detection and oriented image-patch descriptors/matching rather than a modern neural feature matcher.
 
@@ -532,7 +532,7 @@ A close reproduction should therefore model each source image as a camera orient
 
 #### Ceres solver settings — one traced path
 
-The caller initializes `minimizer_type=TRUST_REGION` at options +0, then writes `DENSE_SCHUR` with `DOGLEG` / `SUBSPACE_DOGLEG`, uses one solver thread, leaves the user ordering null, and sets `max_num_iterations=50` from input-record +0x2c. It also writes trust-region radii `1e4 / 1e16 / 1e-8` and tolerances `1e-6 / 1e-10 / 1e-8`. The qword at +64 decomposes into line-search integers 20 and 5 at +64/+68, matching public Ceres 2.2.0 fields; later offsets after +280 still include unresolved vendor-layout differences. The `TRUST_REGION` value is independently corroborated by dispatch to the RTTI-identified `TrustRegionPreprocessor`. See [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md), and [checkpoint 28](google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md).
+The caller initializes `minimizer_type=TRUST_REGION` at options +0, then writes `DENSE_SCHUR` with `DOGLEG` / `SUBSPACE_DOGLEG`, uses one solver thread, leaves the user ordering null, and sets `max_num_iterations=50` from input-record +0x2c. It also writes trust-region radii `1e4 / 1e16 / 1e-8` and tolerances `1e-6 / 1e-10 / 1e-8`. The qword at +64 decomposes into line-search integers 20 and 5 at +64/+68, matching public Ceres 2.2.0 fields; later offsets after +280 still include unresolved vendor-layout differences. The `TRUST_REGION` value is independently corroborated by dispatch to the RTTI-identified `TrustRegionPreprocessor`. See [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md`, [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md), and [checkpoint 28](google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md).
 
 #### GlobalFocalLength loss selection — one traced path
 
@@ -545,7 +545,7 @@ For the call path documented in [checkpoint 20](google-camera-photosphere-checkp
 | RollPitchSensorResidual | 2 | [4, 2, 1] |
 | SensorResidual | 1 | [4, 2, 1] |
 
-Input-record +0x2c maps to `max_num_iterations=50`, though its source field name is unknown. Input-record +0x30=1 selects between the one-scalar pitch prior and two-scalar pitch/roll prior using 10° sample-spread tests and a count threshold of 7; it does not disable sensor constraints. Input-record +0x34=1 allows Ceres `NO_CONVERGENCE` through the first post-solve status gate, while `FAILURE` remains rejected and downstream checks still run. The source field names are unknown. This behavior is scoped to the observed GlobalFocalLength path. Checkpoint 22 recovers caller-written solver settings for that path: DENSE_SCHUR with DOGLEG/SUBSPACE_DOGLEG, one solver thread, trust-region radii, tolerances, and `max_num_iterations=50` from input-record `+0x2c`. Checkpoint 23 recovers the residual equations and scale placement. Checkpoint 33 pins the match-record offsets and shows point scales are also accumulated per image; their source meaning and units remain unknown. The option tail after +280 does not fully match the pinned upstream header; checkpoint 26 corrects the vector/string offsets and leaves the raw +432 value unresolved. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md), and [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
+Input-record +0x2c maps to `max_num_iterations=50`, though its source field name is unknown. Input-record +0x30=1 selects between the one-scalar pitch prior and two-scalar pitch/roll prior using 10° sample-spread tests and a count threshold of 7; it does not disable sensor constraints. Input-record +0x34=1 allows Ceres `NO_CONVERGENCE` through the first post-solve status gate, while `FAILURE` remains rejected and downstream checks still run. The source field names are unknown. This behavior is scoped to the observed GlobalFocalLength path. Checkpoint 22 recovers caller-written solver settings for that path: DENSE_SCHUR with DOGLEG/SUBSPACE_DOGLEG, one solver thread, trust-region radii, tolerances, and `max_num_iterations=50` from input-record `+0x2c`. Checkpoint 23 recovers the residual equations and scale placement. Checkpoint 33 pins the match-record offsets and shows point scales are also accumulated per image; their source meaning and units remain unknown. The option tail after +280 does not fully match the pinned upstream header; checkpoint 26 corrects the vector/string offsets and leaves the raw +432 value unresolved. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md`, [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md), and [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
 
 
 ---
@@ -998,7 +998,7 @@ This section records values recovered directly from the reconstructed 8.8.225 Ja
 
 ### Capture-mode IDs
 
-`foc.m8613D()` maps the UI modes exactly:
+`foc.m8613D(`` maps the UI modes exactly:
 
 | ID | Mode |
 | ---: | --- |
@@ -1012,7 +1012,7 @@ Photo Sphere is the default value of the mode field.
 
 ### Preview/still size selection
 
-`ewu.m7957a()` performs the size pairing.
+`ewu.m7957a(`` performs the size pairing.
 
 For each still size, it searches preview sizes whose aspect-ratio difference is **< 0.03**, whose preview width is **< 640 px**, and chooses the preview closest to **320 px wide**.
 
@@ -1024,7 +1024,7 @@ Therefore “~320 preview / ~3000 still” is an explicit policy in the client, 
 
 ### Preview frame-rate range
 
-`ewt.m7956a()` chooses a supported FPS range that contains **30 fps**:
+`ewt.m7956a(`` chooses a supported FPS range that contains **30 fps**:
 
 - upper bound >= 30000;
 - lower bound <= 30000;
@@ -1039,13 +1039,13 @@ The still-capture camera parameters explicitly set JPEG quality to **100** befor
 
 ### Preview pixel format
 
-The Photo Sphere setup does not explicitly replace the camera preview format. It inherits the Camera1 parameter object's current preview format and sizes callback buffers from `ImageFormat.getBitsPerPixel(format)`.
+The Photo Sphere setup does not explicitly replace the camera preview format. It inherits the Camera1 parameter object's current preview format and sizes callback buffers from `ImageFormat.getBitsPerPixel(format``.
 
 On normal Android Camera1 devices this is commonly NV21, but **NV21 is not hard-coded by the recovered Photo Sphere setup**, so a compatible implementation should not rely on that assumption without querying the active format.
 
 ### Sensor sampling
 
-`eyh.onLooperPrepared()` registers:
+`eyh.onLooperPrepared(`` registers:
 
 - accelerometer (type 1): Android delay constant **1 / SENSOR_DELAY_GAME**;
 - gyroscope (type 4): **SENSOR_DELAY_GAME**;
@@ -1102,7 +1102,7 @@ target_hit_angle = 2.75 deg + extra
 
 Therefore the exact Java-selected native target radius is **2.75° .. 3.50°**.
 
-This is sent every render cycle through `SetTargetHitAngleRadians()`.
+This is sent every render cycle through `SetTargetHitAngleRadians(``.
 
 ### Target-dot visibility angles
 
@@ -1116,7 +1116,7 @@ This visual threshold is separate from the much tighter 2.75°-3.50° native tar
 
 ### Exposure-dependent motion rejection
 
-Java continuously sends the native engine a `SetSensorMovementTooFast(boolean)` signal.
+Java continuously sends the native engine a `SetSensorMovementTooFast(boolean`` signal.
 
 The input is the squared gyro magnitude:
 
@@ -1207,9 +1207,9 @@ The other capture types do not take the same normal GPano Photo Sphere branch.
 
 ### Finish-capture flag
 
-Before finalization the UI always calls `SetOutputResolutionLarge()`.
+Before finalization the UI always calls `SetOutputResolutionLarge(``.
 
-The first boolean passed to `FinishCapture()` is normally **false when at least one target was captured**. It becomes true for an empty/forced-special finish path. The final stitch is then scheduled asynchronously.
+The first boolean passed to `FinishCapture(`` is normally **false when at least one target was captured**. It becomes true for an empty/forced-special finish path. The final stitch is then scheduled asynchronously.
 
 
 ---
@@ -1229,7 +1229,7 @@ Current status:
 
 New confirmed/recovered findings since the first implementation map:
 
-1. `TakeNewPhoto()` and `MovingTooFast()` are thin JNI reads of native state flags updated elsewhere, primarily by `ProcessFrame()`.
+1. `TakeNewPhoto(`` and `MovingTooFast(`` are thin JNI reads of native state flags updated elsewhere, primarily by `ProcessFrame(``.
 2. All capture modes funnel through a shared native reset/setup routine.
 3. Native capture mode IDs recovered so far:
    - 0 = Photo Sphere
@@ -1240,10 +1240,10 @@ New confirmed/recovered findings since the first implementation map:
    - 5 = Calibration
 4. The shared capture reset path hard-codes an internal processing/matching width of **1600**.
 5. A special boolean path is enabled for Photo Sphere and calibration modes.
-6. `RenderNextSession()` passes fixed floating-point parameters **0.2** and **0.95** into the native renderer/session path before dispatching the render operation.
+6. `RenderNextSession(`` passes fixed floating-point parameters **0.2** and **0.95** into the native renderer/session path before dispatching the render operation.
 7. Photo Sphere target generation is latitude-band/ring based:
    - bands close enough to a pole collapse to a single pole target;
-   - otherwise the generator derives the number of targets around a latitude from camera FOV/overlap geometry and `cos(latitude)`;
+   - otherwise the generator derives the number of targets around a latitude from camera FOV/overlap geometry and `cos(latitude``;
    - the ring target count is forced to an odd number and distributed symmetrically.
    Exact formula/constants are being confirmed from focused decompilation before being promoted from partial recovery to confirmed pseudocode.
 
@@ -1257,7 +1257,7 @@ This section will be updated incrementally as additional constants, formulas and
 
 ### 2026-10-07 — Target-generator formulas recovered
 
-Focused Ghidra decompilation of the native target generator completed successfully (Playground run `37601412924`).
+Focused Ghidra decompilation of the native target generator completed successfully (Playground run `37601412924``.
 
 The previously unknown native constants are now identified exactly from the binary:
 
@@ -1350,7 +1350,7 @@ New confirmed findings:
 1. **The Photo Sphere target generator uses actual optical FOV, not a fixed grid.**
    - It queries image width, image height, and focal length from the active camera model.
    - It computes the angular field of view with the pinhole relation:
-     `fov = 2 * atan((dimension / 2) / focal_length)`.
+     `fov = 2 * atan((dimension / 2` / focal_length)`.
    - It swaps the two effective FOV axes when the starting orientation indicates the camera axes are rotated relative to the world frame.
 
 2. **The full-ring target-count formula is recovered.** For a latitude `lat`:
@@ -1393,18 +1393,18 @@ New confirmed findings:
    - The target graph therefore provides a structured capture traversal rather than only an unordered list of dots.
 
 6. **Pole behavior is special-cased.**
-   - When `cos(latitude)` becomes sufficiently small, target generation clamps latitude to +/-90 degrees and emits a single pole target.
+   - When `cos(latitude`` becomes sufficiently small, target generation clamps latitude to +/-90 degrees and emits a single pole target.
    - This explains the top/bottom single-target behavior of the classic Google Photo Sphere UI.
 
 7. **Confirmed JNI ownership details.**
-   - `TakeNewPhoto()` is a direct read of a native byte flag; the decision itself is produced during `ProcessFrame()`.
-   - `AddImage(pose)` forwards the pose to the session builder and returns the native-selected source-image filename.
-   - `AlignNextImage()` directly invokes the incremental aligner's next-image operation.
-   - `InitTargets(rotation)` sends the start rotation to the session builder and immediately retrieves the generated target vector.
-   - `SetTargetHitAngleRadians()` forwards the Java-selected dynamic 2.75-3.50 degree threshold into the native session builder.
+   - `TakeNewPhoto(`` is a direct read of a native byte flag; the decision itself is produced during `ProcessFrame(``.
+   - `AddImage(pose`` forwards the pose to the session builder and returns the native-selected source-image filename.
+   - `AlignNextImage(`` directly invokes the incremental aligner's next-image operation.
+   - `InitTargets(rotation`` sends the start rotation to the session builder and immediately retrieves the generated target vector.
+   - `SetTargetHitAngleRadians(`` forwards the Java-selected dynamic 2.75-3.50 degree threshold into the native session builder.
 
 8. **Exact final-render JNI constants are confirmed from instructions, not string inference.**
-   `RenderNextSession()` builds its native render request using the IEEE-754 constants:
+   `RenderNextSession(`` builds its native render request using the IEEE-754 constants:
    - `0x3e4ccccd = 0.2f`
    - `0x3f733333 ~= 0.95f`
    Their semantic field names are still being recovered from the render-request constructor.
@@ -1412,7 +1412,7 @@ New confirmed findings:
 Remaining work in the current pass:
 
 - resolve the default overlap fields used by the Photo Sphere target-parameter struct;
-- name the session-builder vtable methods behind `ProcessFrame()`;
+- name the session-builder vtable methods behind `ProcessFrame(``;
 - recover the exact criteria that set `TakeNewPhoto`, `TargetHit`, `MovingTooFast`, and `PhotoSkippedTooFast`;
 - map incremental-alignment option values and final-render blend/seam settings.
 
@@ -1423,14 +1423,14 @@ The JNI state behind the four capture-status methods is now mapped exactly:
 
 | JNI getter | Native state byte |
 | --- | --- |
-| `TargetHit()` | `0x4170d8` |
-| `TakeNewPhoto()` | `0x4170d9` |
-| `MovingTooFast()` | `0x4170da` |
-| `PhotoSkippedTooFast()` | `0x4170db` |
+| `TargetHit(`` | `0x4170d8` |
+| `TakeNewPhoto(`` | `0x4170d9` |
+| `MovingTooFast(`` | `0x4170da` |
+| `PhotoSkippedTooFast(`` | `0x4170db` |
 
-`SetSensorMovementTooFast(boolean)` directly writes `MovingTooFast`.
+`SetSensorMovementTooFast(boolean`` directly writes `MovingTooFast`.
 
-The fourth argument passed by Java into `ProcessFrame(..., boolean allowCapture)` is:
+The fourth argument passed by Java into `ProcessFrame(..., boolean allowCapture`` is:
 
 ```text
 allowCapture =
@@ -1525,15 +1525,15 @@ Therefore the target hit angle varies linearly from:
 - **2.75° at <=10°/s**
 - to **3.50° at >=40°/s**.
 
-The resulting value is converted to radians and passed into `SetTargetHitAngleRadians()`.
+The resulting value is converted to radians and passed into `SetTargetHitAngleRadians(``.
 
 
 
 ### 2026-10-07 — Capture-state and output-resolution pass
 
-This pass resolves the native capture flags and the second rejection check used by `ProcessFrame()`.
+This pass resolves the native capture flags and the second rejection check used by `ProcessFrame(``.
 
-#### Exact `ProcessFrame()` capture-state logic
+#### Exact `ProcessFrame(`` capture-state logic
 
 The JNI function at `0x001eeef4` performs this sequence after processing the low-resolution frame:
 
@@ -1553,22 +1553,22 @@ if capture_enabled && target_hit:
         TakeNewPhoto = true
 ```
 
-The exported state accessors are thin reads of these native/global flags. In particular, `TakeNewPhoto()` is not another expensive analysis pass.
+The exported state accessors are thin reads of these native/global flags. In particular, `TakeNewPhoto(`` is not another expensive analysis pass.
 
-#### `MovingTooFast()` is Java sensor state, not a second visual estimator
+#### `MovingTooFast(`` is Java sensor state, not a second visual estimator
 
-`SetSensorMovementTooFast(boolean)` supplies the exposure-dependent gyroscope threshold result from Java to the native capture state. `MovingTooFast()` reflects that state.
+`SetSensorMovementTooFast(boolean`` supplies the exposure-dependent gyroscope threshold result from Java to the native capture state. `MovingTooFast(`` reflects that state.
 
-This corrects the earlier broad description that `MovingTooFast()` might represent an independent native visual-motion estimate.
+This corrects the earlier broad description that `MovingTooFast(`` might represent an independent native visual-motion estimate.
 
-#### Exact `DeviceOrientationStatus()` identity and purpose
+#### Exact `DeviceOrientationStatus(`` identity and purpose
 
-The JNI wrapper `LightCycleNative.DeviceOrientationStatus()`:
+The JNI wrapper `LightCycleNative.DeviceOrientationStatus(``:
 
 1. asks the frame/tracker object for the current 3x3 camera pose;
-2. calls the same `CaptureSessionBuilderImpl` vtable method at offset `+0x78` that `ProcessFrame()` uses as its second rejection test.
+2. calls the same `CaptureSessionBuilderImpl` vtable method at offset `+0x78` that `ProcessFrame(`` uses as its second rejection test.
 
-The Java caller `p000.exh.m8000a()` forwards the result into `p000.exp`. Java interprets:
+The Java caller `p000.exh.m8000a(`` forwards the result into `p000.exp`. Java interprets:
 
 - `-1` as **rotate counter-clockwise** guidance;
 - `+1` as **rotate clockwise** guidance;
@@ -1602,9 +1602,9 @@ Thus a target hit can be suppressed for either excessive gyroscope movement **or
 
 The three JNI setters only assign an enum:
 
-- `SetOutputResolutionSmall()` -> preset **1**
-- `SetOutputResolutionMedium()` -> preset **2**
-- `SetOutputResolutionLarge()` -> preset **3**
+- `SetOutputResolutionSmall(`` -> preset **1**
+- `SetOutputResolutionMedium(`` -> preset **2**
+- `SetOutputResolutionLarge(`` -> preset **3**
 
 `photosphere_parameters.cc` maps those presets to pixel budgets:
 
@@ -1614,7 +1614,7 @@ The three JNI setters only assign an enum:
 | Medium | 26,000,000 |
 | Large | 70,000,000 |
 
-Photo Sphere Java calls `SetOutputResolutionLarge()` before final processing, so its requested native output ceiling is **70 MP**.
+Photo Sphere Java calls `SetOutputResolutionLarge(`` before final processing, so its requested native output ceiling is **70 MP**.
 
 A second native cap is then applied:
 
@@ -1761,7 +1761,7 @@ The recovered test is:
 dot(ray1, ray2) >= 0.9396926
 ```
 
-where `0.9396926 ~= cos(20°)`.
+where `0.9396926 ~= cos(20°``.
 
 This is a geometric pre-filter before descriptor comparison.
 
@@ -1949,17 +1949,17 @@ Undo performs the corresponding reverse activation update.
 
 `TargetManagerCommon` initializes two angular thresholds:
 
-- `cos(3°) = 0.9986295104`
-- `cos(15°) = 0.9659258127`
+- `cos(3°` = 0.9986295104`
+- `cos(15°` = 0.9659258127`
 
 They have different jobs:
 
 - **3°** is the native default capture-hit radius.
 - **15°** is the separate “target in range” radius.
 
-Java continuously overrides the 3° default with its dynamic **2.75° .. 3.50°** hit radius through `SetTargetHitAngleRadians()`.
+Java continuously overrides the 3° default with its dynamic **2.75° .. 3.50°** hit radius through `SetTargetHitAngleRadians(``.
 
-The 15° in-range threshold remains separate and is what `GetTargetInRange()` uses.
+The 15° in-range threshold remains separate and is what `GetTargetInRange(`` uses.
 
 #### Exact nearest-target / hit algorithm
 
@@ -1969,10 +1969,10 @@ For every tracking pose, `TargetManagerCommon`:
 2. computes a dot product against every target direction;
 3. selects the target with maximum dot product;
 4. stores that index as the nearest target;
-5. if `max_dot > cos(15°)`, stores it as the in-range target; otherwise stores `-1`;
+5. if `max_dot > cos(15°``, stores it as the in-range target; otherwise stores `-1`;
 6. reports a **capture hit** only when:
    - the selected target state is exactly `1`; and
-   - `max_dot > cos(current_hit_angle)`.
+   - `max_dot > cos(current_hit_angle``.
 
 Equivalent pseudocode:
 
@@ -1988,7 +1988,7 @@ target_hit =
     && max_dot > cos(dynamic_hit_angle)
 ```
 
-This confirms target acceptance is purely angular at the target-manager layer; movement and device-orientation rejection are applied afterward by `ProcessFrame()`.
+This confirms target acceptance is purely angular at the target-manager layer; movement and device-orientation rejection are applied afterward by `ProcessFrame(``.
 
 #### Target-manager vtable recovered
 
@@ -2032,25 +2032,25 @@ This confirms target acceptance is purely angular at the target-manager layer; m
 | +0x98 | return session pointer |
 | +0xa0 | release/take session pointer |
 
-One surprising result: in this exact 8.8 build, JNI `ResetTargets()` is effectively a **no-op**; normal target reset/reinitialization happens through the session/target-manager lifecycle instead.
+One surprising result: in this exact 8.8 build, JNI `ResetTargets(`` is effectively a **no-op**; normal target reset/reinitialization happens through the session/target-manager lifecycle instead.
 
 
 ### 2026-10-07 — FAST threshold schedule and brightness adaptation
 
-The four base FAST-9 thresholds are `[90, 55, 20, 15]`. The detector scales them down for dark inputs using the sampled mean rule documented in section 11.3. Its non-max radius is read from object offset `+0x14`, but the configured value and feature cap remain open. See [checkpoint 17](google-camera-photosphere-checkpoint-17-fast-threshold-schedule.md).
+The four base FAST-9 thresholds are `[90, 55, 20, 15]`. The detector scales them down for dark inputs using the sampled mean rule documented in section 11.3. Its non-max radius is read from object offset `+0x14`, but the configured value and feature cap remain open. See [checkpoint 17](google-camera-photosphere-checkpoint-17-fast-threshold-schedule.md`.
 
 ### 2026-10-07 — Rotation-estimation RANSAC values recovered
 
-The traced `compute_rotation.cc` call uses a 2.5° angular inlier threshold, two-sample hypotheses, support threshold 2, an early support cutoff of 150, and 550/5000 trial controls. This is scoped to that call path. See [checkpoint 18](google-camera-photosphere-checkpoint-18-rotation-ransac.md).
+The traced `compute_rotation.cc` call uses a 2.5° angular inlier threshold, two-sample hypotheses, support threshold 2, an early support cutoff of 150, and 550/5000 trial controls. This is scoped to that call path. See [checkpoint 18](google-camera-photosphere-checkpoint-18-rotation-ransac.md`.
 
 ### 2026-10-07 — PatchPairwiseMatcher limits and pyramid configuration
 
-The traced matcher construction paths set `+0x128 = 30`, `+0x12c = 3000`, and `+0x130 = 375.0`; `+0x134` remains 3. The matcher processes three levels, with detector point limits `[3000, 751, 189]` and a 30-entry match-index list cap per level. It squares the 375.0 field to obtain a 140625 maximum squared patch distance, then applies the 0.64000005 best/second-best squared-distance ratio gate. The detector constructor initializes `+0x14` to `-1`; its wrapper runs radius suppression only for values at least 2. These values are scoped to the observed matcher paths. See [checkpoint 19](google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md).
+The traced matcher construction paths set `+0x128 = 30`, `+0x12c = 3000`, and `+0x130 = 375.0`; `+0x134` remains 3. The matcher processes three levels, with detector point limits `[3000, 751, 189]` and a 30-entry match-index list cap per level. It squares the 375.0 field to obtain a 140625 maximum squared patch distance, then applies the 0.64000005 best/second-best squared-distance ratio gate. The detector constructor initializes `+0x14` to `-1`; its wrapper runs radius suppression only for values at least 2. These values are scoped to the observed matcher paths. See [checkpoint 19](google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md`.
 
 
 ### 2026-10-07 — GlobalFocalLength post-solve validation
 
-The traced solve path checks that the optimized focal scalar is positive and that the shared image center stays within the returned width/height bounds. When the fourth-argument count is nonzero, it clones camera model zero, applies the optimized focal scalar to the model's X/Y focal fields, then reads its horizontal field of view through vtable slot `+0x40`. Linear/fisheye models return degrees converted from the stored radians; equirectangular models return 360°. The finite accepted range is `[10°, 150°]`. This gate checks the camera model's own FOV, independently of the optimized focal scalar. Passing paths normalize each image quaternion and issue an indexed transform update. The return bit is 1 for an accepted path and 0 for rejection. See [checkpoint 25](google-camera-photosphere-checkpoint-25-post-solve-output-validation.md) and [checkpoint 31](google-camera-photosphere-checkpoint-31-camera-model-field-of-view.md).
+The traced solve path checks that the optimized focal scalar is positive and that the shared image center stays within the returned width/height bounds. When the fourth-argument count is nonzero, it clones camera model zero, applies the optimized focal scalar to the model's X/Y focal fields, then reads its horizontal field of view through vtable slot `+0x40`. Linear/fisheye models return degrees converted from the stored radians; equirectangular models return 360°. The finite accepted range is `[10°, 150°]`. This gate checks the camera model's own FOV, independently of the optimized focal scalar. Passing paths normalize each image quaternion and issue an indexed transform update. The return bit is 1 for an accepted path and 0 for rejection. See [checkpoint 25](google-camera-photosphere-checkpoint-25-post-solve-output-validation.md` and [checkpoint 31](google-camera-photosphere-checkpoint-31-camera-model-field-of-view.md).
 
 ### 2026-10-07 — Ceres option-tail offsets corrected
 
@@ -2059,34 +2059,34 @@ For the traced GlobalFocalLength options object, the copy helper confirms an emp
 
 ### 2026-10-07 — Ceres line-search integer pair
 
-The caller loads rodata qword `0x0000000500000014` and stores it at solver options `+64`, yielding little-endian int32 values 20 at +64 and 5 at +68. Those positions and values match the Ceres 2.2.0 line-search iteration and direction-restart members. The qword stored at +336 is `0x000001f400000000` (words 0 and 500 at +336/+340) and remains unmapped. Full evidence is in [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md).
+The caller loads rodata qword `0x0000000500000014` and stores it at solver options `+64`, yielding little-endian int32 values 20 at +64 and 5 at +68. Those positions and values match the Ceres 2.2.0 line-search iteration and direction-restart members. The qword stored at +336 is `0x000001f400000000` (words 0 and 500 at +336/+340` and remains unmapped. Full evidence is in [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md).
 
 
 ### 2026-10-07 — Ceres minimizer type and preprocessor dispatch
 
-The candidate options record begins with `[1, 2, 1, 0]` at +0..+12. Under the pinned Ceres 2.2.0 enums, +0 selects `TRUST_REGION`; the copied value dispatches through the solver factory to the RTTI-identified `TrustRegionPreprocessor` at `0x1ad7f4`. This confirms the trust-region path for the explicit `DOGLEG` / `SUBSPACE_DOGLEG` settings. The fields at +312/+320, +336/+340, and +376 remain unresolved. See [checkpoint 28](google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md).
+The candidate options record begins with `[1, 2, 1, 0]` at +0..+12. Under the pinned Ceres 2.2.0 enums, +0 selects `TRUST_REGION`; the copied value dispatches through the solver factory to the RTTI-identified `TrustRegionPreprocessor` at `0x1ad7f4`. This confirms the trust-region path for the explicit `DOGLEG` / `SUBSPACE_DOGLEG` settings. The fields at +312/+320, +336/+340, and +376 remain unresolved. See [checkpoint 28](google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md`.
 
 
 ### 2026-10-07 — Ceres linear-solver iteration limits
 
-For the traced GlobalFocalLength options object, candidate `+336/+340` is identified by the options validator as `min_linear_solver_iterations` and `max_linear_solver_iterations`. The caller supplies 0 and 500, respectively. The validator rejects negative values and requires minimum <= maximum, matching pinned Ceres 2.2.0 `TrustRegionOptionsAreValid`; the values also match the pinned header defaults. The Google build has different field placement, so the mapping rests on its diagnostic strings and checks. The pointer-backed field at `+312/+320` and byte at `+376` remain unresolved. See [checkpoint 29](google-camera-photosphere-checkpoint-29-ceres-linear-solver-iteration-limits.md).
+For the traced GlobalFocalLength options object, candidate `+336/+340` is identified by the options validator as `min_linear_solver_iterations` and `max_linear_solver_iterations`. The caller supplies 0 and 500, respectively. The validator rejects negative values and requires minimum <= maximum, matching pinned Ceres 2.2.0 `TrustRegionOptionsAreValid`; the values also match the pinned header defaults. The Google build has different field placement, so the mapping rests on its diagnostic strings and checks. The pointer-backed field at `+312/+320` and byte at `+376` remain unresolved. See [checkpoint 29](google-camera-photosphere-checkpoint-29-ceres-linear-solver-iteration-limits.md`.
 
 
 ### 2026-10-07 — Ceres inner-iteration ordering and logging fields
 
-The candidate `+312/+320` pair is the null `inner_iteration_ordering` shared pointer. The validator's `+304` boolean gates a nonnegative check of `+328`, whose error names it `inner_iteration_tolerance`; pinned Ceres 2.2.0 places the ordering pointer between those two fields. The caller sets `use_inner_iterations=false`, leaves the ordering null, and writes tolerance `0.001`. Candidate `+372=1` and byte `+376=0`, immediately before the known dump vector at `+384`, map to `logging_type=PER_MINIMIZER_ITERATION` and `minimizer_progress_to_stdout=false`. See [checkpoint 30](google-camera-photosphere-checkpoint-30-ceres-inner-iteration-and-logging-fields.md).
+The candidate `+312/+320` pair is the null `inner_iteration_ordering` shared pointer. The validator's `+304` boolean gates a nonnegative check of `+328`, whose error names it `inner_iteration_tolerance`; pinned Ceres 2.2.0 places the ordering pointer between those two fields. The caller sets `use_inner_iterations=false`, leaves the ordering null, and writes tolerance `0.001`. Candidate `+372=1` and byte `+376=0`, immediately before the known dump vector at `+384`, map to `logging_type=PER_MINIMIZER_ITERATION` and `minimizer_progress_to_stdout=false`. See [checkpoint 30](google-camera-photosphere-checkpoint-30-ceres-inner-iteration-and-logging-fields.md`.
 
 
 ### 2026-10-07 — Ceres SPSE and Jacobi option group
 
-For the traced GlobalFocalLength call, candidate fields `+344..+368` map to `max_num_spse_iterations=5`, `use_spse_initialization=false`, `spse_tolerance=0.1`, `eta=0.1`, and `jacobi_scaling=true`. Target diagnostics name the four SPSE/eta fields; the final boolean maps by Ceres 2.2.0 member order and its use in the internal linear-solver options. These are the pinned Ceres defaults. Together with the already mapped `+372` logging type and `+376` stdout flag, this resolves the compact option group for this caller. See [checkpoint 32](google-camera-photosphere-checkpoint-32-ceres-spse-and-jacobi-options.md).
+For the traced GlobalFocalLength call, candidate fields `+344..+368` map to `max_num_spse_iterations=5`, `use_spse_initialization=false`, `spse_tolerance=0.1`, `eta=0.1`, and `jacobi_scaling=true`. Target diagnostics name the four SPSE/eta fields; the final boolean maps by Ceres 2.2.0 member order and its use in the internal linear-solver options. These are the pinned Ceres defaults. Together with the already mapped `+372` logging type and `+376` stdout flag, this resolves the compact option group for this caller. See [checkpoint 32](google-camera-photosphere-checkpoint-32-ceres-spse-and-jacobi-options.md`.
 
 
 ### 2026-10-07 — GlobalFocalLength match-record layouts and scale aggregation
 
-The GlobalFocalLength cost builder reads point records at a 28-byte stride: the two image-coordinate pairs are at offsets `+0..+12`, the multiplier is at `+24`, and image-index fields `+16/+20` are not read by this cost builder. It reads line records at a 36-byte stride: four endpoint pairs at `+0..+28` and multiplier at `+32`. The separate helper `0x318990` adds each point record's `+24` multiplier into both endpoint images' totals across pairwise edges, and the caller uses those totals in thresholded bookkeeping. These findings add exact storage offsets and a second observed use of the point multiplier; its source-level name and units remain unresolved. Full trace: [checkpoint 33](google-camera-photosphere-checkpoint-33-global-focal-match-record-layouts.md).
+The GlobalFocalLength cost builder reads point records at a 28-byte stride: the two image-coordinate pairs are at offsets `+0..+12`, the multiplier is at `+24`, and image-index fields `+16/+20` are not read by this cost builder. It reads line records at a 36-byte stride: four endpoint pairs at `+0..+28` and multiplier at `+32`. The separate helper `0x318990` adds each point record's `+24` multiplier into both endpoint images' totals across pairwise edges, and the caller uses those totals in thresholded bookkeeping. These findings add exact storage offsets and a second observed use of the point multiplier; its source-level name and units remain unresolved. Full trace: [checkpoint 33](google-camera-photosphere-checkpoint-33-global-focal-match-record-layouts.md`.
 
 
 ### 2026-10-07 — GlobalFocalLength point-record scale source
 
-The pair-grid producer selects a point-record multiplier from a score compared against `0.9`: `0.25` for a less-than result and `0.125` otherwise. It appends successful 28-byte point records with two coordinate pairs, image indices at `+16/+20), and the multiplier at `+24). A separate estimator-success path invokes `0x316420) with factor `0.125); the helper scales point `+24) values for type-5 edges whose unordered endpoint pair also appears among type-9 edges. It leaves line records untouched. The score's virtual inputs, source-level multiplier name/units, relationship between the graph contexts, and line-record `+32) source remain unresolved. See [checkpoint 34](google-camera-photosphere-checkpoint-34-point-record-weight-source.md).
+The pair-grid producer selects a point-record multiplier from a score compared against `0.9`: `0.25` for a less-than result and `0.125` otherwise. It appends successful 28-byte point records with two coordinate pairs, image indices at `+16/+20`, and the multiplier at `+24`. A separate estimator-success path invokes `0x316420` with factor `0.125`; the helper scales point `+24` values for type-5 edges whose unordered endpoint pair also appears among type-9 edges. It leaves line records untouched. The score's virtual inputs, source-level multiplier name/units, relationship between the graph contexts, and line-record `+32` source remain unresolved. See [checkpoint 34](google-camera-photosphere-checkpoint-34-point-record-weight-source.md).
