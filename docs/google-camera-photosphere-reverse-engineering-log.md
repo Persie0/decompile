@@ -990,7 +990,7 @@ The 1600-pixel value is explicitly passed into native session construction and m
 
 ### Caller-written solver choices — high confidence for the traced path
 
-The caller writes enum values for `DENSE_SCHUR`, `DOGLEG`, `SUBSPACE_DOGLEG`, `JACOBI`, `EIGEN`, `SUITE_SPARSE`, and `AMD`. It also writes one thread; radii `1e4`, `1e16`, `1e-8`; tolerances `1e-6`, `1e-10`, `1e-8`; and other prefix settings listed in checkpoint 22. Maximum iterations comes from input-record +44 rather than a literal.
+The caller writes enum values for `DENSE_SCHUR`, `DOGLEG`, `SUBSPACE_DOGLEG`, `JACOBI`, `EIGEN`, `SUITE_SPARSE`, and `AMD`. It also writes one thread; radii `1e4`, `1e16`, `1e-8`; tolerances `1e-6`, `1e-10`, `1e-8`; and other prefix settings listed in checkpoint 22. The input record carries 50 at +0x2c, which becomes Ceres max_num_iterations; +0x30=1 enables the residual guard described below.
 
 The callee reads the byte at +436 as a gradient-check switch and skips the gradient-check path when it is zero. The caller writes +436 as zero. Its double pair at +440/+448 is `0.1, 0.1`, but that pair is not used on this call because the switch is false.
 
@@ -999,3 +999,8 @@ The callee reads the byte at +436 as a gradient-check switch and skips the gradi
 The observed reads and caller writes agree with the public Ceres 2.2.0 layout through the solver-library fields. The tail after +280 diverges: +304 is read as a byte flag, +312 is treated as a pointer-backed ordering source, and +436/+440 follow a different tail offset than the upstream header. Keep those fields raw until the exact Google build layout is recovered. Residual equations/weights and the semantics of options +0x2c/+0x30 remain open.
 
 Full trace: [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md) and [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md).
+
+### Bundle-adjuster input-record guard — behavior traced
+
+The record assembled at `0x11ed64) carries `+0x2c = 50` and `+0x30 = 1). The first value feeds Ceres max_num_iterations. The second enables a guard before residual construction: skip when `0x316b8c) reports that all tested normalized 3D-sample dot products are at least `cos(10°)`; also skip when the adjuster result in `w25) is below 7; otherwise skip if `0x316c8c) reports all tested asin-derived pitch-like differences are at most 10°. The exact field name for +0x30 is unresolved.
+
