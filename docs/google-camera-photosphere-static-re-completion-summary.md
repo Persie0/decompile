@@ -48,6 +48,7 @@ Running / checkpoint documents:
 - `docs/google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md`
 - `docs/google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md`
 - `docs/google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md`
+- `docs/google-camera-photosphere-checkpoint-29-ceres-linear-solver-iteration-limits.md`
 - this completion summary
 
 ## Recovered high-level architecture
@@ -312,7 +313,7 @@ These remain unresolved after the current static pass:
 - complete image-pyramid pixel-generation and filter/downsample settings; the traced matcher uses three levels and coordinate factors `[1, 2, 4]`;
 - RANSAC settings outside the traced `compute_rotation.cc` call path;
 - exact graph-edge memory layout and graph-component pruning threshold;
-- source meaning/units of per-observation Ceres residual scales; the byte-sized field at +376, raw words at +336/+340, pointer-backed field at +312, and remaining vendor-tail differences; source names of input `+0x30` and `+0x34`; and configurations of other bundle-adjuster paths;
+- source meaning/units of per-observation Ceres residual scales; the byte-sized field at +376, pointer-backed field at +312, and remaining vendor-tail differences; source names of input `+0x30` and `+0x34`; and configurations of other bundle-adjuster paths;
 - exact blend pyramid level count;
 - exact seam cost weights;
 - exact exposure/gamma adjustment coefficients;
@@ -399,3 +400,8 @@ The candidate options qword at +64 is `0x0000000500000014`; the little-endian wo
 ## Checkpoint 28 update — Ceres trust-region dispatch
 
 The candidate options prefix at +0..+12 is initialized to `[1, 2, 1, 0]`. Pinned Ceres 2.2.0 enum declarations identify +0 as `TRUST_REGION`; the copied value selects the RTTI-identified `TrustRegionPreprocessor` in the solver factory. This confirms the trust-region path alongside `DOGLEG` / `SUBSPACE_DOGLEG`. Vendor-specific fields +312/+320, +336/+340 and +376 remain unresolved. See [checkpoint 28](google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md).
+
+
+## Checkpoint 29 update — Ceres linear-solver iteration limits
+
+The candidate qword at `+336/+340` is `[0, 500]`. The target's own Ceres options validator labels these as `min_linear_solver_iterations` and `max_linear_solver_iterations`, rejects negative values, and enforces minimum <= maximum. The check sequence matches pinned Ceres 2.2.0 trust-region validation, whose header defaults are also 0 and 500. The Google build places these members at different offsets than the pinned public header; the mapping is supported by binary diagnostics and control flow. The pointer-backed field at +312/+320 and byte at +376 remain unresolved. See [checkpoint 29](google-camera-photosphere-checkpoint-29-ceres-linear-solver-iteration-limits.md).

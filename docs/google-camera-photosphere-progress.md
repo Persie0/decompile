@@ -419,10 +419,15 @@ The caller's 8-byte store at candidate options `+64` preserves two little-endian
 The caller initializes solver options `+0..+12` from rodata as `[1, 2, 1, 0]`. Against pinned Ceres 2.2.0 enums, this is `TRUST_REGION`, `LBFGS`, `WOLFE`, and `FLETCHER_REEVES`. The options copy helper preserves the prefix, and the solver's factory dispatches `minimizer_type=1` to the RTTI-identified `TrustRegionPreprocessor` (`0x1ad7f4`). This confirms trust-region mode for the path that explicitly selects `DOGLEG` / `SUBSPACE_DOGLEG`. The raw fields at +312/+320, +336/+340, and +376 remain unresolved; see [checkpoint 28](google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md).
 
 
+## 2026-10-07 — checkpoint 29: Ceres linear-solver iteration limits
+
+The caller's qword at candidate options `+336/+340` is `[0, 500]`. The options validator labels these positions `min_linear_solver_iterations` and `max_linear_solver_iterations`, checks each is nonnegative, and enforces minimum <= maximum. That validation sequence matches pinned Ceres 2.2.0 `TrustRegionOptionsAreValid`; the values also match its public defaults. The Google build uses different member offsets, so the field names are grounded in its diagnostics and checks rather than upstream offsets. The pointer-backed pair at +312/+320 and byte at +376 remain unresolved. See [checkpoint 29](google-camera-photosphere-checkpoint-29-ceres-linear-solver-iteration-limits.md).
+
+
 ### Current next targets
 
 - Identify the nested model scalar's source-level name and units, and map its accessor/setter types.
 - Trace the origin and source meaning/units of point- and line-residual scales; compare other bundle-adjuster paths.
-- Identify the byte-sized field at +376 and its meaning; resolve raw fields at +312 and +336; compare other bundle-adjuster constructors.
+- Identify the byte-sized field at +376 and the pointer-backed field at +312; compare other bundle-adjuster constructors.
 - Trace other RANSAC paths and graph-component pruning.
 - Continue renderer work on blend-level count, seam costs, and exposure coefficients.

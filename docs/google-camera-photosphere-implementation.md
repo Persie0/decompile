@@ -2065,3 +2065,8 @@ The caller loads rodata qword `0x0000000500000014` and stores it at solver optio
 ### 2026-10-07 — Ceres minimizer type and preprocessor dispatch
 
 The candidate options record begins with `[1, 2, 1, 0]` at +0..+12. Under the pinned Ceres 2.2.0 enums, +0 selects `TRUST_REGION`; the copied value dispatches through the solver factory to the RTTI-identified `TrustRegionPreprocessor` at `0x1ad7f4`. This confirms the trust-region path for the explicit `DOGLEG` / `SUBSPACE_DOGLEG` settings. The fields at +312/+320, +336/+340, and +376 remain unresolved. See [checkpoint 28](google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md).
+
+
+### 2026-10-07 — Ceres linear-solver iteration limits
+
+For the traced GlobalFocalLength options object, candidate `+336/+340` is identified by the options validator as `min_linear_solver_iterations` and `max_linear_solver_iterations`. The caller supplies 0 and 500, respectively. The validator rejects negative values and requires minimum <= maximum, matching pinned Ceres 2.2.0 `TrustRegionOptionsAreValid`; the values also match the pinned header defaults. The Google build has different field placement, so the mapping rests on its diagnostic strings and checks. The pointer-backed field at `+312/+320` and byte at `+376` remain unresolved. See [checkpoint 29](google-camera-photosphere-checkpoint-29-ceres-linear-solver-iteration-limits.md).
