@@ -760,3 +760,221 @@ The exact interpretation of the -1/+1 sectors is not yet named; the next pass is
 4. Recover the second target angular threshold stored at `TargetManagerCommon +0x8C`.
 5. Resolve all target-manager vtable slots and target activation state transitions.
 6. Continue from `AlignNextImage` into `SessionImpl` to recover feature matching and bundle-adjustment option constants.
+
+
+---
+
+## Pass N4 — exact target thresholds, state machine, generator composition
+
+### Exact default target angles — confirmed
+
+The native constants at rodata `0x61850` are:
+
+```text
+0.9986295104026794 = cos(3°)
+0.9659258127212524 = cos(15°)
+```
+
+They initialize `TargetManagerCommon` as:
+
+- **hit threshold:** 3°
+- **in-range threshold:** 15°
+
+Java subsequently updates the hit threshold every render cycle to the dynamic **2.75°..3.50°** value already documented. The 15° threshold is the broader “target in range” threshold unless another mode-specific path overrides it.
+
+### TargetHit algorithm — confirmed
+
+`TargetManagerCommon::TargetHit @ 0x1123B4` scans all target records.
+
+For each target it:
+
+1. uses the target direction vector stored at record offsets `+24,+28,+32`;
+2. derives the current camera viewing direction from the supplied rotation;
+3. computes the dot product;
+4. retains the target with the maximum dot product.
+
+It writes the nearest target ID/index to manager field `+128`.
+
+Then:
+
+```text
+if best_dot > in_range_cos:
+    current_in_range = nearest_target
+else:
+    current_in_range = -1
+```
+
+where `in_range_cos = cos(15°)` by default.
+
+The method returns true only when:
+
+```text
+nearest_target.state == ACTIVE
+&& best_dot > hit_cos
+```
+
+where `hit_cos` corresponds to the current 2.75°..3.50° Java-selected angle.
+
+Thus the native target test is fundamentally a **direction-vector dot-product / angular-distance test**.
+
+### Target state values — confirmed
+
+Target records are 72 bytes. Their state word at record offset `+64` uses:
+
+| value | meaning |
+| ---: | --- |
+| 0 | inactive |
+| 1 | active / capturable |
+| 2 | captured |
+
+This is confirmed by the hit test requiring state 1 and the accepted-image path writing state 2.
+
+### Accepted still updates target state inside AddImage — confirmed
+
+`CaptureSessionBuilderImpl::AddImage @ 0x10F6C8`:
+
+1. queries the underlying `SessionImpl` for the next source-image index/state;
+2. prepares a path/storage object;
+3. calls `SessionImpl::AddImage` with the 3x3 pose;
+4. calls target-manager vtable slot `+0x48` / function `0x1124A8`.
+
+The target-manager method:
+
+- identifies the current/nearest accepted target;
+- appends its integer target ID to the captured-target vector;
+- changes that target record to state **2 / captured**;
+- invokes the target-update strategy.
+
+This proves that a full-resolution still and a target-state transition are one atomic logical capture operation.
+
+### Target strategy composition for Photo Sphere — confirmed RTTI/factory mapping
+
+The Photo Sphere target system is composed from distinct strategy objects:
+
+- **target creation:** `PhotosphereTargetGenerator`
+- **initial activation:** `InitFirst`
+- **update strategy:** `ActivateAsYouGo`
+- **start frame:** `StartAtIdentity`
+
+The `ActivateAsYouGo` implementation traverses target adjacency lists. After a target is captured, neighboring eligible targets are activated by changing their state to 1. This explains the guided progressive dot pattern instead of exposing every sphere target as immediately capturable.
+
+### Native capture-mode → generator mapping — confirmed
+
+The exact jump table at rodata `0x62908` is:
+
+```text
+00 0A 10 16 1A 24
+```
+
+and resolves native modes as follows:
+
+| native mode | generator | key constructor parameters |
+| ---: | --- | --- |
+| 0 Photo Sphere | `PhotosphereTargetGenerator` | variant=0, 0.4, 0.325, 0.4 |
+| 1 Horizontal | `SingleAxisTargetGenerator` | axis variant=0, 0.65 |
+| 2 Vertical | `SingleAxisTargetGenerator` | axis variant=1, 0.65 |
+| 3 Wide angle | `WideAngleTargetGenerator` | requested capture FOV |
+| 4 Fisheye | `PhotosphereTargetGenerator` | variant=1, 0.4, 0.325, 0.4 |
+| 5 Calibration | `CalibrationTargetGenerator` | includes 20° constant |
+
+Relevant generator vtables/methods:
+
+- `PhotosphereTargetGenerator`: vptr `0x3FD918`, generate `0x1137B8`
+- `CalibrationTargetGenerator`: vptr `0x3FD968`, generate `0x114FAC`
+- `SingleAxisTargetGenerator`: vptr `0x3FD9A8`, generate `0x1158FC`
+- `WideAngleTargetGenerator`: vptr `0x3FD9E8`, generate `0x115FD0`
+
+### Photo Sphere ring-generation constants — confirmed/partially decoded
+
+The Photo Sphere generator:
+
+1. reads image width, height, and focal length from the camera/intrinsics provider;
+2. computes horizontal and vertical FOV using:
+   `2 * atan((dimension / 2) / focal)`;
+3. selects the relevant FOV according to device/orientation geometry;
+4. uses the generator fields:
+   - `0.4`
+   - `0.325`
+   - `0.4`
+   as overlap/spacing configuration;
+5. creates a central ring, then attempts positive and negative latitude rings around it;
+6. stops when a ring is outside the useful spherical range.
+
+The exact full-circle rodata constant is:
+
+```text
+6.283185307179586 = 2π
+```
+
+The ring target count uses a ceil-like division of `2π` by a latitude-adjusted effective angular horizontal step.
+
+The ring-to-ring latitude step uses an expression based on:
+
+```text
+camera_fov * (1 - 0.4)
+= camera_fov * 0.6
+```
+
+The horizontal within-ring effective overlap uses the `0.325` constructor parameter.
+
+Additional rodata used by nearby sphere helpers includes:
+
+- `π/2 = 1.5707963267948966`
+- `1.413716694115407 rad = 81°`
+- `0.1`
+
+Their exact role in pole handling/ring termination is still being resolved.
+
+### DeviceOrientationStatus exact capture-allowed sectors — confirmed
+
+`CaptureSessionBuilderImpl::DeviceOrientationStatus @ 0x10FC60`:
+
+- computes a pitch-like angle;
+- converts using exact `180/π = 57.29577951308232`;
+- if `abs(pitch) > 40°`, returns **0** immediately;
+- otherwise computes and normalizes a second orientation angle.
+
+For the second angle:
+
+- returns **-1** for `20° < angle < 90°` and `200° < angle < 270°`;
+- returns **+1** for `90° < angle < 160°` and `270° < angle < 340°`;
+- returns **0** in the remaining sectors around 0°/180°.
+
+Only status **0** allows `ProcessFrame()` to set `TakeNewPhoto`.
+
+The sign likely tells the UI/orientation controller which way the phone is misoriented, but that sign interpretation is not yet assigned a semantic label.
+
+### Wide-angle generator — confirmed
+
+The wide-angle path explicitly constructs a **3×3 target lattice**.
+
+It:
+
+- adds a 20° margin around the requested field;
+- computes overlap required for 3×3 coverage;
+- clamps overlap to **0.4** if necessary;
+- emits exactly **9 × 72-byte target records**.
+
+### Resolution hierarchy now strongly established
+
+The recovered paths now support four distinct working scales:
+
+```text
+~320 px width   live preview / target tracking
+1600 px width   native image-match/alignment working scale
+~3000 px width  retained source JPEGs
+large output    final equirectangular render
+```
+
+The 1600-pixel value is explicitly passed into native session construction and matches embedded `image_match_width_` diagnostics.
+
+---
+
+## Pass N4 next targets
+
+1. Fully decode `SessionImpl::AlignNextImage @ 0x11B18C` and the internal worker `0x11BE38`.
+2. Identify `SessionImpl` fields `+0x48,+0x50,+0x58,+0x60,+0x88,+0x90` by RTTI/construction.
+3. Map the alignment-estimator / image-accessor / thumbnail-preview objects.
+4. Recover exact feature extraction and pairwise-match options.
+5. Continue into `BundleAdjustedEstimator` and `BundleAdjusterGlobalFocalLength` for exact residual weights.
+6. Resolve seam-finder and multiband-blend option structures after alignment.
