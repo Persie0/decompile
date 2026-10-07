@@ -1,0 +1,92 @@
+# Google Camera 8.8 Photo Sphere checkpoint 41 — native input, graph, rendering and metadata
+
+**Date:** 2026-10-07  
+**Build:** com.google.android.GoogleCamera 8.8.225.510547499.09 (66251366)  
+**Native library:** liblightcycle.so, SHA-256 878feb4ab3912bc0a4c399d9eb14b6c615926e132b324ad8ea02d4988fd428d1
+
+This checkpoint records the two successful focused Ghidra runs and the parallel ARM64 audit of native preview processing, graph construction, line alignment, pyramid filtering, seam costs, blending, and session metadata. Raw addresses below are ELF virtual addresses; where relevant, Ghidra addresses are given separately.
+
+## Preview callback and native frame processor
+
+The Java boundary is unchanged from checkpoint 40: Camera1’s callback byte array and selected preview dimensions reach ProcessFrame without Java pixel conversion. Android’s preview format is configured and used for callback-buffer sizing, but the JNI method does not forward that format enum.
+
+JNI ProcessFrame at raw 0x0eeef4 obtains the Java byte-array pointer and calls the PreviewFrameProcessorImpl vtable slot +0x20 with pointer, width, height, and a constant selector value of 1 (raw 0x0eef54–0x0eef70). The Java jboolean is retained separately for later JNI-side state gating; it is not the selector passed to the processor. The processor implementation is identified by RTTI and its vtable at raw 0x3fd248; slot +0x20 resolves to raw 0x0f24b4.
+
+The processor tests selector bit 0. With bit 0 set, it calls raw 0x3a779c, which writes a width × height × 3, 8-bit-per-channel image into a ring-buffer slot. The helper reads a full-resolution Y plane followed by interleaved half-resolution VU chroma (first chroma byte behaves as Cr, second as Cb) and applies fixed-point YUV-to-RGB-like coefficients. The coefficients and VU byte order strongly suggest limited-range BT.601 conversion from NV21-style data, but neither the native binary nor the JNI call names NV21 or receives Android’s format enum. Treat NV21 as a strong layout inference, not a confirmed API format.
+
+After this optional conversion, the processor also constructs a one-channel, 8-bit view over the original input. UpdateFrameTexture at raw 0x0ef0c4 retrieves the converted ring-buffer image through processor vtable slot +0x40 (raw target 0x0f2594) and uploads it with GL_RGB and GL_UNSIGNED_BYTE at raw 0x0ef11c–0x0ef144. This ties the conversion output to the preview texture. Optional object flags route through matrix/transform state; no additional pixel conversion or resize was found there.
+
+A separate SessionImpl queue path at raw 0x11a75c copies a 36-byte record into 64-byte queue entries. Its consumer at raw 0x11b18c forwards the record through raw 0x11be38; the inspected path does not receive the ProcessFrame pixel pointer or dimensions.
+
+## Alignment graph construction and components
+
+AlignmentEstimator::AddImage is at raw 0x11d570 (Ghidra 0x21d570). It constructs a 0x30-byte graph node inline: image ID at +8, adjacency-vector storage at +0x10/+0x18/+0x20, and visited byte at +0x28; the node is appended to the estimator’s image_graph_ vector at +0x98. Accepted image pairs append each endpoint to the other’s adjacency list through helper raw 0x122dbc, confirming symmetric edges.
+
+The estimator lazily builds component records at raw 0x1252d4 (Ghidra 0x2252d4); each record is 0x18 bytes, with its tree/root pointer at +8 and size at +0x10. The component cache occupies estimator offsets +0xb0..+0xb8. The largest-component filter at raw 0x11ef24 (Ghidra 0x21ef24) accepts tied largest components. Removal clears the cache at raw 0x11e3e4 (Ghidra 0x21e3e4).
+
+Photo Sphere reset creates the capture builder through the session manager’s virtual +0x10, stores it globally, then creates the preview processor. JNI AddImage dispatches through the builder’s virtual +0x538. The exact builder method that constructs or attaches AlignmentEstimator remains unresolved; no estimator constructor or RTTI/vtable entry was found in the generated inventory, and no numeric minimum-component threshold was established.
+
+## Line alignment RANSAC
+
+The line-alignment RANSAC body is raw 0x306fcc (Ghidra 0x406fcc), called from raw 0x303954; this is separate from the rotation RANSAC documented earlier.
+
+| Control | Recovered value |
+| --- | ---: |
+| minimum-loop gate | 550 iterations |
+| hard iteration cap | 5,000 |
+| sample size | 2 lines |
+| early support cutoff | 150 inliers |
+| inlier threshold | 0.04363323 rad (2.5°) |
+| usable-sample retries | at most 50 |
+
+The loop is adaptive: it can stop at 150 inliers, otherwise runs to at least the 550 boundary once there are two supporting inliers, and can continue to 5,000 when support remains below two. The 50 retries are for finding a distinct, non-degenerate sample; they are not the outer hypothesis budget. A separate near-degenerate pair check uses cosine 0.99619472 (cos 5°). Another 1e-5 numeric guard is present, but its exact role is unresolved.
+
+## Feature pyramid
+
+The native pyramid downsampler at raw 0x3a4740 uses a separable five-tap binomial kernel [1, 4, 6, 4, 1], adds 8, and shifts right by 4. Output dimensions use ceil(input/2), and the backing allocation includes one pixel of padding. Scalar and NEON implementations are present; edge handling adjusts the weights, with first-edge taps [11, 4, 1]. This resolves the earlier unknown about pyramid pixel generation.
+
+The oriented-feature path validates that the number of collected records equals the number of valid points. The grid helper uses dimension/step + 3 cells and 24-byte cell records. Confirmed helpers at raw 0x3a54b4, 0x3a5718, and 0x3a5b34 build the grid, select candidates, and compact 12-byte point records; they do not reveal descriptor emission. The existing Ghidra artifacts omit the OrientedPatchExtractor implementation/method xrefs, so patch dimensions, sampling pattern, and bytes per keypoint remain unverified.
+
+## Bundle-adjustment residual
+
+RTTI and the vtable map identify LineMatchResidual as a four-residual AutoDiff cost with parameter blocks [4, 4, 2, 1]. Its evaluator projects both endpoint pairs in both directions and writes four signed line-equation values of the form c + a*y_projected - b*x_projected. Line coefficients are used as stored; the evaluator applies no separate scalar weight. The projection uses the same scale for coordinates, center, focal value, and projected coordinates, so the static body does not establish whether those values are pixels or normalized units. PointMatchResidual is a separate two-residual class with a different vtable.
+
+The binary identifies BundleAdjusterGlobalFocalLength and its residual templates, but a direct Photo Sphere builder-to-estimator construction chain is not recovered. No alternative app-specific bundle-adjuster implementation surfaced in the inspected RTTI inventory.
+
+## Seam costs and blend-level input
+
+LaplacianCbCrDiffComputer’s pairwise cost is |Y1−Y2| + sqrt((Cb1−Cb2)^2 + (Cr1−Cr2)^2). ExposureUnaryCostComputer computes L = 0.2989R + 0.5871G + 0.114B and cost min(L, 255−L). The YUV mask path fills U and V with 128 where all four corresponding mask bytes are zero.
+
+MonolithicMultibandBlender stores blend_levels_ at object +0x0c and asserts it is greater than zero. Its constructor copies the value from a runtime configuration object at +48 bytes (+0x30); the numeric initialization of that input is unresolved. This blender field is distinct from OptimalSeamMaskGenerator’s +0x0c dilation distance. The seam helper expands crop bounds by that dilation distance; a separate +0.5 averages graph-cut line-segment endpoints before normalization. No final seam feather or weight-normalization formula was recovered.
+
+## session.meta writer/parser mismatch
+
+The native path helper at raw 0x31aa40 builds the session.meta basename. The writer at raw 0x319b74 opens that path in append mode and writes nine newline-terminated rows, in this order:
+
+| Key | Record field |
+| --- | --- |
+| version | string at +0 |
+| filepath | string at +24 |
+| full_pano_width | int32 at +48 |
+| full_pano_height | int32 at +52 |
+| cropped_area_width | int32 at +56 |
+| cropped_area_height | int32 at +60 |
+| cropped_area_left | int32 at +68 |
+| cropped_area_top | int32 at +64 |
+| yaw_correction_deg | int32 at +72 |
+
+The adjacent native parser recognizes these keys plus source_photos_count at record +76, but the writer does not emit that row. Java’s eyb reader recognizes 11 keys, including first_photo_time, last_photo_time, source_photos_count, and pose_heading; the Java source only assigns the session.meta path and does not pre-seed or write those rows. No second native writer or dynamically constructed filename path was found, though this is evidence bounded to the analyzed source and library.
+
+If the file contains only the nine rows emitted by this native writer, Java’s null-guarded XMP writer omits FirstPhotoDate, LastPhotoDate, SourcePhotosCount, and PoseHeadingDegrees. This is the observed format mismatch; an additional external append or unobserved path is not ruled out.
+
+## Analysis runs and remaining gaps
+
+Focused Ghidra runs 37693894574 and 37694151104 completed successfully. The parallel reviews closed the native frame-consumer, graph adjacency, line-RANSAC, pyramid filter, seam-cost, and metadata-writer gaps.
+
+Remaining targets:
+- exact oriented descriptor patch size and byte count;
+- the AlignmentEstimator construction/attachment behind the builder’s virtual AddImage dispatch;
+- numeric default for multiband blend levels and upstream exposure/gamma configuration;
+- any additional native metadata write path and the runtime contents of session.meta;
+- unresolved optical-flow thresholds, graph-cut weights, source-resolution corrections, and point/line scalar units;
+- exact frame byte format on the target device; NV21 remains an inference from the conversion routine.
