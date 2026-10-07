@@ -907,24 +907,19 @@ For a first compatible implementation, the highest-value pieces to reproduce are
 
 ## 22. What is still unknown
 
-The current static analysis does not yet recover:
+The current static analysis has bounded several items but has not closed their runtime/configuration inputs:
 
-- exact Photo Sphere target count and angular spacing for every field of view;
-- exact preview pixel format passed to `ProcessFrame`;
-- exact oriented-patch descriptor dimensions;
-- whether detector construction paths beyond the traced matcher setup override the `-1` non-max-radius sentinel or use a different point cap;
-- complete image-pyramid pixel-generation and filter/downsample settings; the traced matcher consumes three levels and back-projects coordinates with factors `[1, 2, 4]`;
-- optical-flow weights;
-- additional RANSAC settings outside the traced `compute_rotation.cc` call path;
-- exact graph-edge memory layout and graph-component pruning threshold;
-- source meaning/units of residual scales, the source names of input `+0x30` and `+0x34`, Ceres tail offsets, and residual/solver settings for other bundle-adjuster paths;
-- exposure/gamma model coefficients and graph-cut seam-energy weights;
-- number of pyramid/blend levels;
-- exact full-resolution output-sizing rules;
-- native session serialization format;
-- internal retry/failure thresholds not covered by the traced paths.
-
-Those require focused ARM64 decompilation or runtime instrumentation of `liblightcycle.so`.
+- target placement is a confirmed FOV-dependent full-ring formula with per-latitude counts; an exact integer total needs the active camera dimensions, focal length, orientation, and latitude sequence;
+- `ProcessFrame` receives a Java byte array, dimensions, and native input code `1`; its precise byte-array pixel format/layout is unknown. The returned preview texture is uploaded as RGB unsigned bytes;
+- the oriented-patch descriptor is byte-valued with one byte per sampled patch point, but Photo Sphere patch size and exact descriptor byte count remain unknown;
+- the observed FastCornerDetector constructor sets `+0x14` to `-1`, and the observed matcher uses three levels with back-projection factors `[1,2,4]`; other detector overrides/caps and pyramid pixel-generation/filter/downsample settings remain open;
+- optical-flow assignments and the call-site `16.0` normalization/selection factor are known; the runtime threshold/sample-cap defaults and configured solver/iteration fields are not. No separate row weight was visible in the inspected solver builder;
+- a second line-alignment RANSAC path is identified, but its threshold, sample size, and trial count are not in the available dump;
+- largest-connected-component membership is established, including acceptance of tied largest components. Exact adjacency insertion/layout remains unknown; no numeric minimum component threshold was seen;
+- 28-byte point-match and 36-byte line-match record scalar paths are traced, but their source-level names/units remain unknown. The only concrete BA class found is GlobalFocalLength; the meaning of its scalar blocks and cross-path settings need more source coverage;
+- renderer output budgets, limiter formula, and two color/exposure cost formulas are known. Selected blend levels, exposure coefficient, graph-cut weights, gamma coefficients, and remaining source-resolution corrections remain unknown;
+- native session access is through `SessionStorage`, and Java `LocalSessionStorage` is path-oriented. The actual session serialization format and Java scheduling/retry policy are not exposed in native artifacts;
+- native queue draining and failure exits are mapped, but no native retry count/backoff or minimum-image threshold was found in the inspected paths.
 
 ---
 
@@ -981,14 +976,12 @@ Native inspection workflow:
 
 ## 24. Next reverse-engineering steps
 
-The highest-value remaining static targets are:
-
-1. Trace the `FastCornerDetector` constructor/configuration to recover object field `+0x14` and any feature cap.
-2. Recover the `PatchPairwiseMatcher +0x130` maximum descriptor-distance default and complete pyramid settings.
-3. Trace runtime optical-flow constraints and their weights.
-4. Separate the remaining line-alignment and other RANSAC call paths from the now-traced rotation estimator.
-5. Recover graph-edge insertion and graph-component pruning; determine the source meaning of BA residual scales and names of the +0x30/+0x34 options, then check other BA paths.
-6. Trace the renderer's selected blend-level count and remaining seam/exposure parameters.
+1. Recover the Photo Sphere `patch_size`/descriptor length, all FastCornerDetector constructor overrides and point caps, and the image-pyramid filter/downsample path.
+2. Obtain the Java source/decompiled archive in a readable form to identify the `ProcessFrame` input format, LocalSessionStorage file layout, and Java retry/scheduling behavior.
+3. Decompile the full line-alignment RANSAC body and the graph adjacency insertion routine to resolve their parameters/layout.
+4. Trace point/line residual scalar origins and units; inspect any additional bundle-adjuster paths beyond the concrete GlobalFocalLength class found in this export.
+5. Trace the selected renderer blend-level count, exposure alpha, graph-cut weights, gamma coefficients, and remaining source-resolution/output corrections.
+6. For exact target totals, evaluate the recovered ring equations using a concrete device camera model and its full latitude sequence.
 
 ---
 
@@ -2099,3 +2092,8 @@ For the traced line-aligner path, `FUN_00416154` in `line_aligner_utils.cc` buil
 ### 2026-10-07 — GlobalFocalLength line-record scalar initializer
 
 Checkpoint 36 traces the `LineAlignerImpl` object field at `+44` to the allocation/initialization sequence at raw VA `0x303b08`. It copies the 16-byte rodata constant at `0x62260`—four floats `[0.25, 0.15, 1.5, 25.0]`—to `this+32`. The method at raw VA `0x303cf8` reads `this+44` at `0x3052d4` and passes it to `FUN_00416154`; the utility stores it unchanged at line-record `+32`, so the traced records carry `25.0`. The field's source-level name and units, and values from other line-record producers, remain open. See [checkpoint 36](google-camera-photosphere-checkpoint-36-line-record-scale-initializer.md).
+
+
+### 2026-10-07 — checkpoint 39: cross-pipeline backlog audit
+
+The target generator is now characterized as a full-ring, camera-FOV-dependent lattice with center/non-center overlap values `0.4/0.325`, vertical step `0.6 * vertical_fov`, exact per-latitude count and pole cutoffs. The pass also bounded the preview-frame format boundary, variable-length byte descriptors and match-record paths, optical-flow row assignments, largest-component filtering, line-alignment RANSAC, render-cost equations, and session failure boundary. See [checkpoint 39](google-camera-photosphere-checkpoint-39-native-backlog-audit.md) for function-level evidence and remaining unknowns. The next work depends on recovering the missing Java payloads and focused native constructor/graph/RANSAC bodies.
