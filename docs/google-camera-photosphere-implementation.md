@@ -532,7 +532,7 @@ A close reproduction should therefore model each source image as a camera orient
 
 #### GlobalFocalLength loss selection — one traced path
 
-For the call path documented in [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), the options record's +0x20 robust-loss selector is 1 at both loss-construction sites. The selector factory maps 1 to HuberLoss(35). RTTI confirms these AutoDiffCostFunction signatures:
+For the call path documented in [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), the options record's +0x20 robust-loss selector is 1 at both loss-construction sites. The selector factory maps 1 to HuberLoss(35). The binary's embedded build fingerprint identifies Ceres 2.2.0 with Eigen 3.4.90, no LAPACK, SuiteSparse 4.5.4, and METIS 5.1.0. RTTI confirms these AutoDiffCostFunction signatures:
 
 | Functor | Residual scalars | Parameter block sizes |
 | --- | ---: | --- |
