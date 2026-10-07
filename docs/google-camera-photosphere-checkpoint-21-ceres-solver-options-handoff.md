@@ -27,7 +27,9 @@ The target reads fields from that base at several offsets. The prefix offsets be
 | +212 | `preconditioner_type` |
 | +216 | `visibility_clustering_type` |
 
-This is an ABI/layout cross-reference, not proof that the application overrides any of these fields. Other observed reads at +264, +268, +272, +280, +304, +312, +436, and +440 are retained as raw offsets; their exact member mapping depends on the Android C++ library layout and needs a direct object-layout check.
+The prefix fields through +216 do not depend on the STL container layout. The later assignments use the 64-bit Android libc++ layout for the intervening `std::unordered_set` member (40 bytes for this stateless-hash/equality/allocator instantiation). They are strong ABI-based mappings, not confirmed against the exact compiler/STL build used for this ELF. The Android libc++ `__hash_table` member layout is available in the [NDK source](https://chromium.googlesource.com/android_ndk/+/401019bf85744311b26c88ced255cd53401af8b7/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__hash_table). Reads at +436 and +440 remain unmapped; at least one may be part of a wider copy rather than a standalone option-field access.
+
+This remains a layout cross-reference, not proof that the application overrides any field.
 
 The version-matched declaration is [Ceres Solver 2.2.0 `include/ceres/solver.h`](https://raw.githubusercontent.com/ceres-solver/ceres-solver/2.2.0/include/ceres/solver.h). Its constructor defaults provide a reference baseline only. They do not establish the APK's effective values because the caller may write options after construction.
 
