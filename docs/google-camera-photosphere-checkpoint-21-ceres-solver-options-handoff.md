@@ -46,7 +46,7 @@ The version-matched declaration is [Ceres Solver 2.2.0 `include/ceres/solver.h`]
 ## Evidence
 
 - `0x12924c`: local object setup; candidate options storage at `sp+0x2b0`.
-- `0x1294f0`: `x0) points to `sp+0x2b0` before the solve wrapper call.
+- `0x1294f0`: `x0` points to `sp+0x2b0` before the solve wrapper call.
 - `0x129564`: call to the argument-shifting thunk.
 - `0x153900`: shifts `x0/x1/x2` into `x1/x2/x3` before branching to `0x15245c`.
 - `0x15245c`: saves `x1` in `x23` and reads the offsets listed above.
