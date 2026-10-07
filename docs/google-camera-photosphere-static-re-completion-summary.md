@@ -197,7 +197,7 @@ RTTI recovers these AutoDiffCostFunction dimensions:
 | RollPitchSensorResidual | 2 | [4, 2, 1] |
 | SensorResidual | 1 | [4, 2, 1] |
 
-Residual formulas, applied weights, and effective Ceres solver settings remain unresolved. The solve-call trace likely identifies the `Solver::Options` object and maps several prefix-field reads, but not effective caller-specific values. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md) and [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md).
+Residual formulas, applied weights, and effective Ceres solver settings remain unresolved. The solve-call trace likely identifies the `Solver::Options` object and maps prefix plus ABI-derived fields, but not effective caller-specific values. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md) and [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md).
 
 
 Confirmed residual families:
