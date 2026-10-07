@@ -502,17 +502,26 @@ The parallel native audit resolved the Photo Sphere full-ring target formula and
 
 ## 2026-10-07 — checkpoint 40: Java preview and session artifacts
 
-The 26-chunk source archive reconstructs to a valid 12,693,580-byte ZIP (SHA-256 `e3893733c41acc88442424bd6649a51f62f6ad0fcc176b78c155500ccbfd0b65`). The Camera1 callback array reaches `ProcessFrame(bytes, width, height, boolean)` unchanged; Java supplies the configured preview dimensions and makes no stride, crop, rotation, or byte-format conversion. The callback format remains the Camera parameter for that device and only affects preview-buffer sizing.
+The 26-chunk source archive reconstructs to a valid 12,693,580-byte ZIP (SHA-256 e3893733c41acc88442424bd6649a51f62f6ad0fcc176b78c155500ccbfd0b65). The Camera1 callback array reaches ProcessFrame(bytes, width, height, boolean) unchanged; Java supplies the configured preview dimensions and makes no stride, crop, rotation, or byte-format conversion. The callback format remains the Camera parameter for that device and only affects preview-buffer sizing.
 
-The `orientations.txt` line is nine selected sensor rotation-matrix floats plus their sum, newline-terminated and flushed per still. `session.meta` is read as comma-separated key/value rows, with panorama dimensions/crop, timestamps, photo count, pose heading, and yaw correction consumed for EXIF/GPano XMP. The writer is not present in Java. `LocalSessionStorage` implements `Serializable`, but no serialization use was found.
+The orientations.txt line is nine selected sensor rotation-matrix floats plus their sum, newline-terminated and flushed per still. session.meta is read as comma-separated key/value rows, with panorama dimensions/crop, timestamps, photo count, pose heading, and yaw correction consumed for EXIF/GPano XMP. The writer is not present in Java. LocalSessionStorage implements Serializable, but no serialization use was found.
 
-The feature-gated autofocus path allows up to three trials after a pitch change greater than 8° or a forced retry; this is a camera autofocus loop, not a stitch retry/backoff. No Java retry around `AlignNextImage` was found.
+The feature-gated autofocus path allows up to three trials after a pitch change greater than 8° or a forced retry; this is a camera autofocus loop, not a stitch retry/backoff. No Java retry around AlignNextImage was found.
 
-Focused native rerun [37693894574](https://github.com/Persie0/Playground/actions/runs/37693894574) is running with direct graph, line-RANSAC, seam-cost, and feature-pyramid focus.
+## 2026-10-07 — checkpoint 41: native input, graph, renderer and metadata
 
-### Next targets
+Focused Ghidra runs [37693894574](https://github.com/Persie0/Playground/actions/runs/37693894574) and [37694151104](https://github.com/Persie0/Playground/actions/runs/37694151104) completed successfully. The parallel reviews traced the correct PreviewFrameProcessorImpl JNI dispatch and its converted RGB ring-buffer consumer. JNI passes selector 1 to the frame processor; this is separate from Android's preview-format enum. NV21 is a strong input-layout inference from the plane/chroma handling and coefficients, but the binary does not name the format.
 
-- Read the focused Ghidra output for RANSAC, graph component, seam-cost, and feature-pyramid paths.
-- Resolve oriented-patch descriptor size and pyramid pixel-generation details.
-- Trace graph adjacency insertion, line-RANSAC tuning, residual scalar units, other bundle-adjuster paths, blend-level selection, and seam/gamma coefficients.
-- Compute target totals for a specified camera model and FOV.
+Alignment graph nodes and symmetric pair adjacency are confirmed, as are the lazy largest-component cache and tied-largest acceptance. The line-alignment RANSAC controls, fixed-point five-tap pyramid downsampler, LineMatchResidual equation, and seam-cost equations are resolved. The numeric blend-level input remains unknown; it is read from an upstream runtime object at +48.
+
+The native session.meta writer appends nine rows, while its parser recognizes source_photos_count in addition. Java also expects timestamps and pose_heading; no Java preseed/write was found. The resulting key-set mismatch is bounded to the inspected paths, and a second dynamic-path append is not ruled out. See [checkpoint 41](../google-camera-photosphere-checkpoint-41-native-input-graph-renderer-and-metadata.md).
+
+### Remaining targets
+
+- Recover oriented-feature descriptor patch dimensions and byte count.
+- Locate the AlignmentEstimator construction/attachment behind the builder's virtual AddImage method.
+- Trace blend-level configuration, gamma/exposure settings, seam weights, and final seam feathering.
+- Verify the target device's preview format and corresponding native byte layout.
+- Resolve optical-flow runtime thresholds and point/line scalar units.
+- Check for any additional session.meta writer and capture a runtime metadata file.
+- Evaluate exact target totals for a specified camera model and FOV.
