@@ -50,11 +50,11 @@ For candidate indices 0–2, the driver skips a trial when its scaled threshold 
 
 The `FastCornerDetector` method at `0x39f0d8` reads the integer at object offset `+0x14`. It passes this value as the non-max radius into helper `0x3a5324`; the helper asserts `nonmax_radius > 0`. The call site only runs this suppression pass when the field is at least 2.
 
-This proves how the radius field is consumed, but the configured radius is still unknown. The adjacent integer at offset `+0x0c` is passed as the requested feature-count target to the threshold driver; the driver retries thresholds until enough candidates are produced or it reaches the final fallback. Its configured value remains unknown, and the class-vtable evidence alone does not prove the runtime dispatch path.
+The constructor at `0x39e9ac` initializes the 32-byte detector's `+0x0c` point-limit field to 150 and its `+0x14` non-max-radius field to `-1`. In the traced `PatchPairwiseMatcher` construction path, matcher setup calls the detector setter with 3000; the three-level wrapper reduces that cap to `[3000, 751, 189]`. It does not override the radius sentinel. Since `0x39f0d8` calls the suppression helper only when `+0x14 >= 2`, this constructed detector skips radius-based suppression unless a later writer changes the field. The path and per-level values are documented in [checkpoint 19](google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md).
 
 ## Limits of this result
 
-The table and brightness rule recover the thresholds passed to FAST-9. They do not establish the configured non-max radius, requested feature-count value, or every pyramid/scale configuration. The class-vtable evidence is static and does not by itself prove which dispatch path is used at runtime.
+The table and brightness rule recover the thresholds passed to FAST-9. The constructor and setup trace recover a `-1` non-max-radius sentinel and a per-level point cap for the observed matcher path; they do not establish whether other detector construction paths use different values or identify every image-pyramid pixel-generation detail. Runtime behavior was not exercised.
 
 ## Evidence
 
