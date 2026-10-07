@@ -386,7 +386,7 @@ For the traced GlobalFocalLength path, input-record `+0x30 = 1` chooses between 
 
 ## Checkpoint 25 update — post-solve output validation
 
-For the traced GlobalFocalLength path, the optimized focal parameter must be positive and the shared image center must remain within the returned image dimensions. With a nonzero count from the fourth argument, a separate nested-object scalar must lie in `[10, 150]`; its source-level name and units are unknown, and interpreting it as a view-angle/FOV value remains an inference. The passing path normalizes per-image quaternions and writes back transforms. The adjuster returns 1 for the accepted path and 0 for rejection. See [checkpoint 25](google-camera-photosphere-checkpoint-25-post-solve-output-validation.md).
+For the traced GlobalFocalLength path, the optimized focal parameter must be positive and the shared image center must remain within the returned image dimensions. With a nonzero count from the fourth argument, the solver clones camera model zero, applies the optimized focal to its X/Y focal fields, and validates the model's horizontal field of view through vtable slot `+0x40`. Linear/fisheye getters convert internal radians to degrees; equirectangular getters return 360°. The finite accepted interval is `[10°, 150°]`, independent of the optimized focal parameter. Passing paths normalize per-image quaternions and write back transforms; the adjuster returns 1 for accepted and 0 for rejected paths. See [checkpoint 25](google-camera-photosphere-checkpoint-25-post-solve-output-validation.md) and [checkpoint 31](google-camera-photosphere-checkpoint-31-camera-model-field-of-view.md).
 
 ## Checkpoint 26 update — Ceres option-tail copy layout
 
