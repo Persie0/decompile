@@ -486,7 +486,7 @@ The line-record producer and rescaling checks are continued in checkpoint 38 bel
 
 ## 2026-10-07 — checkpoint 38: line-record candidate audit
 
-A broad non-stack `+32)-store scan retained 99 functions that also contain a literal `#0x24` or `#36`. The audit confirmed `FUN_00416154) as the only likely line-record producer among the candidates: it consumes paired 16-byte line inputs, writes a 36-byte record, and copies the caller's **25.0** scalar unchanged to `+32). The only direct caller remains `LineAlignerImpl) at `FUN_00403cf8).
+A broad non-stack `+32`-store scan retained 99 functions that also contain a literal `#0x24` or `#36`. The audit confirmed `FUN_00416154` as the only likely line-record producer among the candidates: it consumes paired 16-byte line inputs, writes a 36-byte record, and copies the caller's **25.0** scalar unchanged to `+32`. The only direct caller remains `LineAlignerImpl` at `FUN_00403cf8`.
 
 The strongest same-layout false positives are 3×3 rosette/camera matrices; other candidates are larger ImagePair records, nested containers, or SIMD array outputs. No additional line-domain rescaler was found in the audited path. The scan is heuristic and does not prove that every possible indirect or computed-address write has been ruled out. The field name and units remain unknown. See [checkpoint 38](../google-camera-photosphere-checkpoint-38-line-record-candidate-audit.md).
 
