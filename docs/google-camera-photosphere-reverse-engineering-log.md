@@ -976,7 +976,7 @@ The 1600-pixel value is explicitly passed into native session construction and m
 2. Identify `SessionImpl` fields `+0x48,+0x50,+0x58,+0x60,+0x88,+0x90` by RTTI/construction.
 3. Map the alignment-estimator / image-accessor / thumbnail-preview objects.
 4. Recover exact feature extraction and pairwise-match options.
-5. Continue into `BundleAdjustedEstimator` and `BundleAdjusterGlobalFocalLength` for exact residual weights.
+5. Continue into other `BundleAdjuster` paths and trace the source meaning and units of the GlobalFocalLength residual scales.
 6. Resolve seam-finder and multiband-blend option structures after alignment.
 
 
@@ -996,10 +996,16 @@ The callee reads the byte at +436 as a gradient-check switch and skips the gradi
 
 ### ABI caveat and remaining work
 
-The observed reads and caller writes agree with the public Ceres 2.2.0 layout through the solver-library fields. The tail after +280 diverges: +304 is read as a byte flag, +312 is treated as a pointer-backed ordering source, and +436/+440 follow a different tail offset than the upstream header. Keep those fields raw until the exact Google build layout is recovered. Residual equations/weights and the semantics of options +0x2c/+0x30 remain open.
+The observed reads and caller writes agree with the public Ceres 2.2.0 layout through the solver-library fields. The tail after +280 diverges: +304 is read as a byte flag, +312 is treated as a pointer-backed ordering source, and +436/+440 follow a different tail offset than the upstream header. Keep those fields raw until the exact Google build layout is recovered. Input-record `+0x2c` is confirmed as the 50-iteration limit; the semantic name of `+0x30` remains open. Checkpoint 23 recovers residual equations and scale placement for this path.
 
 Full trace: [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md) and [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md).
 
 ### Bundle-adjuster input-record guard — behavior traced
 
-The record assembled at `0x11ed64` carries `+0x2c = 50` and `+0x30 = 1`. The first value feeds Ceres `max_num_iterations). The second enables a guard before residual construction: skip when `0x316b8c` reports that all tested normalized 3D-sample dot products are at least `cos(10°)); also skip when the adjuster result in `w25` is below 7; otherwise skip if `0x316c8c` reports all tested asin-derived pitch-like differences are at most 10°. The exact field name for +0x30 remains unresolved.
+The record assembled at `0x11ed64` carries `+0x2c = 50` and `+0x30 = 1`. The first value feeds Ceres `max_num_iterations`. The second enables a guard before residual construction: skip when `0x316b8c` reports that all tested normalized 3D-sample dot products are at least `cos(10°)`; also skip when the adjuster result in `w25` is below 7; otherwise skip if `0x316c8c` reports all tested asin-derived pitch-like differences are at most 10°. The exact field name for `+0x30` remains unresolved.
+
+## Pass N6 — GlobalFocalLength residual equations
+
+The shared helper `0x12a97c` transfers image points between orientation quaternions using the shared center and focal blocks. `PointMatchResidual` `0x12cbe8` returns two scale-weighted reprojection errors. `LineMatchResidual` `0x129fb0` returns four scale-weighted line-incidence errors, two in each transfer direction. `RollPitchSensorResidual` `0x12cffc` returns pitch and roll errors, with the roll term gated above 81° absolute target pitch; `SensorResidual` `0x12d4c8` returns a pitch error with sine-over-cosine normalization. Match blocks use HuberLoss(35); sensor blocks use TrivialLoss.
+
+The per-record scales are applied directly, but their source field meanings and units are not identified. Full trace and equations: [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md).
