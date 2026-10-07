@@ -383,11 +383,13 @@ Full trace: [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver
 
 ## 2026-10-07 — checkpoint 22: caller-written Ceres settings
 
-The caller's stack writes recover a strong core configuration for this GlobalFocalLength path: DENSE_SCHUR, DOGLEG with SUBSPACE_DOGLEG, one solver thread, trust-region radii `1e4 / 1e16 / 1e-8), function/gradient/parameter tolerances `1e-6 / 1e-10 / 1e-8`, and a runtime-supplied max-iteration value from input-record +44. The user ordering is null; dense algebra is EIGEN and the sparse-library enum is SUITE_SPARSE. The gradient-check flag is false.
+The caller's stack writes recover a strong core configuration for this GlobalFocalLength path: DENSE_SCHUR, DOGLEG with SUBSPACE_DOGLEG, one solver thread, trust-region radii `1e4 / 1e16 / 1e-8`, function/gradient/parameter tolerances `1e-6 / 1e-10 / 1e-8`, and a runtime-supplied max-iteration value from input-record +44. The user ordering is null; dense algebra is EIGEN and the sparse-library enum is SUITE_SPARSE. The gradient-check flag is false.
 
 The caller also writes additional raw values at +64 and beyond +280, but those offsets do not consistently match the upstream header, so their field names remain open. The raw values, call-site offsets and confidence limits are recorded in [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md).
 
+
 ### Current next targets
+
 - Resolve the Google Camera Ceres tail ABI after +280, the semantics of raw writes at +64/+336/+432, and the input-record +44 iteration-limit source.
 - Recover residual equations/weights and semantic names/values of bundle-adjuster options +0x2c/+0x30.
 - Trace optical-flow weights and identify their effects on pose constraints.
