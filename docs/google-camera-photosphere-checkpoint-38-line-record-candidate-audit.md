@@ -49,4 +49,4 @@ This does not establish that every 36-byte record in the library carries 25.0. T
 - Checkpoint 35: [line-record multiplier handoff](google-camera-photosphere-checkpoint-35-line-record-multiplier-handoff.md)
 - Checkpoint 36: [line-record scalar initializer](google-camera-photosphere-checkpoint-36-line-record-scale-initializer.md)
 - Checkpoint 37: [line-record helper call-site audit](google-camera-photosphere-checkpoint-37-line-record-helper-callsite-audit.md)
-- Ghidra scan runs: [37687574028](https://github.com/Persie0/Playground/actions/runs/37687574028), [37688286692](https://github.com/Persie0/Playground/actions/runs/37688286692), [37688853494](https://github.com/Persie0/Playground/actions/runs/37688853494)
+- Ghidra scan runs: [37687574028](https://github.com/Persie0/Playground/actions/runs/37687574028), [37688286692](https://github.com/Persie0/Playground/actions/runs/37688286692), [37688853494](https://github.com/Persie0/Playground/actions/runs/37688853494), [37689989604](https://github.com/Persie0/Playground/actions/runs/37689989604)
