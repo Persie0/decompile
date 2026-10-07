@@ -40,8 +40,8 @@ The version-matched declaration is [Ceres Solver 2.2.0 `include/ceres/solver.h`]
 - The call path passes a local solver-options-like record into the Ceres solve routine.
 - The observed reads through +280 identify a stable prefix and likely library/ordering fields.
 - Later offsets reveal a vendor-specific or otherwise different tail layout than the pinned upstream declaration.
-- Checkpoint 22 recovers many caller-written values, but the exact semantic mapping of part of the tail and the runtime value sourced from the bundle-adjuster input record remain open.
-- Residual equations and weights, and the meanings of bundle-adjuster input offsets +0x2c/+0x30, remain unresolved.
+- Checkpoint 22 identifies input-record `+0x2c` as the 50-iteration limit and recovers caller-written options. The semantic name of the `+0x30` guard and part of the option tail remain open.
+- Checkpoint 23 recovers the residual equations and scale placement for this GlobalFocalLength path. The scale source meanings, the `+0x30` field name, and other bundle-adjuster paths remain open.
 
 ## Evidence
 
