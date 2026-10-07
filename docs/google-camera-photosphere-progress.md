@@ -449,4 +449,14 @@ The Ceres option tail after `min_linear_solver_iterations=0` and `max_linear_sol
 
 ## 2026-10-07 — checkpoint 33: GlobalFocalLength match records and scale aggregation
 
-The traced GlobalFocalLength path reads point observations at a 28-byte stride: two 2D endpoints at offsets `+0..+12`, unused fields at `+16/+20` in this cost builder, and the residual multiplier at `+24`. Line observations use a 36-byte stride with four 2D endpoints at `+0..+28` and the multiplier at `+32`. The `0x318990` helper also sums each point record's `+24` value into per-image totals for both endpoints of its pairwise edge; its caller uses those totals in thresholded image bookkeeping. The multiplier's upstream source name and units remain unknown. See [checkpoint 33](google-camera-photosphere-checkpoint-33-global-focal-match-record-layouts.md).
+The traced GlobalFocalLength path reads point observations at a 28-byte stride: two 2D endpoints at offsets `+0..+12`, image-index fields at `+16/+20` (not read by this cost builder), and the residual multiplier at `+24`. Line observations use a 36-byte stride with four 2D endpoints at `+0..+28` and the multiplier at `+32`. The `0x318990` helper also sums each point record's `+24` value into per-image totals for both endpoints of its pairwise edge; its caller uses those totals in thresholded image bookkeeping. See [checkpoint 33](google-camera-photosphere-checkpoint-33-global-focal-match-record-layouts.md).
+
+## 2026-10-07 — checkpoint 34: point-record multiplier source
+
+In one pair-grid matching path, a normalized angle-derived score below `0.9` selects point multiplier `0.25`; scores at or above the threshold (and unordered comparisons) select `0.125`. Successful matches append a 28-byte record with two coordinate pairs, the two image indices at `+16/+20`, and the selected multiplier at `+24`. A separate post-estimator pass supplies `0.125` to `0x316420), which multiplies `+24) for point observations on type-5 graph edges that match type-9 edges by unordered image pair. The line-record multiplier source and score's class-level inputs remain unresolved. See [checkpoint 34](google-camera-photosphere-checkpoint-34-point-record-weight-source.md).
+
+### Next targets
+
+- Trace the producer and source of the line-record multiplier at `+32`.
+- Compare remaining point-record producers and consumers.
+- Continue reviewing feature, pyramid, and low-level processing helpers.
