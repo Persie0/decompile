@@ -541,7 +541,7 @@ For the call path documented in [checkpoint 20](google-camera-photosphere-checkp
 | RollPitchSensorResidual | 2 | [4, 2, 1] |
 | SensorResidual | 1 | [4, 2, 1] |
 
-The same options record has 50 at +0x2c and 1 at +0x30; the latter controls a branch, but neither field's semantic name is recovered. This configuration is scoped to the observed GlobalFocalLength path. Residual formulas/weights and solver options remain unresolved.
+The same options record has 50 at +0x2c and 1 at +0x30; the latter controls a branch, but neither field's semantic name is recovered. This configuration is scoped to the observed GlobalFocalLength path. Residual formulas/weights and effective solver settings remain unresolved. The solve-call trace likely identifies the local Ceres `Solver::Options` object and maps several prefix-field reads, but does not recover caller-specific values. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md) and [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md).
 
 
 ---
