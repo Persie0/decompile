@@ -24,7 +24,7 @@ The call path initializes its options record at stack address sp+8. The first wo
 
 The factory at 0x129e80 maps selector 1 to Ceres HuberLoss with delta 35. Therefore, both observed loss-construction sites in this BundleAdjusterGlobalFocalLength call path select HuberLoss(35).
 
-The same local record contains 50 at offset +0x2c and 1 at +0x30. The method reads +0x30 and branches when it equals 1; the option's semantic name is still unresolved. No meaning is assigned here to the adjacent value 50.
+The same local record contains 50 at offset +0x2c and 1 at +0x30. Checkpoint 22 identifies +0x2c as the 50-iteration limit; +0x30 activates a residual-construction guard whose field name remains unresolved.
 
 ## Residual functor signatures from RTTI
 
@@ -37,11 +37,11 @@ Mangled RTTI names identify four Ceres AutoDiffCostFunction signatures:
 | RollPitchSensorResidual | 2 | [4, 2, 1] |
 | SensorResidual | 1 | [4, 2, 1] |
 
-These signatures recover the template dimensions, not the residual equations or any scale/weight applied inside them.
+Checkpoint 23 recovers the direct residual equations and scale placement for these signatures. The source meanings and units of the per-observation scales remain unknown.
 
 ## Boundaries and next work
 
-This is one traced BundleAdjusterGlobalFocalLength call path. The evidence does not show that other BundleAdjuster implementations or callers use selector 1. Residual equations and weights remain open. Input-record +0x2c is the 50-iteration limit; +0x30=1 enables a residual-construction guard whose field name remains open. [Checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md) recovers caller-written settings for this path, including DENSE_SCHUR with DOGLEG/SUBSPACE_DOGLEG, but the option tail after +280 remains ABI-unresolved. [Checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md) records the handoff and offset caveat. Runtime testing was unavailable because no Android runtime or device is present in this environment.
+This is one traced BundleAdjusterGlobalFocalLength call path. The evidence does not show that other BundleAdjuster implementations or callers use selector 1. Checkpoint 23 recovers this path's residual equations and scale placement; the scales' source meanings and units remain open. Input-record +0x2c is the 50-iteration limit; +0x30=1 enables a residual-construction guard whose field name remains open. [Checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md) recovers caller-written settings, including DENSE_SCHUR with DOGLEG/SUBSPACE_DOGLEG, but the option tail after +280 remains ABI-unresolved. [Checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md) records the handoff and offset caveat. Runtime testing was unavailable because no Android runtime or device is present in this environment.
 
 ## Evidence
 
