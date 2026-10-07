@@ -361,10 +361,18 @@ The estimator draws two distinct correspondence samples to form a candidate rota
 
 Full trace: [checkpoint 18](google-camera-photosphere-checkpoint-18-rotation-ransac.md).
 
+## 2026-10-07 — checkpoint 19: matcher limits and three-level pyramid
+
+The traced `PatchPairwiseMatcher` setup writes a 375.0 maximum patch-distance value, a 3000-point FAST detector cap, and a 30-entry per-level match-index cap. The constructor leaves the matcher pyramid count at 3. Its matching path squares 375.0 to a maximum squared distance of 140625 and applies the existing 0.64000005 best/second-best squared-distance ratio gate.
+
+The detector cap decreases by `ceil(previous / 4) + 1` across the three levels, producing `[3000, 751, 189]`. The traced detector constructor sets its non-max-radius field `+0x14` to `-1`; the matcher setup does not override it, and the detector wrapper only runs radius suppression for values at least 2. Per-level coordinate back-projection uses factors `[1, 2, 4]`. This establishes the matcher level count and coordinate scales, not every pixel-pyramid generation detail.
+
+Full trace: [checkpoint 19](google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md).
+
 ### Current next targets
 
-- Recover the constructor/configuration value for `FastCornerDetector +0x14` and any feature cap.
-- Trace the `PatchPairwiseMatcher +0x130` maximum descriptor-distance default.
-- Identify the exact runtime optical-flow and Ceres option values.
-- Trace other RANSAC paths and graph-component pruning independently.
+- Determine whether other detector construction paths override the `-1` non-max-radius sentinel.
+- Recover image-pyramid pixel generation and filter/downsample details beyond the three matcher coordinate scales.
+- Identify exact optical-flow and Ceres option values, other RANSAC paths, and graph-component pruning.
+- Continue renderer work on blend-level count, seam costs, and exposure coefficients.
 
