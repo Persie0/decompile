@@ -19,6 +19,8 @@ Therefore, the helper's observed direct invocation uses 25.0. This closes the po
 
 This does not prove that all line records in the library carry 25.0. Other code could allocate or populate 36-byte records without calling this helper, or modify their `+32` field afterward. The field's source-level name, units, and semantic role remain unresolved. The call-reference result is scoped to this binary and the analyzed Ghidra project state.
 
+Checkpoint 23 already traces the GlobalFocalLength consumer: it multiplies the line-equation coefficients by the record's `+32` scale before evaluating four line-incidence residuals, then submits that residual block to Ceres with `HuberLoss(35)`. The remaining question is whether another producer or transport path rescales the field before that consumer.
+
 ## Evidence
 
 - The `FUN_00416154` Ghidra function listing identifies its caller as `FUN_00403cf8`.
@@ -28,7 +30,7 @@ This does not prove that all line records in the library carry 25.0. Other code 
 ## Next checks
 
 1. Search for all stores to offset `+32` on 36-byte record paths, including direct vector appends and postprocessing passes.
-2. Trace whether the GlobalFocalLength consumer multiplies each line residual by this scalar directly or normalizes/reweights it later.
+2. Check for additional rescaling between line-record ingestion and residual construction, beyond the direct line-triple multiplication established in checkpoint 23.
 3. Keep 25.0 scoped to the traced LineAlignerImpl producer until those checks are complete.
 
 ## References
