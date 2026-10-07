@@ -462,7 +462,7 @@ The FAST-9 detector uses four base integer thresholds from rodata VA `0x625a0`:
 
 Before detection, it samples grayscale values on a grid with stride approximately `sqrt(width * height / 100)`. If the sampled mean is at least 50, the thresholds are unchanged. Below 50, the multiplier is `0.1 + 0.9 * mean / 50`; each threshold product is truncated to an integer. The first three candidates are skipped if their scaled threshold exceeds either `2 * mean` or the sampled intensity range. The fourth threshold is always the final fallback. The FAST-9 core receives the selected threshold at `0x39f560`.
 
-The detector reads its non-max radius from object offset `+0x14`; the suppression helper is called only when that field is at least 2. The configured radius, feature cap, and full scale-level configuration remain unresolved.
+The detector reads its non-max radius from object offset `+0x14`; the suppression helper is called only when that field is at least 2. The detector's separate integer at object offset `+0x0c` is passed as a requested feature-count target to the threshold driver. Its configured value, the non-max radius, and the full scale-level configuration remain unresolved.
 
 This strongly indicates the visual registration pipeline uses FAST-style corner detection and oriented image-patch descriptors/matching rather than a modern neural feature matcher.
 
@@ -894,7 +894,7 @@ The current static analysis does not yet recover:
 - exact Photo Sphere target count and angular spacing for every field of view;
 - exact preview pixel format passed to `ProcessFrame`;
 - exact oriented-patch descriptor dimensions;
-- configured FAST non-max radius, feature cap, and all scale-level settings;
+- configured FAST non-max radius, requested feature-count value, and all scale-level settings;
 - the `PatchPairwiseMatcher +0x130` maximum descriptor-distance default;
 - optical-flow weights;
 - additional RANSAC settings outside the traced `compute_rotation.cc` call path;
