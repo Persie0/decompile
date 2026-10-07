@@ -524,7 +524,7 @@ The native session.meta writer appends nine rows, while its parser recognizes so
 
 The traced extractor setup at raw 0x125ae4 initializes 16 rotated patterns from a centered 8×8 grid; each pattern has 64 integer coordinate pairs. Builder raw 0x3a2020 consumes 12-byte {score,x,y} detector records and writes 64-byte feature records containing position at +8, optional gradient orientation at +0x10, and a 64-byte descriptor vector at +0x28/+0x30 for the observed configuration. Its sampler mean-centers each 64-byte patch, scales by 64/sample-standard-deviation, adds 128, and clamps to [0,255]. The AddImage path calls the extractor wrapper before passing the feature collection and image entries to the matcher. The exact settings behind alternate descriptor/orientation modes remain unknown.
 
-The same follow-up mapped optical-flow point pixels into normalized camera-plane coordinates, while leaving bundle-adjustment units separate. Graph-cut code makes two +0x58 receiver calls with argument 100, then two +0x50 mask calls with argument 80 after labels are applied; receiver types and feathering semantics remain unresolved. The available session artifacts still do not identify an extra session.meta writer or queued-file read-failure outcome. Full trace: [checkpoint 42](../google-camera-photosphere-checkpoint-42-oriented-patch-feature-records.md).
+The same follow-up mapped optical-flow point pixels into normalized camera-plane coordinates, while leaving bundle-adjustment units separate. Graph-cut code makes two +0x58 receiver calls with argument 100, then two +0x50 calls with mask pointers after labels are applied. The +0x50 callsites do not load a literal 80; receiver types and method semantics remain unresolved. The available session artifacts still do not identify an extra session.meta writer or queued-file read-failure outcome. Full trace: [checkpoint 42](../google-camera-photosphere-checkpoint-42-oriented-patch-feature-records.md).
 
 
 ## 2026-10-07 — checkpoint 43: queue failures, residual inputs and render system
@@ -542,7 +542,7 @@ The follow-up scans did not find static constructors/default writers for tracker
 ### Remaining targets
 
 - Determine whether the JNI caller repeats AlignNextImage when a missing path remains queued, and characterize per-image scheduling/timing.
-- Identify concrete receiver types/methods for SeamFinderGraphcut's +0x58/100 and +0x50/80 calls; locate any final seam feathering or weight normalization.
+- Identify concrete receiver types/methods for SeamFinderGraphcut's +0x58/100 and +0x50 with mask pointers (no explicit 80 immediate); locate any final seam feathering or weight normalization.
 - Recover runtime AlignmentTracker and GlobalFlowSolver defaults.
 - Trace point/line row producers to establish coordinate units/calibration and identify the point scalar's units.
 - Verify the target device's preview byte format; the native JNI call omits Android's format enum.
