@@ -64,7 +64,8 @@ The code writes these bytes after the linear-ordering pointer. Names beyond the 
 | +336 | binary64 `0.6931471805599453` |
 | +344, +348 | 5; low byte 0 |
 | +352, +360 | 0.1, 0.1 |
-| +368, +372 | byte 1; 32-bit value 1 |
+| +368 | low byte 1; positionally `PER_MINIMIZER_ITERATION` |
+| +372 | 32-bit value 1; positional `minimizer_progress_to_stdout = true` |
 | +376 | zero byte, copied as a byte by the Ceres options copy helper | extra boolean-like field; name and semantics unknown |
 | +384..+407 | empty three-pointer vector storage |
 | +408..+431 | short-string object containing `"/tmp"` |
