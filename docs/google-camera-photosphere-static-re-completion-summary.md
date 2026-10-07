@@ -1,6 +1,6 @@
 # Pixel Camera 8.8 Photo Sphere static reverse engineering — completion summary
 
-Updated through checkpoint 21, this document summarizes the current static reverse-engineering pass for the audited artifacts.
+Updated through checkpoint 22, this document summarizes the current static reverse-engineering pass for the audited artifacts.
 
 It does **not** claim that Google's proprietary C++ source code has been recovered. The audited native library is stripped. Several exact constants and object fields still require deeper decompilation or runtime instrumentation. The current work is an engineering reconstruction of the Photo Sphere architecture, Java/JNI control flow, native object boundaries, major algorithm families, and many exact constants.
 
@@ -38,6 +38,10 @@ Running / checkpoint documents:
 - `docs/google-camera-photosphere-checkpoint-16-corrected-static-extraction.md`
 - `docs/google-camera-photosphere-checkpoint-17-fast-threshold-schedule.md`
 - `docs/google-camera-photosphere-checkpoint-18-rotation-ransac.md`
+- `docs/google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md`
+- `docs/google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md`
+- `docs/google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md`
+- `docs/google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md`
 - this completion summary
 
 ## Recovered high-level architecture
@@ -348,3 +352,16 @@ For implementation in a new Photo Sphere app, start with:
 9. GPano metadata writer.
 
 For further reverse engineering, the next target is runtime instrumentation, not more broad static notes.
+
+## Checkpoint 22 update — Ceres settings from one bundle-adjustment path
+
+The caller writes a concrete Ceres configuration for the traced `BundleAdjusterGlobalFocalLength` path:
+
+- `DENSE_SCHUR` with `DOGLEG` / `SUBSPACE_DOGLEG`;
+- Eigen dense algebra and the `SUITE_SPARSE` sparse-algebra enum;
+- one solver thread and a null user ordering;
+- trust-region radii `1e4`, `1e16), and `1e-8`;
+- function, gradient, and parameter tolerances `1e-6`, `1e-10), and `1e-8`;
+- max iterations sourced from bundle-adjuster input-record +44.
+
+This is a static caller trace, not runtime output. The binary's option tail after +280 does not fully match the pinned upstream Ceres 2.2.0 header. Some later writes remain raw offsets; see [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md) and [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md). Residual equations and weights remain unresolved.
