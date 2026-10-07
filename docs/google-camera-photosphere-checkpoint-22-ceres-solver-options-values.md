@@ -63,7 +63,7 @@ The code writes these bytes after the linear-ordering pointer. Names beyond the 
 | +312, +320 | two zero 64-bit words; the value at +312 is passed to the ordering-copy helper |
 | +328 | 1e-3 |
 
-| +336, +340 | One 64-bit store; little-endian 32-bit words 0 and 500 | Raw values; field names and semantics unresolved |
+| +336, +340 | One 64-bit store; little-endian 32-bit words 0 and 500; field names and semantics unresolved |
 | +344, +348 | 5; low byte 0 |
 | +352, +360 | 0.1, 0.1 |
 | +368 | low byte 1; positionally `PER_MINIMIZER_ITERATION` |
