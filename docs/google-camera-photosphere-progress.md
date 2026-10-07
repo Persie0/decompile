@@ -379,7 +379,7 @@ Full trace: [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal
 
 The call path through `0x129564` and thunk `0x153900` indicates that the local record at `sp+0x2b0) is passed to the Ceres solve routine; the target saves its corresponding argument as `x23). Reads from that base at +4, +12, +24, +88, +92, +120, +208, +212, and +216 align with the version-matched Ceres 2.2.0 `Solver::Options` prefix fields. This identifies likely field names for the observed reads, but does not recover whether the caller changed any values from defaults.
 
-Other observed reads (+264, +268, +272, +280, +304, +312, +436, +440) remain unmapped pending a direct Android C++ object-layout check. The caller's writes to its stack options object are still needed to determine effective solver settings. See [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md).
+Using the Android 64-bit libc++ layout, the reads at +264/+268/+272/+280/+304/+312 likely map to the dense/sparse solver libraries, ordering type and object, minimum linear-solver iterations, and max SPSE iterations. These later offsets remain ABI-derived pending confirmation against the exact build; +436/+440 are still unmapped. The caller's writes to its stack options object are still needed to determine effective solver settings. See [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md).
 
 ### Current next targets
 
