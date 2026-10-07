@@ -483,6 +483,6 @@ The Ghidra call-reference listing shows one direct caller of the line-record uti
 ### Next targets
 
 - Search for all stores to offset `+32` across 36-byte line-record paths, including direct appends and postprocessing.
-- Trace whether GlobalFocalLength applies this scalar directly to line residuals or normalizes it later.
+- Check for additional rescaling between line-record ingestion and residual construction, beyond the direct line-triple multiplication established in checkpoint 23.
 - Compare remaining point-record producers and consumers.
 - Continue reviewing feature, pyramid, and low-level processing helpers.
