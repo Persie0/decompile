@@ -1016,3 +1016,10 @@ The per-record scales are applied directly, but their source field meanings and 
 The record at `0x11ed64` initializes the 50-iteration setting and writes `+0x30 = 1`, `+0x34 = 1`. At `0x128f04`, `+0x30` selects a sensor-prior model: a count/spread predicate chooses either the two-scalar pitch/roll residual or the one-scalar pitch residual. Both branches instantiate sensor residuals. After the Ceres solve, `0x129620` rejects `NO_CONVERGENCE` only when `+0x34` is zero; it always rejects `FAILURE`. The observed caller sets `+0x34` to one, so a nonconverged result reaches later validation. The option names remain unknown.
 
 Full trace: [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
+
+
+## Pass N8 — post-solve output validation
+
+The `BundleAdjusterGlobalFocalLength` path checks the optimized focal parameter at `sp+0x4a8` for positivity, then checks the shared center at `sp+0x4b0`/`sp+0x4b8` against the dimension values returned by indexed accessors. For a nonzero count from the fourth argument's `+24` virtual slot, a separate nested-object value returned at vtable slot `+64` must lie in `[10, 150]`. The value's source name and units are unresolved; a view-angle/FOV meaning is an inference. The passing path normalizes each per-image quaternion and issues an indexed transform update. Return bit 1 marks the accepted path; 0 marks rejection. A zero-count path copies the center pair and returns accepted without the per-image update.
+
+This narrows the meaning of checkpoint 24's downstream checks: `NO_CONVERGENCE` can pass the termination gate and still fail output validation. Full trace: [checkpoint 25](google-camera-photosphere-checkpoint-25-post-solve-output-validation.md).
