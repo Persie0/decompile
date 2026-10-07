@@ -1,8 +1,8 @@
 # Pixel Camera 8.8 Photo Sphere static reverse engineering — completion summary
 
-This document marks the current static reverse-engineering pass as complete for the available artifacts.
+Updated through checkpoints 17–18, this document summarizes the current static reverse-engineering pass for the audited artifacts.
 
-It does **not** claim that Google's proprietary C++ source code has been recovered. The audited native library is stripped. Several exact constants and object fields still require deeper decompilation or runtime instrumentation. The completed work is an engineering reconstruction of the Photo Sphere architecture, Java/JNI control flow, native object boundaries, major algorithm families, and many exact constants.
+It does **not** claim that Google's proprietary C++ source code has been recovered. The audited native library is stripped. Several exact constants and object fields still require deeper decompilation or runtime instrumentation. The current work is an engineering reconstruction of the Photo Sphere architecture, Java/JNI control flow, native object boundaries, major algorithm families, and many exact constants.
 
 ## Audited target
 
@@ -150,6 +150,9 @@ Nexus 5 special path for <10 ms: approximately `0.01`.
 ### Feature extraction / matching
 
 - detector family: FAST-9
+- FAST base threshold schedule: **[90, 55, 20, 15]**
+- dark-image threshold multiplier: `0.1 + 0.9 * mean / 50` below a sampled mean of 50; otherwise `1.0`
+- non-max radius: read from detector object offset `+0x14`; configured value remains unknown
 - feature record size: `0x40`
 - feature-set record size: `0x30`
 - orientation bins: `16`
@@ -159,6 +162,13 @@ Nexus 5 special path for <10 ms: approximately `0.01`.
 - ratio test: `0.64000005`, equivalent to squared `0.8`
 - accepted match record size: `0x14`
 - spherical observation size: `3 floats = 12 bytes`
+
+Rotation-estimation RANSAC configuration for the traced `compute_rotation.cc` call path:
+
+- angular inlier threshold: **0.04363323 rad = 2.5°**
+- two-correspondence rotation hypotheses
+- minimum support: **2** correspondences
+- early support cutoff: **150**; iteration controls: **550** and **5000**
 
 ### Bundle adjustment
 
@@ -265,22 +275,20 @@ A clean-room implementation should follow this architecture:
 
 ## What is still not exactly recovered
 
-These remain unresolved after the static pass:
+These remain unresolved after the current static pass:
 
-- exact FAST threshold;
-- non-max suppression and feature cap settings;
+- configured FAST non-max radius and feature cap;
 - exact patch size / descriptor length in every configuration path;
-- exact pyramid scale count used per input image;
-- exact pairwise RANSAC / robust-estimation thresholds;
-- exact graph-edge memory layout;
-- exact Ceres residual weights;
-- exact Ceres solver options and iteration limits;
+- `PatchPairwiseMatcher +0x130` maximum descriptor-distance default;
+- complete pyramid scale settings used per input image;
+- RANSAC settings outside the traced `compute_rotation.cc` call path;
+- exact graph-edge memory layout and graph-component pruning threshold;
+- exact Ceres residual weights and solver options / iteration limits;
 - exact blend pyramid level count;
 - exact seam cost weights;
 - exact exposure/gamma adjustment coefficients;
 - exact YUV/RGB fallback thresholds;
 - all internal field names of stripped C++ classes.
-
 ## Why these remain unresolved
 
 The native binary is a stripped ARM64 ELF. Static decompilation recovered many constants, vtables, strings, RTTI names and function boundaries, but not all semantic field names or all constructor/config values.
