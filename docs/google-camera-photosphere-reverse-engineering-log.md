@@ -978,3 +978,24 @@ The 1600-pixel value is explicitly passed into native session construction and m
 4. Recover exact feature extraction and pairwise-match options.
 5. Continue into `BundleAdjustedEstimator` and `BundleAdjusterGlobalFocalLength` for exact residual weights.
 6. Resolve seam-finder and multiband-blend option structures after alignment.
+
+
+---
+
+## Pass N5 — GlobalFocalLength Ceres caller options
+
+### Solver call handoff — confirmed
+
+`BundleAdjusterGlobalFocalLength` passes the local record at `sp+0x2b0` through thunk `0x153900` into the Ceres solve target at `0x15245c`; the target saves the record base in `x23`.
+
+### Caller-written solver choices — high confidence for the traced path
+
+The caller writes enum values for `DENSE_SCHUR`, `DOGLEG`, `SUBSPACE_DOGLEG`, `JACOBI`, `EIGEN`, `SUITE_SPARSE`, and `AMD`. It also writes one thread; radii `1e4`, `1e16), `1e-8`; tolerances `1e-6), `1e-10), `1e-8); and other prefix settings listed in checkpoint 22. Maximum iterations comes from input-record +44 rather than a literal.
+
+The callee reads the byte at +436 as a gradient-check switch and skips the gradient-check path when it is zero. The caller writes +436 as zero. Its double pair at +440/+448 is `0.1, 0.1`, but that pair is not used on this call because the switch is false.
+
+### ABI caveat and remaining work
+
+The observed reads and caller writes agree with the public Ceres 2.2.0 layout through the solver-library fields. The tail after +280 diverges: +304 is read as a byte flag, +312 is treated as a pointer-backed ordering source, and +436/+440 follow a different tail offset than the upstream header. Keep those fields raw until the exact Google build layout is recovered. Residual equations/weights and the semantics of options +0x2c/+0x30 remain open.
+
+Full trace: [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md) and [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md).
