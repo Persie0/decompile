@@ -507,3 +507,256 @@ The first two intervals are supported by call-site constants; the interpretation
 4. Resolve the parameter constructors receiving 360/180/120, 160, 512, 384 and 682.
 5. Follow `ProcessFrame()` into the state writer that computes target-hit/take-photo/motion flags.
 6. Resolve the render progress updater type to promote the 0.0/0.2/0.95 interpretation from strong inference to confirmed.
+
+
+---
+
+## Pass N3 — exact capture gate, real capture-session type, target-manager internals
+
+### Address-notation correction from N1
+
+Pass N1 reported several globals as `0x8170xx`. Those were **angr rebased addresses** using a +0x400000 load base.
+
+The corresponding ELF virtual addresses in the file are:
+
+```text
+0x4170D0  active CaptureSessionBuilderImpl pointer
+0x4170D8  TargetHit
+0x4170D9  TakeNewPhoto
+0x4170DA  MovingTooFast
+0x4170DB  PhotoSkippedTooFast
+0x417100  orientation/rotation manager pointer
+0x41710C  stitching-session counter
+```
+
+Both notations referred to the same runtime data after rebasing, but all subsequent offsets in this document use the ELF virtual address form.
+
+Relevant GOT relocation slots are:
+
+```text
+0x412030 -> 0x4170D0  active capture object
+0x412038 -> 0x417100  rotation manager
+0x412040 -> 0x41710C  stitch counter
+0x412058 -> 0x4170DB  PhotoSkippedTooFast
+0x412060 -> 0x4170D8  TargetHit
+0x412068 -> 0x4170D9  TakeNewPhoto
+0x412070 -> 0x4170DA  MovingTooFast
+```
+
+### Exact ProcessFrame capture decision — confirmed from AArch64
+
+The JNI method `ProcessFrame @ 0xEEEF4` performs the following native state update after preview/orientation processing:
+
+1. obtains the current 3x3 rotation;
+2. clears `PhotoSkippedTooFast`;
+3. calls active capture-object virtual method `+0x48` with that rotation;
+4. writes its boolean result to `TargetHit`;
+5. clears `TakeNewPhoto`;
+6. checks the Java-supplied `calibrationActive` boolean;
+7. if calibration is active and `TargetHit` is true:
+   - if `MovingTooFast` is true, set `PhotoSkippedTooFast = true`;
+   - otherwise call active-object virtual method `+0x78`, `DeviceOrientationStatus(rotation)`;
+   - if that status is nonzero, set `PhotoSkippedTooFast = true`;
+   - if that status is zero, set `TakeNewPhoto = true`.
+
+Therefore the exact capture gate at this layer is:
+
+```text
+TakeNewPhoto =
+    calibrationActive
+    && TargetHit
+    && !MovingTooFast
+    && DeviceOrientationStatus(rotation) == 0
+```
+
+and:
+
+```text
+PhotoSkippedTooFast =
+    calibrationActive
+    && TargetHit
+    && (
+         MovingTooFast
+         || DeviceOrientationStatus(rotation) != 0
+       )
+```
+
+The second public name is somewhat misleading: the same flag is used when the device-orientation status rejects capture, not only for excessive angular speed.
+
+### MovingTooFast is exactly the Java-supplied sensor gate — confirmed
+
+`SetSensorMovementTooFast(boolean)` writes directly to:
+
+`0x4170DA`
+
+and `MovingTooFast()` reads that exact same byte.
+
+So the native JNI layer does **not** maintain a separate hidden visual-speed flag under that name. The Java exposure-dependent gyro threshold feeds the exact state queried by `MovingTooFast()`.
+
+The native capture gate then combines that externally supplied motion state with target hit and orientation validity.
+
+### The active object is CaptureSessionBuilderImpl — confirmed RTTI
+
+The object stored at `0x4170D0` is **not** the previously suspected `SessionImpl`.
+
+The common reset path creates an object whose vptr address point is:
+
+`0x3FD478`
+
+RTTI identifies it as:
+
+`cityblock::portable::{anonymous}::CaptureSessionBuilderImpl`
+
+It is allocated as a **96-byte** object.
+
+Important fields recovered so far:
+
+| object offset | value |
+| ---: | --- |
+| `+0x38` | pointer to the underlying `SessionImpl` |
+| `+0x40` | target-manager object |
+| `+0x48 .. +0x58` | target/map storage used by target-return paths |
+
+The separately constructed `SessionImpl` is approximately `0xA0` bytes and has its own vtable. It is handed to finalization when capture ends.
+
+### Complete CaptureSessionBuilderImpl vtable — confirmed
+
+Vtable address point: `0x3FD478`.
+
+| vtable offset | function | recovered role |
+| ---: | ---: | --- |
+| `+0x00` | `0x10F588` | destructor |
+| `+0x08` | `0x10F614` | deleting destructor |
+| `+0x10` | `0x10F6A0` | InitTargets |
+| `+0x18` | `0x10F6C8` | AddImage |
+| `+0x20` | `0x10F7DC` | AlignNextImage |
+| `+0x28` | `0x10F84C` | UndoAddImage |
+| `+0x30` | `0x10F958` | NumImagesInQueue |
+| `+0x38` | `0x10F968` | NumImagesTotal |
+| `+0x40` | `0x10F978` | CanUndo |
+| `+0x48` | `0x10F9E4` | TargetHit |
+| `+0x50` | `0x10F9F4` | GetTargetInRange |
+| `+0x58` | `0x10FA04` | GetTargets |
+| `+0x60` | `0x10FC30` | GetNumCapturedTargets |
+| `+0x68` | `0x10FC40` | GetNumTotalTargets |
+| `+0x70` | `0x10FC50` | SetTargetHitAngleRadians |
+| `+0x78` | `0x10FC60` | DeviceOrientationStatus |
+| `+0x80` | `0x10FE74` | GetFrameGeometry |
+| `+0x88` | `0x1100EC` | StartGyroCalibration |
+| `+0x90` | `0x1100F4` | EndGyroCalibration |
+| `+0x98` | `0x1100FC` | expose underlying SessionImpl |
+| `+0xA0` | `0x110104` | transfer/remove SessionImpl for finalization |
+
+This replaces the earlier generic “active-session slot” interpretation with concrete class-level method assignments.
+
+### CaptureSessionBuilderImpl construction — confirmed
+
+The reset/factory path constructs:
+
+1. a mode-specific target manager/generator;
+2. a `CaptureSessionBuilderImpl` at `0x10F310`;
+3. an underlying `SessionImpl` via constructor around `0x11A204`;
+4. stores `SessionImpl*` at object offset `+0x38`;
+5. stores target manager at `+0x40`.
+
+This establishes a useful hierarchy:
+
+```text
+CaptureSessionBuilderImpl
+  |- SessionImpl
+  |- TargetManagerCommon / mode-specific target strategy
+  |- target/map state
+```
+
+### TargetManagerCommon identified — confirmed RTTI
+
+The target-manager object at capture-builder offset `+0x40` resolves to RTTI:
+
+`TargetManagerCommon`
+
+with vtable address point:
+
+`0x3FD7C8`
+
+Recovered entries include:
+
+| vtable offset | function | recovered role |
+| ---: | ---: | --- |
+| `+0x20` | `0x112384` | set hit-angle threshold |
+| `+0x28` | `0x11239C` | set second angular threshold |
+| `+0x30` | `0x1123B4` | test target hit |
+| `+0x38` | `0x112498` | get target in range |
+| `+0x70` | `0x1126D8` | captured-target count |
+| `+0x78` | `0x1126E8` | total-target count |
+
+The intermediate entries are still being assigned semantic names from their callers.
+
+### Hit angle is stored as cosine — confirmed
+
+`TargetManagerCommon::set-hit-angle @ 0x112384` does:
+
+```text
+cosf(input_angle_radians)
+```
+
+and stores the result at manager offset:
+
+`+0x88` (decimal 136)
+
+Therefore the Java dynamic hit radius of 2.75°..3.50° is converted once per update into a dot-product threshold:
+
+```text
+hit if directional cosine >= cos(hit_angle)
+```
+
+The neighboring method `0x11239C` similarly stores `cosf(angle)` at manager offset `+0x8C`. This is a second angular threshold, likely the broader “target in range”/activation threshold, but its exact public meaning is still being resolved.
+
+### Target record size and counts — confirmed
+
+The target-manager target vector uses records of exactly:
+
+**72 bytes per target**
+
+`GetNumTotalTargets()` computes the vector length as:
+
+```text
+(end - begin) / 72
+```
+
+The captured-target list is a vector of 32-bit IDs, and `GetNumCapturedTargets()` computes:
+
+```text
+(end - begin) / 4
+```
+
+A separate target-state field is explicitly reset to `-1` by one target-manager method and is likely the currently selected/in-range target index.
+
+### DeviceOrientationStatus — partially decoded
+
+`CaptureSessionBuilderImpl::DeviceOrientationStatus @ 0x10FC60` operates directly on the current 3x3 rotation.
+
+Confirmed behavior:
+
+- derives a pitch-like angle using `asinf`;
+- converts radians to degrees;
+- if absolute pitch exceeds **40.0°**, returns **0** immediately;
+- otherwise derives another orientation angle with `atan2f`;
+- normalizes it into a 0..360°-style domain;
+- branches on exact boundaries:
+  **20°, 90°, 160°, 200°, 270°, 340°**;
+- returns values including `-1`, `0`, and `+1`.
+
+In `ProcessFrame()`, **only zero permits a still capture**.
+
+The exact interpretation of the -1/+1 sectors is not yet named; the next pass is decoding the branch intervals precisely.
+
+---
+
+## Pass N3 next targets
+
+1. Fully decode `TargetManagerCommon::TargetHit @ 0x1123B4`, including exact vector/dot-product math and state updates.
+2. Decode the complete `DeviceOrientationStatus` sector map.
+3. Dump and resolve the mode factory jump table to map each native mode to its concrete generator constructor and default overlap constants.
+4. Recover the second target angular threshold stored at `TargetManagerCommon +0x8C`.
+5. Resolve all target-manager vtable slots and target activation state transitions.
+6. Continue from `AlignNextImage` into `SessionImpl` to recover feature matching and bundle-adjustment option constants.
