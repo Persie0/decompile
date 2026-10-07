@@ -65,15 +65,16 @@ The code writes these bytes after the linear-ordering pointer. Names beyond the 
 | +344, +348 | 5; low byte 0 |
 | +352, +360 | 0.1, 0.1 |
 | +368, +372 | byte 1; 32-bit value `0x3f800000` |
-| +376..+399 | empty vector storage |
-| +400..+413 | short string storage for `"/tmp"` |
-| +432 | 32-bit value `0x3f800000` |
+| +376 | low byte 0; adjacent bytes are not classified by this caller |
+| +384..+407 | empty three-pointer vector storage |
+| +408..+431 | short-string object containing `"/tmp"` |
+| +432 | raw 32-bit value `0x3f800000`; positional dump-format match, invalid as a public Ceres enum |
 | +436 | false; the callee's conditional gradient-check path is skipped |
 | +440, +448 | 0.1, 0.1 |
 | +456 | false |
 | +464, +472, +480 | empty callback-vector storage |
 
-Two additional writes are outside a clean upstream field mapping: a binary64 `0.6931471805599453` at +64, and a 64-bit zero at +312 that the callee passes to an ordering-copy helper. The public 2.2.0 header places two line-search integers at +64 and places scalar SPSE controls at +312, so the exact binary's tail ABI differs from that header or reuses some slots in a way that cannot be resolved from this caller alone. The write at +436 is independently identified as the gradient-check switch by the callee's branch; the two doubles at +440/+448 are loaded only after that branch is enabled.
+Two writes remain outside a clean upstream field mapping: a binary64 `0.6931471805599453` at +64, and a 64-bit zero at +312 that the callee passes to an ordering-copy helper. The public 2.2.0 header places two line-search integers at +64 and scalar SPSE controls at +312. The later tail has clearer object boundaries: the vector starts at +384 and the string at +408, while +432 is a raw value that positionally matches the public dump-format field but is not a valid public enum value. The write at +436 is independently identified as the gradient-check switch by the callee's branch; the two doubles at +440/+448 are loaded only after that branch is enabled. See [checkpoint 26](google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md).
 
 The caller does not write offsets +0, +4, or +12 in the audited initialization window, although the Ceres target reads them. The input record feeding +104 is initialized with 50, so the traced solver call uses a 50-iteration limit. The input-record +0x30 selector and +0x34 nonconvergence flag have unresolved source names; checkpoint 24 documents their observed behavior.
 
@@ -93,3 +94,5 @@ The caller does not write offsets +0, +4, or +12 in the audited initialization w
 Runtime verification remains unavailable in the audited environment.
 
 Checkpoint 23 follows the cost-function vtables and recovers the four residual equations, their per-observation scales, and the Huber-versus-Trivial loss choices for this path.
+
+Checkpoint 26 later traces the options-copy helper and corrects the tail vector/string boundaries.
