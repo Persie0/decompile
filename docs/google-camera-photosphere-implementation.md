@@ -1614,3 +1614,97 @@ The `CaptureSessionBuilderImpl` virtual interface is now partially mapped from J
 | +0xa0 | release/finalize session ownership |
 
 The still-unnamed methods at +0x28..+0x40, +0x60..+0x68 and +0x80..+0x98 are being resolved in the next focused decompilation pass.
+
+
+### 2026-10-07 — Production Photo Sphere target configuration resolved
+
+The native session-type jump table at `0x62908` contains six byte offsets:
+
+```text
+00 0a 10 16 1a 24
+```
+
+Using the branch base `0x10f16c`, this maps the six capture-mode IDs exactly:
+
+| Mode ID | Branch | Capture type |
+| ---: | --- | --- |
+| 0 | `0x10f16c` | Photo Sphere |
+| 1 | `0x10f194` | Horizontal |
+| 2 | `0x10f1ac` | Vertical |
+| 3 | `0x10f1c4` | Wide angle |
+| 4 | `0x10f1d4` | Fisheye |
+| 5 | `0x10f1fc` | Calibration |
+
+The **Photo Sphere** branch calls the PhotosphereTargetGenerator constructor that writes selector `0`, confirming that standard Photo Sphere uses the **full-circle ring layout** recovered above.
+
+The exact Photo Sphere overlap constants are:
+
+```text
+equator horizontal overlap      = 0.400000006  (~40%)
+non-equator horizontal overlap  = 0.324999988  (~32.5%)
+vertical overlap                = 0.400000006  (~40%)
+```
+
+The constructor stores them as:
+
+```text
++0x14 = 0.40   // equator ring overlap
++0x18 = 0.325  // other latitude-ring overlap
++0x1c = 0.40   // inter-band vertical overlap
+```
+
+Therefore standard Photo Sphere target placement is now recoverable as:
+
+```text
+vertical_step = verticalFov * 0.60
+
+equator_count =
+    floor((2π / horizontalFov) / 0.60)
+
+for each non-polar latitude:
+    latitude = bandIndex * vertical_step
+    count =
+        floor((2π / horizontalFov) /
+              0.675 *
+              cos(latitude))
+
+near a pole:
+    collapse the band to one target at ±π/2
+```
+
+Bands are attempted for indices `0, +1..+5, -1..-5` and generation stops once the pole/beyond-pole condition terminates further rows.
+
+This removes the earlier uncertainty about which target-layout branch production Photo Sphere uses.
+
+#### Other mode constructors
+
+The same native switch shows:
+
+- Horizontal uses a single-axis target generator with a `0.65` parameter.
+- Vertical uses a single-axis target generator with a `0.65` parameter.
+- Wide angle uses its own wide-angle generator and a mode/session parameter from the configuration object.
+- Fisheye uses the PhotosphereTargetGenerator **selector 1** symmetric half-ring layout with the same `0.40 / 0.325 / 0.40` overlap triplet.
+- Calibration uses a dedicated calibration target generator.
+
+#### Output projection/camera mapping
+
+The native output-camera factory also maps capture modes to projection models:
+
+| Mode | Native output camera |
+| --- | --- |
+| Photo Sphere | Equirectangular |
+| Horizontal | Equirectangular |
+| Vertical | Rotated vertical equirectangular |
+| Wide angle | Linear/perspective camera |
+| Fisheye | Fisheye camera |
+| Calibration | Equirectangular |
+
+Recovered constructor behavior includes:
+
+- Equirectangular camera: cached height = width / 2, i.e. canonical **2:1** geometry.
+- Rotated vertical equirectangular camera: height = 2 × width.
+- Fisheye camera: uses a **180°** field of view and square dimensions.
+- Wide-angle linear camera: selects between approximately **120° and 160°** configurations depending on its mode/config bit.
+
+The internal output-camera factory uses a nominal width of **512** for several setup/geometry objects; this is not necessarily the final exported JPEG width, which is selected later in the rendering/output-resolution path.
+
