@@ -545,7 +545,7 @@ For the call path documented in [checkpoint 20](google-camera-photosphere-checkp
 | RollPitchSensorResidual | 2 | [4, 2, 1] |
 | SensorResidual | 1 | [4, 2, 1] |
 
-The same options record has 50 at +0x2c and 1 at +0x30; the latter controls a branch, but neither field's semantic name is recovered. This configuration is scoped to the observed GlobalFocalLength path. Checkpoint 22 recovers caller-written solver settings for that path: DENSE_SCHUR with DOGLEG/SUBSPACE_DOGLEG, one solver thread, trust-region radii, tolerances, and a runtime-supplied iteration limit. Residual formulas/weights remain unresolved, and the option tail after +280 does not fully match the pinned upstream header. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), and [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md).
+Input-record +0x2c maps to `max_num_iterations=50`, though its source field name is unknown. Input-record +0x30=1 enables a residual-construction guard whose field name is unknown. This configuration is scoped to the observed GlobalFocalLength path. Checkpoint 22 recovers caller-written solver settings for that path: DENSE_SCHUR with DOGLEG/SUBSPACE_DOGLEG, one solver thread, trust-region radii, tolerances, and `max_num_iterations=50` from input-record `+0x2c`. Checkpoint 23 recovers the residual equations and scale placement for this path; source meaning/units of those scales remain unknown. The option tail after +280 does not fully match the pinned upstream header. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), and [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md).
 
 
 ---
@@ -917,7 +917,7 @@ The current static analysis does not yet recover:
 - optical-flow weights;
 - additional RANSAC settings outside the traced `compute_rotation.cc` call path;
 - exact graph-edge memory layout and graph-component pruning threshold;
-- Ceres residual equations/weights and solver settings; the traced GlobalFocalLength path selects HuberLoss(35), while other call paths and option semantics remain open;
+- source meaning/units of residual scales, the `+0x30` guard field name, Ceres tail offsets, and residual/solver settings for other bundle-adjuster paths;
 - exposure/gamma model coefficients and graph-cut seam-energy weights;
 - number of pyramid/blend levels;
 - exact full-resolution output-sizing rules;
@@ -987,7 +987,7 @@ The highest-value remaining static targets are:
 2. Recover the `PatchPairwiseMatcher +0x130` maximum descriptor-distance default and complete pyramid settings.
 3. Trace runtime optical-flow constraints and their weights.
 4. Separate the remaining line-alignment and other RANSAC call paths from the now-traced rotation estimator.
-5. Recover graph-edge insertion, graph-component pruning, and exact BA residual equations/weights and the semantic name of the +0x30 guard.
+5. Recover graph-edge insertion and graph-component pruning; determine the source meaning of BA residual scales and the semantic name of the +0x30 guard, then check other BA paths.
 6. Trace the renderer's selected blend-level count and remaining seam/exposure parameters.
 
 ---
