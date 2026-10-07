@@ -369,7 +369,19 @@ The detector cap decreases by `ceil(previous / 4) + 1` across the three levels, 
 
 Full trace: [checkpoint 19](google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md).
 
+## 2026-10-07 — checkpoint 20: global focal-length bundle loss selection
+
+One traced BundleAdjusterGlobalFocalLength path initializes the robust-loss selector at options offset +0x20 to 1. Both loss-construction sites in that method read this field, and the native factory maps selector 1 to HuberLoss(35). RTTI also confirms the AutoDiffCostFunction dimensions for line matches, point matches, roll/pitch sensor terms, and sensor terms. This does not establish settings for other bundle-adjuster paths; residual equations/weights and Ceres solver options remain open.
+
+Full trace: [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md).
+
 ### Current next targets
+- Determine the semantic names and caller-specific values of the remaining bundle-adjustment option fields; recover residual equations/weights and Ceres solver settings.
+- Trace optical-flow weights and identify their effects on pose constraints.
+- Check whether other detector construction paths override the -1 non-max-radius sentinel, and recover image-pyramid filtering/downsampling.
+- Resolve additional RANSAC paths and graph-component pruning.
+- Continue renderer work on blend-level count, seam costs, and exposure coefficients.
+
 
 - Determine whether other detector construction paths override the `-1` non-max-radius sentinel.
 - Recover image-pyramid pixel generation and filter/downsample details beyond the three matcher coordinate scales.
