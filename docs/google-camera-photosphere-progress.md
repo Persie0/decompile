@@ -431,11 +431,10 @@ Candidate `+312/+320` is a null `inner_iteration_ordering` shared pointer. The o
 
 ### Current next targets
 
-- Trace the source meaning and units of point- and line-residual scales; compare other bundle-adjuster paths.
-- Trace the origin and source meaning/units of point- and line-residual scales; compare other bundle-adjuster paths.
-- Compare other bundle-adjuster option constructors and verify whether any Ceres option fields differ by path.
+- Trace upstream assignments and units for point and line residual scales; compare all bundle-adjuster consumers and option constructors.
 - Trace other RANSAC paths and graph-component pruning.
-- Continue renderer work on blend-level count, seam costs, and exposure coefficients.
+- Continue renderer work on blend-level count, seam costs, exposure coefficients, and source-resolution limits.
+- Continue reviewing remaining feature, pyramid, and low-level processing helpers.
 
 
 ## 2026-10-07 — checkpoint 31: camera-model field of view
@@ -445,4 +444,9 @@ The post-solve scalar read through CameraModel vtable slot `+0x40` is the camera
 
 ## 2026-10-07 — checkpoint 32: Ceres SPSE and Jacobi options
 
-The Ceres option tail after `min_linear_solver_iterations=0` and `max_linear_solver_iterations=500` now maps through candidate `+368`: `+344=5) max SPSE iterations, `+348=false) SPSE initialization, `+352=0.1) SPSE tolerance, `+360=0.1) eta, and `+368=true) Jacobi scaling. The target validator names the SPSE and eta fields; member order and bool consumption identify Jacobi scaling. These are the pinned Ceres 2.2.0 defaults. Checkpoint 30 already mapped `+372) and `+376) to logging type and progress-to-stdout. See [checkpoint 32](google-camera-photosphere-checkpoint-32-ceres-spse-and-jacobi-options.md).
+The Ceres option tail after `min_linear_solver_iterations=0` and `max_linear_solver_iterations=500` now maps through candidate `+368`: `+344=5` is the maximum SPSE iteration count, `+348=false` disables SPSE initialization, `+352=0.1` is the SPSE tolerance, `+360=0.1` is eta, and `+368=true` enables Jacobi scaling. The target validator names the SPSE and eta fields; member order and bool consumption identify Jacobi scaling. These are the pinned Ceres 2.2.0 defaults. Checkpoint 30 already mapped `+372` and `+376` to logging type and progress-to-stdout. See [checkpoint 32](google-camera-photosphere-checkpoint-32-ceres-spse-and-jacobi-options.md).
+
+
+## 2026-10-07 — checkpoint 33: GlobalFocalLength match records and scale aggregation
+
+The traced GlobalFocalLength path reads point observations at a 28-byte stride: two 2D endpoints at offsets `+0..+12`, unused fields at `+16/+20` in this cost builder, and the residual multiplier at `+24`. Line observations use a 36-byte stride with four 2D endpoints at `+0..+28` and the multiplier at `+32`. The `0x318990` helper also sums each point record's `+24` value into per-image totals for both endpoints of its pairwise edge; its caller uses those totals in thresholded image bookkeeping. The multiplier's upstream source name and units remain unknown. See [checkpoint 33](google-camera-photosphere-checkpoint-33-global-focal-match-record-layouts.md).
