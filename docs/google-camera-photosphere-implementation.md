@@ -1173,3 +1173,47 @@ The other capture types do not take the same normal GPano Photo Sphere branch.
 Before finalization the UI always calls `SetOutputResolutionLarge()`.
 
 The first boolean passed to `FinishCapture()` is normally **false when at least one target was captured**. It becomes true for an empty/forced-special finish path. The final stitch is then scheduled asynchronously.
+
+
+---
+
+## Reverse-engineering progress log
+
+### 2026-10-07 — Native ARM64 deep dive in progress
+
+Current status:
+
+- Java/JNI control flow: mapped end-to-end.
+- Native `liblightcycle.so` hash verified and extracted.
+- Native symbols/RTTI/string evidence mapped for alignment, bundle adjustment, seam finding, blending and rendering.
+- Headless Ghidra pass completed successfully for the main JNI entry points.
+- Focused target-generator / session-builder decompilation is in progress.
+- A separate string-xref Ghidra pass failed at script output generation; this did not affect the recovered binary or the successful earlier Ghidra decompilation.
+
+New confirmed/recovered findings since the first implementation map:
+
+1. `TakeNewPhoto()` and `MovingTooFast()` are thin JNI reads of native state flags updated elsewhere, primarily by `ProcessFrame()`.
+2. All capture modes funnel through a shared native reset/setup routine.
+3. Native capture mode IDs recovered so far:
+   - 0 = Photo Sphere
+   - 1 = Horizontal panorama
+   - 2 = Vertical panorama
+   - 3 = Wide angle
+   - 4 = Fisheye
+   - 5 = Calibration
+4. The shared capture reset path hard-codes an internal processing/matching width of **1600**.
+5. A special boolean path is enabled for Photo Sphere and calibration modes.
+6. `RenderNextSession()` passes fixed floating-point parameters **0.2** and **0.95** into the native renderer/session path before dispatching the render operation.
+7. Photo Sphere target generation is latitude-band/ring based:
+   - bands close enough to a pole collapse to a single pole target;
+   - otherwise the generator derives the number of targets around a latitude from camera FOV/overlap geometry and `cos(latitude)`;
+   - the ring target count is forced to an odd number and distributed symmetrically.
+   Exact formula/constants are being confirmed from focused decompilation before being promoted from partial recovery to confirmed pseudocode.
+
+Active analysis runs:
+
+- Main native Ghidra decompilation: Playground run `37491930779` — success.
+- Exact binary extraction: Playground run `37600105501` — success.
+- Focused target-generator decompilation: Playground run `37601412924` — currently running at the time of this log entry.
+
+This section will be updated incrementally as additional constants, formulas and internal call graphs are recovered.
