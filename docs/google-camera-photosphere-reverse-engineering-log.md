@@ -247,3 +247,263 @@ The exact bias estimator math remains below those native virtual calls.
 4. Resolve the constructor at `0x340560` used by `RenderNextSession()` and prove what the 0.2/0.95 values mean.
 5. Recover sibling output-resolution JNI setters to map the enum around value 3.
 6. Cross-reference parameter strings with data references to recover exact target, RANSAC, bundle, seam, and blend constants.
+
+
+---
+
+## Pass N2 — capture modes, fixed alignment width, target-generator math
+
+This pass combines the JNI reset-family disassembly, Java/native call correlation, and source-string/data-reference analysis.
+
+### Native capture-mode enum — confirmed
+
+All capture reset JNI methods converge on the same native reset helper at approximately `0xED84C`.
+
+The mode values are:
+
+| Native mode | Capture type | extra boolean/flag |
+| ---: | --- | ---: |
+| 0 | Photo Sphere | 1 |
+| 1 | Horizontal | 0 |
+| 2 | Vertical | 0 |
+| 3 | Wide angle | 0 |
+| 4 | Fisheye | 0 |
+| 5 | Calibration | 1 |
+
+Each call also forwards:
+
+- the session-directory string;
+- the camera field of view in `s0`.
+
+The third argument behaves as a spherical/calibration-special flag, but its exact semantic name is not yet proven.
+
+This mapping is independent of the Java UI IDs (1..5). It is the native capture-mode enum used inside LightCycle.
+
+### Fixed image-match width = 1600 px — strong evidence
+
+The common reset helper passes the exact integer:
+
+```text
+0x640 = 1600
+```
+
+into the native capture/session builder.
+
+The same binary contains alignment strings referring explicitly to:
+
+- `image_match_width_`;
+- scaling an input to `image_match_width_`;
+- an image being wider/narrower than the specified `image_match_width_`.
+
+Together, these are strong evidence that LightCycle's native alignment working width is **1600 pixels** for this Pixel Camera 8.8 capture path.
+
+This is distinct from:
+
+- the roughly 320 px live tracking preview;
+- the roughly 3000 px source JPEG.
+
+A likely resolution hierarchy is therefore:
+
+```text
+~320 px preview       -> live pose/target tracking
+1600 px match image   -> source-image registration/alignment
+~3000 px source JPEG  -> retained source for final render
+full equirect output  -> final high-resolution stitch
+```
+
+### Output-resolution enum — confirmed
+
+Sibling native exports map the full resolution enum:
+
+| setter | native enum |
+| --- | ---: |
+| `SetOutputResolutionSmall` | 1 |
+| `SetOutputResolutionMedium` | 2 |
+| `SetOutputResolutionLarge` | 3 |
+
+The Java facade in this build only exposes/uses the large setter in the normal Photo Sphere completion path.
+
+### ResetTargets is a no-op in this build — confirmed
+
+The exported JNI `ResetTargets()` consists only of a return instruction.
+
+Target reset/reinitialization must therefore happen through session reset/`InitTargets()` state rather than this exported method in the audited build.
+
+### ProcessFrame Java contract — confirmed
+
+Java uses the result as follows:
+
+```text
+pose = ProcessFrame(previewBytes, width, height, calibrationActive)
+
+valid = pose[0] != -1.0f
+take  = TakeNewPhoto()
+
+if valid && take && noStillCurrentlyPending:
+    AddImage(pose)
+    request full-resolution still
+```
+
+On an accepted frame, the first nine returned floats are copied into the renderer's matrix representation and passed back through `AddImage()`.
+
+Therefore `ProcessFrame()` returns at least a **3x3 pose/rotation representation**, with `-1.0f` in element zero acting as an invalid-frame sentinel.
+
+The boolean passed to `ProcessFrame()` is true only after the Java gyro-calibration state has completed and the capture bridge is in its corresponding enabled state. Its exact native semantic is still being resolved.
+
+### Gyro calibration timing — confirmed
+
+The Java calibration UI advances in approximately **400 ms** steps.
+
+When its progress reaches the final UI slot, Java calls:
+
+```text
+EndGyroCalibration(integratedGyro, sampleCount, elapsedMs)
+```
+
+and marks calibration complete. This provides the boolean state later forwarded into `ProcessFrame()`.
+
+### SetSensorMovementTooFast is a separate native input — confirmed
+
+`SetSensorMovementTooFast(boolean)` is a very small JNI setter that writes a dedicated native boolean state through a GOT-backed global.
+
+It is separate from the four output-state bytes returned by:
+
+- `TargetHit()`
+- `TakeNewPhoto()`
+- `MovingTooFast()`
+- `PhotoSkippedTooFast()`
+
+Thus the Java exposure/gyro threshold supplies an **input constraint**, while `ProcessFrame()` combines that input with its own visual/target logic and produces the four output flags.
+
+### Additional active-session vtable slots — confirmed at JNI boundary
+
+The same active capture-session object is used by:
+
+| vtable byte offset | JNI operation |
+| ---: | --- |
+| `+0x10` | InitTargets |
+| `+0x20` | AlignNextImage |
+| `+0x28` | UndoAddImage |
+| `+0x30` | NumImagesInQueue |
+| `+0x38` | NumImagesTotal |
+| `+0x40` | CanUndo |
+| `+0x50` | GetTargetInRange |
+| `+0x58` | GetTargets |
+| `+0x60` | GetNumCapturedTargets |
+| `+0x68` | GetNumTotalTargets |
+| `+0x70` | SetTargetHitAngleRadians |
+| `+0x78` | DeviceOrientationStatus consumer |
+| `+0x80` | GetFrameGeometry |
+| `+0x98`, `+0xA0` | final-capture/session-state operations used by FinishCapture |
+
+The concrete C++ class/method names behind these slots are still being resolved from RTTI/vtables.
+
+### GetFrameGeometry output shape — confirmed
+
+`GetFrameGeometry(width, height)` allocates:
+
+```text
+3 * width * height
+```
+
+floats, invokes active-session vtable slot `+0x80`, then applies a coordinate transform to each 3-float vertex before returning the Java array.
+
+This is a dense 3D geometry field used by the preview/GL path, not the 3x3 capture pose returned by `ProcessFrame()`.
+
+### DeviceOrientationStatus — confirmed structure
+
+The JNI path obtains current rotation/orientation state from a separate native object, then forwards that state into active-session vtable slot `+0x78`.
+
+This confirms device-orientation validity/status is evaluated by the active capture session with access to native orientation state.
+
+### Wide-angle target generator: explicit 3x3 lattice — confirmed
+
+Native target-generator code contains the diagnostic:
+
+```text
+is too wide to be reliably covered by 3x3 targets.
+Clamping the overlap per image to ...
+```
+
+The corresponding function:
+
+1. computes horizontal/vertical camera FOV from image dimensions and focal length using an expression equivalent to:
+   `2 * atan((dimension / 2) / focal)`;
+2. adds a **20° margin** to the requested wide-angle field;
+3. computes the overlap needed to cover that field with a **3x3 target grid**;
+4. clamps per-image overlap to the exact float:
+   `0.4f` (`0x3ECCCCCD`) when the requested field is too wide;
+5. constructs exactly **9 target records**.
+
+The target backing storage is `0x288 = 648` bytes, and each target entry is **72 bytes**, confirming `648 / 72 = 9`.
+
+### Photo Sphere target generator — partially recovered
+
+A nearby function around `0x1159FC`, strongly associated with `target_generator.cc`, appears to implement Photo Sphere target generation.
+
+Observed behavior:
+
+- consumes an overlap-like parameter from the generator object;
+- computes horizontal/vertical FOV;
+- derives an angular step from camera FOV and overlap;
+- computes a count using a full-circle constant divided by that step and applies a ceil-like operation;
+- iterates angular columns/rings and constructs rotation matrices/target relationships;
+- contains the assertion:
+  `There must be more than one target in a column.`
+
+The full-circle constant is highly likely to be `2*pi`, but its referenced rodata value still needs to be resolved before marking the exact formula confirmed.
+
+### Capture-type target/output FOV constants — partially recovered
+
+Code associated with `photosphere_parameters.cc` switches on native capture mode and contains exact floats:
+
+- **360.0f**
+- **180.0f**
+- **120.0f**
+
+The observed mode-dependent selection includes:
+
+- mode 4 (Fisheye): selects 180 instead of the 360 branch;
+- mode 3 (Wide angle): selects 120.
+
+These are almost certainly capture/output field-of-view parameters, but the receiving constructor fields still need type resolution before assigning final semantic names.
+
+Additional parameter-building code contains:
+
+- **120.0f**
+- **160.0f**
+- integer dimensions **384** and **682**
+- a separate constructor using **180.0f** and **512 x 512**
+- another large parameter structure containing **512** and integer **90**.
+
+These values are recorded now but intentionally not named beyond what the receiving types prove.
+
+### Render progress intervals — strong inference
+
+The same internal constructor near `0x340560` is called with:
+
+- `0.0f, 0.2f` during capture/session setup;
+- `0.2f, 0.95f` by `RenderNextSession()`.
+
+The native binary also contains RTTI for `RangeProgressUpdater`.
+
+This is strong evidence that the two floats are **progress-range boundaries**:
+
+```text
+capture/session stage: 0% -> 20%
+final rendering:       20% -> 95%
+final save/metadata:   95% -> 100%   (inference)
+```
+
+The first two intervals are supported by call-site constants; the interpretation of the final 95-100% interval remains inferred until the downstream updater is resolved.
+
+---
+
+## Pass N2 next targets
+
+1. Resolve the GOT relocation for every LightCycle global and trace writes to the four `ProcessFrame` output-state bytes.
+2. Recover active-session concrete vtable/typeinfo and replace numeric slot labels with C++ method names.
+3. Resolve the Photo Sphere full-circle rodata constant and exact target-ring formula.
+4. Resolve the parameter constructors receiving 360/180/120, 160, 512, 384 and 682.
+5. Follow `ProcessFrame()` into the state writer that computes target-hit/take-photo/motion flags.
+6. Resolve the render progress updater type to promote the 0.0/0.2/0.95 interpretation from strong inference to confirmed.
