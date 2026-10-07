@@ -31,13 +31,13 @@ The same estimator-owned collection at offset +0x68 is passed into the extractio
 ## Parallel follow-ups
 
 - **Optical flow coordinates:** feature candidates are image-pixel positions in raw 0x0ff1c8 (Ghidra 0x1ff1c8). Raw 0x0fefdc (Ghidra 0x1fefdc) converts them to normalized camera-plane coordinates x=(pixel_x−principal_x)/focal_x, y=−(pixel_y−principal_y)/focal_y, z=−1 in one mode; its alternate branch uses the camera model's pixel-to-ray virtual method at +0x88. CameraRotationModel raw 0x0fd76c (Ghidra 0x1fd76c) projects them as x/−z and y/z. This does not establish point/line bundle-adjustment units. Numeric GlobalFlowSolver defaults remain unresolved.
-- **Graph-cut masks:** SeamFinderGraphcut raw 0x33ad54 makes two receiver-vtable +0x58 calls with argument 100 at raw 0x33b804/0x33b81c. After labels are applied to the masks, it makes two receiver-vtable +0x50 calls with argument 80 at raw 0x33b958/0x33b96c. The receiver types and method semantics remain unknown; these calls do not prove feathering or normalization. RTTI identifies raw 0x3390a8 and 0x339600 as separate LaplacianCbCrDiffComputer and ExposureUnaryCostComputer callbacks.
+- **Graph-cut masks:** SeamFinderGraphcut raw 0x33ad54 makes two receiver-vtable +0x58 calls with argument 100 at raw 0x33b804/0x33b81c. After labels are applied to the masks, it makes two receiver-vtable +0x50 calls with mask pointers in x1 at raw 0x33b958/0x33b96c; these callsites do not load a literal 80. The receiver types and method semantics remain unknown; these calls do not prove feathering or normalization. RTTI identifies raw 0x3390a8 and 0x339600 as separate LaplacianCbCrDiffComputer and ExposureUnaryCostComputer callbacks.
 - **Session artifacts:** The current rodata/disassembly artifacts do not prove another session.meta writer or establish whether queued-file read failures are skipped, retried, or fatal. The successful AddImage path is traced elsewhere; the failure branch and any runtime-only writer remain open.
 
 ## Remaining limits
 
 - Runtime GlobalFlowSolver/tracker defaults.
 - Point/line bundle-adjustment coordinate units and residual scale initialization.
-- Concrete receiver vtables and semantics for the graph-cut +0x58/100 and +0x50/80 calls; final mask feathering/normalization.
+- Concrete receiver vtables and semantics for the graph-cut +0x58/100 and +0x50 mask calls (with no explicit 80 immediate); final mask feathering/normalization.
 - Queued-file read-failure behavior and any additional session.meta writer.
 - Actual Android preview format on the target device.
