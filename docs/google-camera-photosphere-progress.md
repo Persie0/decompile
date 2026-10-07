@@ -172,3 +172,147 @@ This helper is selected by a generator configuration flag; the full Photo Sphere
 - Capture-state Ghidra run: `37494547323`
 - Capture-builder Ghidra run: `37520661659`
 - Focused target-generator Ghidra run: `37601412924`
+
+
+## 2026-10-07 — checkpoint 3: output sizing, matching thresholds and bundle robust losses
+
+### Output-resolution presets
+
+The JNI resolution setters are simple enum writes:
+
+- `SetOutputResolutionSmall()` -> preset **1**
+- `SetOutputResolutionMedium()` -> preset **2**
+- `SetOutputResolutionLarge()` -> preset **3**
+
+`photosphere_parameters.cc` maps these presets to target rendered-pixel budgets:
+
+| Preset | nominal rendered pixel budget |
+| --- | ---: |
+| Small | **8,000,000 px** |
+| Medium | **26,000,000 px** |
+| Large | **70,000,000 px** |
+
+The Java Photo Sphere completion path always selects **Large** before `FinishCapture()`.
+
+### Memory-dependent output cap
+
+The fourth argument passed into the native finalization parameters is not a timestamp. Tracing the Java provider resolves it to LightCycle's configured memory budget:
+
+```text
+budget_bytes = min(300, configured_lightcycle_MB) * 1,000,000
+budget_MB = budget_bytes / 1,000,000
+```
+
+The config wrapper's default is **420 MB**, but the LightCycle resource manager clamps it to **300 MB**.
+
+The native output pixel cap is:
+
+```text
+memory_pixel_cap =
+    ((budget_MB - 30) / 6.5) * 1,000,000
+
+render_pixel_budget =
+    min(resolution_preset_pixels, memory_pixel_cap)
+```
+
+At the 300 MB internal cap:
+
+```text
+memory_pixel_cap ≈ 41.538 million pixels
+```
+
+Therefore the Java call to "Large" requests 70 MP, but on the normal capped budget this build renders at most about **41.5 MP of actual cropped panorama content**.
+
+Approximate memory thresholds for the nominal presets are:
+
+- 8 MP: ~82 MB
+- 26 MP: ~199 MB
+- 70 MP: ~485 MB, which is above this build's 300 MB internal resource cap.
+
+### Exact final panorama scaling
+
+The final Stitcher computes geometry first in a reference equirectangular projection whose width is **2400 px**.
+
+It determines the valid/rendered crop in that reference projection, then computes:
+
+```text
+reference_crop_pixels =
+    crop_width_2400 * crop_height_2400
+
+scale =
+    sqrt(render_pixel_budget / reference_crop_pixels)
+
+full_width =
+    round_to_even(2400 * scale)
+
+full_height =
+    projection_aspect_height * full_width
+
+scaled_crop_bounds =
+    reference_crop_bounds * (full_width / 2400)
+```
+
+There are additional corrections for per-source resolution limits and blender alignment. In particular, if required, the mosaic width is rounded down to a multiple of the blender's `BlendDistance()` to prevent a seam at the left/right wrap boundary.
+
+Important consequence: the budget applies to **rendered/cropped content**, so a partial sphere may have a virtual `full_pano_width/full_pano_height` substantially larger than the actual rendered JPEG pixel count.
+
+### Patch matcher acceptance constants
+
+The recovered `PatchPairwiseMatcher` uses two notable exact tests:
+
+1. Feature-direction/orientation compatibility requires a dot product of at least:
+
+   ```text
+   0.9396926 = cos(20°)
+   ```
+
+   so the compared feature directions must differ by no more than approximately **20°**.
+
+2. The nearest/second-nearest descriptor-distance test uses:
+
+   ```text
+   best_distance / second_best_distance <= 0.64000005
+   ```
+
+   on squared distances, equivalent to the familiar **0.8 ratio test** before squaring.
+
+The best descriptor distance must also be below a configurable maximum-distance threshold stored in the matcher object.
+
+### Bundle-adjustment robust-loss enum
+
+Static Ceres RTTI + the exact native factory resolve the bundle-adjustment robust-loss enum:
+
+| enum | Ceres loss |
+| ---: | --- |
+| 0 | `TrivialLoss` |
+| 1 | `HuberLoss(35)` |
+| 2 | `SoftLOneLoss(35)` |
+
+For Huber, the native object stores **35** and **35² = 1225**. For Soft-L1 it stores **1225** and **1/1225**, matching Ceres' internal parameterization.
+
+Invalid enum values log:
+
+`Invalid Robust type - using Trivial loss function.`
+
+### Seam graph-cut cost details
+
+The graph-cut seam path computes image-difference costs from color differences and also builds an exposure/unary penalty.
+
+Recovered luminance conversion is:
+
+```text
+Y = 0.2989 R + 0.5871 G + 0.114 B
+```
+
+One unary term uses distance from mid-luma 128, with a dead/threshold region of **78** and a configurable multiplier. This biases seam placement away from problematic exposure/extreme-intensity areas rather than using RGB difference alone.
+
+The graph-cut implementation is backed by Google's IBFS max-flow code (`research/bigml/mrf/maxflow/ibfs.cc`).
+
+### Evidence
+
+- Output sizing: `FUN_0021874c`, `FUN_0041c5e0`, `FUN_0041df08`, `FUN_0041d3dc`.
+- Java memory budget: `gqm.mo9646a()`, `lbn(dhv)`, `foa.handleMessage()`.
+- Patch matching: `FUN_00226614`.
+- Robust losses: `FUN_00229e80` plus Ceres RTTI/vtables.
+- Seam costs: `FUN_004390a8`, `FUN_00439600`.
+- Analysis artifacts: runs `37518942026`, `37519726361`, `37491930779`.
