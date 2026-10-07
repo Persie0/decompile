@@ -1217,3 +1217,79 @@ Active analysis runs:
 - Focused target-generator decompilation: Playground run `37601412924` — currently running at the time of this log entry.
 
 This section will be updated incrementally as additional constants, formulas and internal call graphs are recovered.
+
+
+### 2026-10-07 — Target-generator decompilation completed
+
+Focused Ghidra run `37601412924` completed successfully against the exact ARM64 `liblightcycle.so`.
+
+New confirmed findings:
+
+1. **The Photo Sphere target generator uses actual optical FOV, not a fixed grid.**
+   - It queries image width, image height, and focal length from the active camera model.
+   - It computes the angular field of view with the pinhole relation:
+     `fov = 2 * atan((dimension / 2) / focal_length)`.
+   - It swaps the two effective FOV axes when the starting orientation indicates the camera axes are rotated relative to the world frame.
+
+2. **The full-ring target-count formula is recovered.** For a latitude `lat`:
+   ```text
+   ring_count =
+       floor((2*pi / horizontal_fov)
+             / (1 - horizontal_overlap)
+             * cos(lat))
+   ```
+   Near a pole, the ring collapses to one target. Otherwise targets are evenly spaced by:
+   ```text
+   azimuth_step = 2*pi / ring_count
+   ```
+
+3. **A second symmetric/odd-ring generator is also present.** It derives:
+   ```text
+   half_count =
+       floor((pi/2 / horizontal_fov)
+             / (1 - overlap)
+             * cos(lat))
+
+   ring_count = 2 * max(half_count, 0) + 1
+   azimuth_step = (pi/2) / half_count
+   ```
+   This produces an odd number of targets symmetric around the forward direction instead of a complete 360-degree ring.
+
+4. **Latitude bands are generated incrementally around the starting row.**
+   - The center band is generated first.
+   - Positive and negative latitude bands are then added using:
+     ```text
+     latitude = row_index * vertical_fov * (1 - vertical_overlap)
+     ```
+   - The recovered loop considers at most five positive and five negative additional bands around the center band.
+   - Generation terminates earlier when the requested latitude no longer intersects useful camera coverage.
+
+5. **Target graph connectivity is explicit.**
+   - Consecutive targets in a ring are linked as neighbors.
+   - Full rings wrap last -> first.
+   - Adjacent latitude rings are connected by choosing the target whose azimuth is nearest after circular-angle wrapping.
+   - The target graph therefore provides a structured capture traversal rather than only an unordered list of dots.
+
+6. **Pole behavior is special-cased.**
+   - When `cos(latitude)` becomes sufficiently small, target generation clamps latitude to +/-90 degrees and emits a single pole target.
+   - This explains the top/bottom single-target behavior of the classic Google Photo Sphere UI.
+
+7. **Confirmed JNI ownership details.**
+   - `TakeNewPhoto()` is a direct read of a native byte flag; the decision itself is produced during `ProcessFrame()`.
+   - `AddImage(pose)` forwards the pose to the session builder and returns the native-selected source-image filename.
+   - `AlignNextImage()` directly invokes the incremental aligner's next-image operation.
+   - `InitTargets(rotation)` sends the start rotation to the session builder and immediately retrieves the generated target vector.
+   - `SetTargetHitAngleRadians()` forwards the Java-selected dynamic 2.75-3.50 degree threshold into the native session builder.
+
+8. **Exact final-render JNI constants are confirmed from instructions, not string inference.**
+   `RenderNextSession()` builds its native render request using the IEEE-754 constants:
+   - `0x3e4ccccd = 0.2f`
+   - `0x3f733333 ~= 0.95f`
+   Their semantic field names are still being recovered from the render-request constructor.
+
+Remaining work in the current pass:
+
+- resolve the default overlap fields used by the Photo Sphere target-parameter struct;
+- name the session-builder vtable methods behind `ProcessFrame()`;
+- recover the exact criteria that set `TakeNewPhoto`, `TargetHit`, `MovingTooFast`, and `PhotoSkippedTooFast`;
+- map incremental-alignment option values and final-render blend/seam settings.
