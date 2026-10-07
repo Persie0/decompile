@@ -2,7 +2,7 @@
 
 ## Scope
 
-This checkpoint follows the global focal-length bundle-adjustment trace in [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md). It cross-references the observed call into Ceres with the public Ceres 2.2.0 `Solver::Options` layout. It narrows the object identification and field mapping, but does not recover caller-written solver values.
+This checkpoint follows the global focal-length bundle-adjustment trace in [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md). It identifies the stack object passed through the Ceres solve wrapper and records which offsets the callee reads. Checkpoint 22 follows the caller's writes and tests the offsets against the public Ceres 2.2.0 layout.
 
 - APK SHA-256: `9ca2264cbf5680c8b5b740e53849c1586c53436a7e860616584c0349dba37c47`
 - `liblightcycle.so` SHA-256: `878feb4ab3912bc0a4c399d9eb14b6c615926e132b324ad8ea02d4988fd428d1`
@@ -11,9 +11,9 @@ This checkpoint follows the global focal-length bundle-adjustment trace in [chec
 
 ## Options-object handoff
 
-The traced caller assembles local objects near `0x12924c`; the candidate `ceres::Solver::Options` record begins at `sp+0x2b0). Before the call at `0x129564`, the caller places that address in `x0). The thunk at `0x153900` shifts the arguments one register to the right, and the target at `0x15245c` saves its `x1` argument in `x23`. This makes `x23) the likely base of the Options record consumed by Ceres.
+The caller assembles local objects near `0x12924c`. The candidate solver-options record begins at `sp+0x2b0`. At `0x1294f0`, the caller places that address in `x0`; thunk `0x153900` shifts the arguments one register to the right; and the target at `0x15245c` saves its `x1` argument in `x23`. The target therefore consumes the same stack address as its candidate options base.
 
-The target reads fields from that base at several offsets. The prefix offsets below agree with the declaration order in the version-matched public header:
+The early field reads align with the version-matched Ceres declaration. After the subset-preconditioner container, the observed library and ordering slots also align with a 40-byte Android libc++ `std::unordered_set` member:
 
 | Observed offset | Candidate Ceres field |
 | ---: | --- |
@@ -29,29 +29,26 @@ The target reads fields from that base at several offsets. The prefix offsets be
 | +264 | `dense_linear_algebra_library_type` |
 | +268 | `sparse_linear_algebra_library_type` |
 | +272 | `linear_solver_ordering_type` |
-| +280 | `linear_solver_ordering` (`shared_ptr`) |
-| +304 | `min_linear_solver_iterations` |
-| +312 | `max_num_spse_iterations` |
+| +280 | `linear_solver_ordering` (pointer-backed ordering) |
 
-The prefix fields through +216 do not depend on the STL container layout. The later assignments use the 64-bit Android libc++ layout for the intervening `std::unordered_set` member (40 bytes for this stateless-hash/equality/allocator instantiation). They are strong ABI-based mappings, not confirmed against the exact compiler/STL build used for this ELF. The Android libc++ `__hash_table` member layout is available in the [NDK source](https://chromium.googlesource.com/android_ndk/+/401019bf85744311b26c88ced255cd53401af8b7/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__hash_table). Reads at +436 and +440 remain unmapped; at least one may be part of a wider copy rather than a standalone option-field access.
+This is a cross-reference, not a complete ABI proof. In particular, the binary's reads at +304, +312, +436, and +440/+448 do not all match the pinned upstream header's field sequence. The target treats +304 as a byte flag, passes the value at +312 to an ordering-copy helper, branches on the byte at +436, and loads two doubles from +440/+448. The +304/+312 fields should not be labeled as `min_linear_solver_iterations` or `max_num_spse_iterations` solely from the public header.
 
-This remains a layout cross-reference, not proof that the application overrides any field.
-
-The version-matched declaration is [Ceres Solver 2.2.0 `include/ceres/solver.h`](https://raw.githubusercontent.com/ceres-solver/ceres-solver/2.2.0/include/ceres/solver.h). Its constructor defaults provide a reference baseline only. They do not establish the APK's effective values because the caller may write options after construction.
+The version-matched declaration is [Ceres Solver 2.2.0 `include/ceres/solver.h`](https://raw.githubusercontent.com/ceres-solver/ceres-solver/2.2.0/include/ceres/solver.h). Its defaults are only a reference baseline; they do not establish the APK's effective values. Checkpoint 22 records the caller's stack writes and the remaining layout conflict.
 
 ## What this resolves and what remains open
 
-- The call path likely passes a `ceres::Solver::Options` object into Ceres' solve routine.
-- Several Ceres reads can now be interpreted as solver-option fields, giving a cross-reference for the next disassembly pass.
-- No effective solver setting is established here. The caller's stack writes between `0x12924c) and `0x129564) must be recovered to distinguish Ceres defaults from explicit overrides.
-- Residual equations and weights, option semantics at the bundle-adjuster record offsets +0x2c and +0x30, and other bundle-adjuster paths remain unresolved.
+- The call path passes a local solver-options-like record into the Ceres solve routine.
+- The observed reads through +280 identify a stable prefix and likely library/ordering fields.
+- Later offsets reveal a vendor-specific or otherwise different tail layout than the pinned upstream declaration.
+- Checkpoint 22 recovers many caller-written values, but the exact semantic mapping of part of the tail and the runtime value sourced from the bundle-adjuster input record remain open.
+- Residual equations and weights, and the meanings of bundle-adjuster input offsets +0x2c/+0x30, remain unresolved.
 
 ## Evidence
 
-- `0x12924c): local object setup; candidate Options storage at `sp+0x2b0`.
-- `0x1294f0): `x0) points to `sp+0x2b0` before the solve wrapper call.
-- `0x129564): call to the argument-shifting thunk.
-- `0x153900): shifts `x0/x1/x2` into `x1/x2/x3` before branching to `0x15245c`.
+- `0x12924c`: local object setup; candidate options storage at `sp+0x2b0`.
+- `0x1294f0`: `x0) points to `sp+0x2b0` before the solve wrapper call.
+- `0x129564`: call to the argument-shifting thunk.
+- `0x153900`: shifts `x0/x1/x2` into `x1/x2/x3` before branching to `0x15245c`.
 - `0x15245c`: saves `x1` in `x23` and reads the offsets listed above.
 - Official Ceres 2.2.0 header: field declaration order and baseline defaults.
 
