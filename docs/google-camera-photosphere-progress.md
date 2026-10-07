@@ -394,11 +394,19 @@ The shared quaternion projection helper transfers 2D points between views using 
 
 Full trace: [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md).
 
+
+## 2026-10-07 — checkpoint 24: sensor-prior selection and solve termination
+
+Input-record `+0x30 = 1` selects between the one-scalar pitch prior and two-scalar pitch/roll prior using the 10° sample-spread predicates and a count threshold of 7; both branches add sensor residuals. Input-record `+0x34 = 1` lets Ceres `NO_CONVERGENCE` pass the first status gate, while `FAILURE` remains rejected. Full trace: [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
+
+## 2026-10-07 — checkpoint 25: post-solve output validation
+
+After that first gate, the optimized focal must be positive and the center pair must be within the checked image dimensions. For a nonzero input-object count, a separate nested-object scalar must be in `[10, 150]`; a view-angle/FOV interpretation is plausible but unverified. Passing results normalize and write back the per-image rotations. The traced return bit is 1 for accepted paths and 0 for rejection. Full trace: [checkpoint 25](google-camera-photosphere-checkpoint-25-post-solve-output-validation.md).
+
 ### Current next targets
 
-- Resolve the Google Camera Ceres tail ABI after +280 and the semantics of raw writes at +64/+336/+432.
-- Recover source-level names for the +0x30 sensor-prior selector and +0x34 nonconvergence flag; trace the source meaning/units of residual scales and verify whether other bundle-adjuster paths share these residuals.
-- Trace optical-flow weights and identify their effects on pose constraints.
-- Check whether other detector construction paths override the -1 non-max-radius sentinel, and recover image-pyramid filtering/downsampling.
-- Resolve additional RANSAC paths and graph-component pruning.
+- Identify the nested model scalar's source-level name and units, and map its accessor/setter types.
+- Trace the origin and source meaning/units of point- and line-residual scales; compare other bundle-adjuster paths.
+- Resolve the vendor Ceres option-tail ABI after +280 and the source meaning of raw writes at +64/+336/+432.
+- Trace other RANSAC paths and graph-component pruning.
 - Continue renderer work on blend-level count, seam costs, and exposure coefficients.
