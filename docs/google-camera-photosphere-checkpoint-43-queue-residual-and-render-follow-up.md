@@ -43,6 +43,8 @@ Initializer raw 0x3a1808 constructs the extractor's object+32 vector with 16 pat
 
 The direct callsites in raw SeamFinderGraphcut body 0x33ad54 trace to four distinct incoming polymorphic pointers. Receivers at stack slots +0x48/+0x38 dispatch through vtable byte offset +0x58 with argument 100 (raw 0x33b804/0x33b81c). Receivers at +0x20/+0x10 dispatch through +0x50 after labels are applied (raw 0x33b958/0x33b96c). The RTTI export has a primary address point at Ghidra 0x50d8c8 with slot-compatible entries +0x50 -> FUN_00439a6c and +0x58 -> FUN_00439abc. The incoming receiver vptrs were not recovered, so these functions are only candidates. The separately identified ExposureUnaryCostComputer callback at raw 0x339600 does not prove these receiver mappings.
 
+After the receiver callbacks, helper raw 0x33bd94 converts each score into a signed integer update by multiplying it by −1,000,000 or +1,000,000. It then queries the graph state and fills an integer output mask with 0/1 labels. This establishes score quantization and binary mask extraction after the graph calls, but not a later seam feather or normalized blend-weight stage.
+
 ## Runtime flow defaults
 
 AlignmentTracker processing raw 0x0f399c reads this+0x50 as a float threshold and this+0x54 as an integer cap, then calls flow-constraint builder raw 0x0ff1c8; the separate multiplier is 16.0. The embedded GlobalFlowSolver is passed from AlignmentTracker+0x78 at raw 0x0f44c8. Solver raw 0x0ffc30 reads type at +0x08, maximum-iteration control at +0x0c, and another iteration/stopping control at +0x10; type 0 selects normal equations and type 1 selects Ceres. No constructor/default writers for these fields were found in the loaded native artifacts, so their active values remain unresolved.
