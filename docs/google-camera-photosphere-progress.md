@@ -383,15 +383,15 @@ Full trace: [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver
 
 ## 2026-10-07 — checkpoint 22: caller-written Ceres settings
 
-The caller's stack writes recover a strong core configuration for this GlobalFocalLength path: DENSE_SCHUR, DOGLEG with SUBSPACE_DOGLEG, one solver thread, trust-region radii `1e4 / 1e16 / 1e-8`, function/gradient/parameter tolerances `1e-6 / 1e-10 / 1e-8`, and a runtime-supplied max-iteration value from input-record +44. The user ordering is null; dense algebra is EIGEN and the sparse-library enum is SUITE_SPARSE. The gradient-check flag is false.
+The caller's stack writes recover a strong core configuration for this GlobalFocalLength path: DENSE_SCHUR, DOGLEG with SUBSPACE_DOGLEG, one solver thread, trust-region radii `1e4 / 1e16 / 1e-8`, function/gradient/parameter tolerances `1e-6 / 1e-10 / 1e-8`, and a 50-iteration limit copied from input-record +44. The user ordering is null; dense algebra is EIGEN and the sparse-library enum is SUITE_SPARSE. The gradient-check flag is false.
 
-The caller also writes additional raw values at +64 and beyond +280, but those offsets do not consistently match the upstream header, so their field names remain open. The raw values, call-site offsets and confidence limits are recorded in [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md).
+Input-record +0x2c resolves to max_num_iterations=50. Input-record +0x30 is 1 and activates a residual-construction guard based on a cos(10°) direction test, a count floor of 7, and an asin-derived 10° pitch-like test. The guard field name and raw option writes at +64 and after +280 remain open; [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md) records the trace.
 
 
 ### Current next targets
 
-- Resolve the Google Camera Ceres tail ABI after +280, the semantics of raw writes at +64/+336/+432, and the input-record +44 iteration-limit source.
-- Recover residual equations/weights and semantic names/values of bundle-adjuster options +0x2c/+0x30.
+- Resolve the Google Camera Ceres tail ABI after +280, the semantics of raw writes at +64/+336/+432, and the input-record +0x30 guard's semantic field name.
+- Recover residual equations/weights and the semantic name of the bundle-adjuster +0x30 guard flag.
 - Trace optical-flow weights and identify their effects on pose constraints.
 - Check whether other detector construction paths override the -1 non-max-radius sentinel, and recover image-pyramid filtering/downsampling.
 - Resolve additional RANSAC paths and graph-component pruning.
