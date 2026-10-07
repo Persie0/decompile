@@ -331,3 +331,40 @@ Recovered from the existing native-analysis artifacts:
 - `RenderNextSession()` stores/clamps the JNI floats **0.2** and **0.95** as request parameters. Current evidence is consistent with progress/range parameters, not seam-energy weights, so the documentation no longer treats them as rendering-quality constants.
 
 Next targets: recover the upstream assignment of the final blend-level count, bundle-adjustment residual weights, optical-flow parameters, seam-cost defaults, and per-source output-resolution limiter.
+
+## 2026-10-07 — checkpoint 17: FAST thresholds and brightness adaptation
+
+The corrected extraction artifact contains an integer threshold table at rodata VA `0x625a0`: **[90, 55, 20, 15]**. The FAST detector driver at `0x39e9dc` samples grayscale values on a grid with approximately one sample per 100 image pixels, then scales the table by:
+
+```text
+mean >= 50: 1.0
+mean < 50: 0.1 + 0.9 * mean / 50
+```
+
+Each scaled value is truncated to an integer and passed to FAST-9. The first three thresholds are skipped when they exceed either twice the sampled mean or the sampled intensity range; the final 15 threshold is the fallback. FAST-9 core use is confirmed at `0x39f560`.
+
+The detector also reads object field `+0x14` as its non-max radius and calls the suppression helper only when the field is at least 2. The configured radius and feature cap remain unknown. Full trace: [checkpoint 17](google-camera-photosphere-checkpoint-17-fast-threshold-schedule.md).
+
+## 2026-10-07 — checkpoint 18: rotation RANSAC configuration
+
+The rotation-estimation call near `0x3074e4` passes a five-field options record into the `compute_rotation.cc` RANSAC path:
+
+| Field | Value |
+| --- | ---: |
+| iteration boundary | 550 |
+| hard iteration cap | 5000 |
+| minimum support | 2 |
+| early support threshold | 150 |
+| angular inlier threshold | 0.04363323 rad = 2.5° |
+
+The estimator draws two distinct correspondence samples to form a candidate rotation, scores ray correspondences using the cosine-form angular gate, and returns the support count. Its control flow can stop early at 150 support; otherwise it checks for at least 2 supported matches at the 550-trial boundary and keeps searching without support up to 5000. This resolves the pairwise-rotation RANSAC threshold and control values for this call path; it does not imply every RANSAC use shares them.
+
+Full trace: [checkpoint 18](google-camera-photosphere-checkpoint-18-rotation-ransac.md).
+
+### Current next targets
+
+- Recover the constructor/configuration value for `FastCornerDetector +0x14` and any feature cap.
+- Trace the `PatchPairwiseMatcher +0x130` maximum descriptor-distance default.
+- Identify the exact runtime optical-flow and Ceres option values.
+- Trace other RANSAC paths and graph-component pruning independently.
+
