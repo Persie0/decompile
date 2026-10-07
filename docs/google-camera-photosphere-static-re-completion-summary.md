@@ -201,7 +201,7 @@ RTTI recovers these AutoDiffCostFunction dimensions:
 | RollPitchSensorResidual | 2 | [4, 2, 1] |
 | SensorResidual | 1 | [4, 2, 1] |
 
-Checkpoint 23 recovers the residual equations and scale placement for the traced GlobalFocalLength path; the scales' source meanings and units remain open. Checkpoint 22 records its concrete caller-written solver configuration. The vendor-specific option tail and semantic name of the input-record +0x30 guard also remain open. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), and [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md).
+Checkpoint 23 recovers the residual equations and scale placement for the traced GlobalFocalLength path; the scales' source meanings and units remain open. Checkpoint 24 shows that input-record +0x30 selects the sensor-prior form and +0x34 permits NO_CONVERGENCE through the first post-solve gate. Their source-level field names and the vendor-specific option tail remain open. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md), and [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
 
 
 Confirmed residual families:
@@ -306,7 +306,7 @@ These remain unresolved after the current static pass:
 - complete image-pyramid pixel-generation and filter/downsample settings; the traced matcher uses three levels and coordinate factors `[1, 2, 4]`;
 - RANSAC settings outside the traced `compute_rotation.cc` call path;
 - exact graph-edge memory layout and graph-component pruning threshold;
-- source meaning/units of per-observation Ceres residual scales; vendor-specific option-tail details; the semantic name of input `+0x30`; and configurations of other bundle-adjuster paths;
+- source meaning/units of per-observation Ceres residual scales; vendor-specific option-tail details; source names of input `+0x30` and `+0x34`; and configurations of other bundle-adjuster paths;
 - exact blend pyramid level count;
 - exact seam cost weights;
 - exact exposure/gamma adjustment coefficients;
@@ -369,3 +369,8 @@ This is a static caller trace, not runtime output. The binary's option tail afte
 ## Checkpoint 23 update — GlobalFocalLength residuals
 
 The shared projection helper transfers points using two orientation blocks, an image-center pair, and one focal-length scalar. Point matches produce two scale-weighted reprojection errors. Line matches produce four scale-weighted line-incidence residuals in both transfer directions. Sensor priors produce pitch and roll residuals; the roll term is suppressed above 81° absolute target pitch. Point and line blocks use HuberLoss(35); sensor blocks use TrivialLoss. See [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md).
+
+
+## Checkpoint 24 update — sensor-prior selection and Ceres termination
+
+For the traced GlobalFocalLength path, input-record `+0x30 = 1` chooses between a one-scalar pitch prior and a two-scalar pitch/roll prior using two 10° sample-spread predicates and a count threshold of 7. It does not remove sensor constraints. Input-record `+0x34 = 1` allows Ceres `NO_CONVERGENCE` through the first post-solve status gate; `FAILURE` remains rejected and downstream validation still runs. Source field names remain unknown. See [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
