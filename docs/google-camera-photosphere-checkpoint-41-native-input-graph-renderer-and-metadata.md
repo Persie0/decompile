@@ -91,7 +91,7 @@ If the file contains only the nine rows emitted by this native writer, Java’s 
 
 ## Analysis runs and remaining gaps
 
-Focused Ghidra runs 37693894574 and 37694151104 completed successfully. The parallel reviews closed the native frame-consumer, graph adjacency, line-RANSAC, pyramid filter, seam-cost, and metadata-writer gaps. They also identified optical-flow field roles, the GammaAdjuster transfer function/application, and the distinction between pairwise match-data scaling and bundle-adjustment residual scalars. A further queue-to-AddImage edge is confirmed by vtable relocation and is conditional on a successful queued-file read. The new focused descriptor run for commit c5bc8e99081d984788068dd8c61614ed2e8a01d3 is in progress.
+Focused Ghidra runs 37693894574 and 37694151104 completed successfully. The parallel reviews closed the native frame-consumer, graph adjacency, line-RANSAC, pyramid filter, seam-cost, and metadata-writer gaps. They also identified optical-flow field roles, the GammaAdjuster transfer function/application, and the distinction between pairwise match-data scaling and bundle-adjustment residual scalars. A further queue-to-AddImage edge is confirmed by vtable relocation and is conditional on a successful queued-file read. The focused descriptor run for commit c5bc8e99081d984788068dd8c61614ed2e8a01d3 completed successfully as run 37696733930 and produced artifact 11515618113; its targeted decompiles are being reviewed.
 
 Remaining targets:
 - exact oriented descriptor patch size and byte count;
