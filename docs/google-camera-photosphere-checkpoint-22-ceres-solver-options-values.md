@@ -19,6 +19,7 @@ The following values are written directly to the candidate record. The enum name
 | +16 | 20 | `max_lbfgs_rank` |
 | +20 | false | `use_approximate_eigenvalue_bfgs_scaling` |
 | +24 | 2 | `line_search_interpolation_type` enum |
+| +64, +68 | 20, 5 | `max_num_line_search_step_size_iterations`, `max_num_line_search_direction_restarts` |
 | +72, +80 | 0.9, 10.0 | line-search curvature decrease and max step expansion |
 | +88, +92 | 1, 1 | `DOGLEG` and `SUBSPACE_DOGLEG` |
 | +96, +100 | false, 5 | non-monotonic steps disabled; max consecutive steps |
@@ -61,7 +62,7 @@ The code writes these bytes after the linear-ordering pointer. Names beyond the 
 | +304 | low byte 0; the callee reads this byte as a flag |
 | +312, +320 | two zero 64-bit words; the value at +312 is passed to the ordering-copy helper |
 | +328 | 1e-3 |
-| +64, +68 | One 64-bit store; little-endian 32-bit words 20 and 5 | Positional match for public Ceres 2.2.0 `max_num_line_search_step_size_iterations` and `max_num_line_search_direction_restarts` |
+
 | +336, +340 | One 64-bit store; little-endian 32-bit words 0 and 500 | Raw values; field names and semantics unresolved |
 | +344, +348 | 5; low byte 0 |
 | +352, +360 | 0.1, 0.1 |
