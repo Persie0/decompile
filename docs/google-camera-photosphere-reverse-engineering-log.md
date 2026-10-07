@@ -990,7 +990,7 @@ The 1600-pixel value is explicitly passed into native session construction and m
 
 ### Caller-written solver choices — high confidence for the traced path
 
-The caller writes enum values for `DENSE_SCHUR`, `DOGLEG`, `SUBSPACE_DOGLEG`, `JACOBI`, `EIGEN`, `SUITE_SPARSE`, and `AMD`. It also writes one thread; radii `1e4`, `1e16), `1e-8`; tolerances `1e-6), `1e-10), `1e-8); and other prefix settings listed in checkpoint 22. Maximum iterations comes from input-record +44 rather than a literal.
+The caller writes enum values for `DENSE_SCHUR`, `DOGLEG`, `SUBSPACE_DOGLEG`, `JACOBI`, `EIGEN`, `SUITE_SPARSE`, and `AMD`. It also writes one thread; radii `1e4`, `1e16`, `1e-8`; tolerances `1e-6`, `1e-10`, `1e-8`; and other prefix settings listed in checkpoint 22. Maximum iterations comes from input-record +44 rather than a literal.
 
 The callee reads the byte at +436 as a gradient-check switch and skips the gradient-check path when it is zero. The caller writes +436 as zero. Its double pair at +440/+448 is `0.1, 0.1`, but that pair is not used on this call because the switch is false.
 
