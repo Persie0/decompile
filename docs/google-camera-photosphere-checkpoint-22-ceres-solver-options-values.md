@@ -40,13 +40,13 @@ The local input record is initialized at `0x11ed64`, based at caller `sp+8`, and
 
 - Input-record `+0x2c` is 50. The adjuster loads it at `0x12939c` and writes it to Ceres options `+104`, so this path uses `max_num_iterations = 50`.
 - Input-record `+0x30` is 1. At `0x128f04`, it selects between the one-scalar pitch prior and two-scalar pitch/roll prior. It does not skip all sensor residual construction.
-- Input-record `+0x34` is 1. The caller initializes it at `0x11ed84); after Ceres returns, `0x12962c) uses it to allow termination type `NO_CONVERGENCE` through the first status gate.
+- Input-record `+0x34` is 1. The caller initializes it at `0x11ed84`; after Ceres returns, `0x12962c` uses it to allow termination type `NO_CONVERGENCE` through the first status gate.
 
-When `+0x30 != 1`, the code builds one `SensorResidual` (evaluator `0x12d4c8), with one residual scalar. When `+0x30 == 1`, any of the following routes to `RollPitchSensorResidual` (evaluator `0x12cffc), with two residual scalars:
+When `+0x30 != 1`, the code builds one `SensorResidual` (evaluator `0x12d4c8`), with one residual scalar. When `+0x30 == 1`, any of the following routes to `RollPitchSensorResidual` (evaluator `0x12cffc`), with two residual scalars:
 
 1. `0x316b8c` returns true. That helper requires at least two samples and reports true when every checked normalized dot product of stored 3D samples is at least `0.9848077` (approximately `cos(10°)`).
 2. The computed sensor count `w25` is below 7.
-3. `0x316c8c` returns true. It compares `asin)-derived pitch-like samples and reports true when every checked difference is at most `0.1745329 rad) (10°).
+3. `0x316c8c` returns true. It compares `asin`-derived, pitch-like samples and reports true when every checked difference is at most `0.1745329` rad (10°).
 
 If `+0x30 == 1` and all three predicates are false, the code builds the one-scalar `SensorResidual`. Both branches create sensor residuals; the flag chooses the prior model. Exact field names remain unknown. After solving, `NO_CONVERGENCE` proceeds only when `+0x34` is nonzero; termination type `FAILURE` always takes the cleanup path. Later checks can still reject the solution. The full trace is in [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
 
