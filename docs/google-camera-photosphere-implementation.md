@@ -522,13 +522,27 @@ Recovered residual types include:
 
 The native classes include:
 
-- `BundleAdjuster`
-- `BundleAdjusterGlobalFocalLength`
-- `BundleAdjustedEstimator`.
+- BundleAdjuster
+- BundleAdjusterGlobalFocalLength
+- BundleAdjustedEstimator.
 
 This means the final poses are globally optimized across images instead of only chaining neighboring pairwise transforms.
 
 A close reproduction should therefore model each source image as a camera orientation/projection and run a global nonlinear optimization over camera rotations and possibly focal length.
+
+#### GlobalFocalLength loss selection — one traced path
+
+For the call path documented in [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), the options record's +0x20 robust-loss selector is 1 at both loss-construction sites. The selector factory maps 1 to HuberLoss(35). RTTI confirms these AutoDiffCostFunction signatures:
+
+| Functor | Residual scalars | Parameter block sizes |
+| --- | ---: | --- |
+| LineMatchResidual | 4 | [4, 4, 2, 1] |
+| PointMatchResidual | 2 | [4, 4, 2, 1] |
+| RollPitchSensorResidual | 2 | [4, 2, 1] |
+| SensorResidual | 1 | [4, 2, 1] |
+
+The same options record has 50 at +0x2c and 1 at +0x30; the latter controls a branch, but neither field's semantic name is recovered. This configuration is scoped to the observed GlobalFocalLength path. Residual formulas/weights and solver options remain unresolved.
+
 
 ---
 
@@ -899,7 +913,7 @@ The current static analysis does not yet recover:
 - optical-flow weights;
 - additional RANSAC settings outside the traced `compute_rotation.cc` call path;
 - exact graph-edge memory layout and graph-component pruning threshold;
-- Ceres residual weights, remaining robust-loss choices, and solver settings;
+- Ceres residual equations/weights and solver settings; the traced GlobalFocalLength path selects HuberLoss(35), while other call paths and option semantics remain open;
 - exposure/gamma model coefficients and graph-cut seam-energy weights;
 - number of pyramid/blend levels;
 - exact full-resolution output-sizing rules;
