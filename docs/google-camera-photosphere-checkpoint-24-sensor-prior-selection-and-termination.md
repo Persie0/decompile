@@ -74,4 +74,4 @@ The enum values are cross-checked against the pinned [Ceres Solver 2.2.0 `types.
 - `0x129620`..`0x129640`: post-solve termination gate reading `+0x34`.
 - `0x12cffc`, `0x12d4c8`, and their relocations/RTTI: residual evaluator identity and dimensions.
 
-This is static analysis of the audited binary. Runtime behavior, exact source-level field names, residual-scale units, other bundle-adjuster paths, and the vendor Ceres option tail remain open.
+This is static analysis of the audited binary. Runtime behavior, exact source-level field names, residual-scale units, other bundle-adjuster paths, and the vendor Ceres option tail remain open. Checkpoint 25 traces the later focal, image-center, and model-side output checks before the adjuster returns.
