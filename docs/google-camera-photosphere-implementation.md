@@ -2046,3 +2046,8 @@ The traced `compute_rotation.cc` call uses a 2.5° angular inlier threshold, two
 ### 2026-10-07 — PatchPairwiseMatcher limits and pyramid configuration
 
 The traced matcher construction paths set `+0x128 = 30`, `+0x12c = 3000`, and `+0x130 = 375.0`; `+0x134` remains 3. The matcher processes three levels, with detector point limits `[3000, 751, 189]` and a 30-entry match-index list cap per level. It squares the 375.0 field to obtain a 140625 maximum squared patch distance, then applies the 0.64000005 best/second-best squared-distance ratio gate. The detector constructor initializes `+0x14` to `-1`; its wrapper runs radius suppression only for values at least 2. These values are scoped to the observed matcher paths. See [checkpoint 19](google-camera-photosphere-checkpoint-19-matcher-limits-and-pyramid.md).
+
+
+### 2026-10-07 — GlobalFocalLength post-solve validation
+
+The traced solve path checks that the optimized focal scalar is positive and that the shared image center stays within the returned width/height bounds. When the fourth-argument count is nonzero, a separate nested-object scalar returned from vtable slot `+64` must be within `[10, 150]`; its exact name and units remain unresolved, though a view-angle/FOV interpretation is plausible. Passing paths normalize each image quaternion and issue an indexed transform update. The return bit is 1 for an accepted path and 0 for rejection. See [checkpoint 25](google-camera-photosphere-checkpoint-25-post-solve-output-validation.md).
