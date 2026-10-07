@@ -1708,3 +1708,106 @@ Recovered constructor behavior includes:
 
 The internal output-camera factory uses a nominal width of **512** for several setup/geometry objects; this is not necessarily the final exported JPEG width, which is selected later in the rendering/output-resolution path.
 
+
+
+### 2026-10-07 — Feature matching and final encoding pass
+
+The focused algorithm pass resolves several concrete pieces of the visual matcher and final JPEG path.
+
+#### Patch-feature candidate gate
+
+The pairwise patch matcher in `patch_pairwise_matcher.cc` first rejects feature candidates whose viewing rays differ by more than **20 degrees**.
+
+The recovered test is:
+
+```text
+dot(ray1, ray2) >= 0.9396926
+```
+
+where `0.9396926 ~= cos(20°)`.
+
+This is a geometric pre-filter before descriptor comparison.
+
+#### Descriptor distance and ratio test
+
+The descriptor matcher compares byte descriptors with exact sum-of-squared differences:
+
+```text
+SSD = sum_i (descriptor1[i] - descriptor2[i])^2
+```
+
+For every source feature it retains the best and second-best SSD and accepts the match only when all of these conditions hold:
+
+```text
+best_ssd <= absolute_threshold^2
+second_best_ssd != 0
+best_ssd / second_best_ssd <= 0.64000005
+```
+
+Thus the recovered Lowe-style ambiguity ratio is **0.64**.
+
+The absolute descriptor threshold is the matcher object's float field at offset `+0x130`. Its constructor/default assignment is still being traced, so its value is not yet claimed here.
+
+The matcher also stores a configurable number of scale levels at object offset `+0x134`; the decompiled matching loop requires both images to contain the same number of scale-level feature sets.
+
+#### Spherical registration stage
+
+Accepted patch correspondences are converted into spherical/ray correspondences and passed into the rotation estimator. The pairwise pipeline therefore performs:
+
+```text
+feature extraction
+  -> angular candidate pruning (20°)
+  -> patch SSD + 0.64 ratio test
+  -> spherical ray correspondence
+  -> robust camera-rotation estimation
+  -> model validation
+```
+
+A post-estimation validation function additionally requires the rotation-estimator support count to exceed:
+
+```text
+0.15 * successfully_projectable_correspondences + 5
+```
+
+The exact semantic name of the support-count output is still being confirmed, so this condition is recorded structurally rather than labeled as a definitive "inlier count" yet.
+
+#### Final mosaic encoding is YUV-first
+
+The final blender keeps full-resolution luma and half-resolution chroma planes and attempts a direct **YUV420 -> JPEG** write.
+
+Confirmed behavior:
+
+1. Y is full resolution.
+2. U and V dimensions must be half the luma dimensions.
+3. Chroma for fully empty/zero mosaic regions is filled with neutral **128**.
+4. The encoder first invokes the YUV420 JPEG writer.
+5. Only if that fails does it allocate/construct the full RGB mosaic and use the fallback JPEG writer.
+6. If the RGB fallback also fails, the native code logs `Double bad, fallback plan failed!`.
+
+This confirms Google's final path deliberately avoids a full RGB panorama allocation in the normal case.
+
+#### Multiband blender state
+
+The recovered blender initialization explicitly asserts:
+
+```text
+blend_levels_ > 0
+```
+
+and creates one internal pyramid structure per configured blend level. The exact default number of levels is still being traced through the renderer/blender constructor.
+
+#### Graph-cut color-cost constants
+
+One recovered seam-cost implementation uses the exact RGB luminance formula:
+
+```text
+Y = 0.2989 * R + 0.5871 * G + 0.114 * B
+```
+
+Its chroma-related penalty is centered at neutral value **128** and introduces an additional penalty once:
+
+```text
+abs(chroma - 128) >= 78
+```
+
+The exact class-to-function mapping between this function and `ExposureUnaryCostComputer` / `LaplacianCbCrDiffComputer` is still being resolved before assigning the final semantic name.
