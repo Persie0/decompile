@@ -526,11 +526,25 @@ The traced extractor setup at raw 0x125ae4 initializes 16 rotated patterns from 
 
 The same follow-up mapped optical-flow point pixels into normalized camera-plane coordinates, while leaving bundle-adjustment units separate. Graph-cut code makes two +0x58 receiver calls with argument 100, then two +0x50 mask calls with argument 80 after labels are applied; receiver types and feathering semantics remain unresolved. The available session artifacts still do not identify an extra session.meta writer or queued-file read-failure outcome. Full trace: [checkpoint 42](../google-camera-photosphere-checkpoint-42-oriented-patch-feature-records.md).
 
+
+## 2026-10-07 — checkpoint 43: queue failures, residual inputs and render system
+
+The queue audit separates missing-file failure from processing failure. SessionImpl queue method raw 0x11b18c (Ghidra 0x21b18c) logs and returns 0 without advancing the head/count when the path is absent, so the entry remains queued. If the path exists, the entry is advanced and removed before file processing; a read failure returns 0 after consumption. The separate batch drain raw 0x11b5f4 also advances before processing and stops on failure. JNI AlignNextImage raw 0x0ef830 dispatches through manager vtable slot +0x20; the caller's repeat/retry policy is not established. The Java source audit found no explicit retry/backoff around AlignNextImage.
+
+Bundle-adjustment setup walks 0x80-byte records, selecting seven-float point rows (0x1c bytes) at +0x50/+0x58 and nine-float line rows (0x24 bytes) at +0x68/+0x70. Point setup forwards fields 0–3 as two double pairs and field 6 as a float, skipping fields 4–5 in this path; the point evaluator uses perspective division and scales two reprojection differences by the stored scalar. Line setup forms segment differences and scales line coefficients by field 8 divided by segment length; the line evaluator projects four endpoints by depth and combines them with those coefficients. No fixed pixel-size or degree/radian conversion appears in these stages. Whether upstream rows are already calibrated and the point scalar's units remain unknown. RTTI gives two point residuals and four line residuals with parameter blocks [4,4,2,1].
+
+The image-analysis loop's explicit matrix assembly is confirmed at raw 0x3416b0–0x341780. For each ordered pair with overlap count n_ij > 5, it reads logged normalized means L_ji and L_ij and a call-supplied scalar g=1.0. For i≠j, it adds M_ii += n_ij + 2g n_ij L_ji², M_ij += −2g n_ij L_ji L_ij, and b_i += n_ij. The q/r inputs use transposed flattened indices; the reversed traversal supplies the counterpart. This confirms the system terms but does not identify a unique higher-level loss interpretation or prove the solved parameters are gamma values.
+
+The descriptor initializer's object+32 is a vector of 16 records at a 24-byte stride; each holds a nested rotated coordinate pattern. The traced 8×8 construction supplies 64 coordinate pairs per pattern, and builder raw 0x3a2020 appends 64-byte feature records with 64-byte descriptors. This resolves the 48-vs-64 stride confusion: the 24-byte entries are pattern headers, not output records or sample bytes.
+
+The follow-up scans did not find static constructors/default writers for tracker +0x50/+0x54 or GlobalFlowSolver +0x08/+0x0c/+0x10; those values remain runtime-dependent or absent from the supplied artifacts. The seam audit traces the four receiver objects back to the method's incoming arguments. RTTI offers slot-compatible candidates at Ghidra address point 0x50d8c8, with +0x50 -> FUN_00439a6c and +0x58 -> FUN_00439abc. No available constructor or argument-vptr evidence proves that the receivers use this address point, so the functions remain candidates. Concrete seam receiver semantics and final mask weighting remain unresolved. AlignmentTracker reads threshold/cap from +0x50/+0x54, and the solver subobject at +0x78 reads type +0x08 and iteration controls +0x0c/+0x10; the inspected artifacts contain no constructor/default writers, so runtime values remain unknown. The additional session.meta writer, target-device preview format, and upstream bundle-adjustment row units are also unresolved. Full trace: [checkpoint 43](../google-camera-photosphere-checkpoint-43-queue-residual-and-render-follow-up.md).
+
 ### Remaining targets
 
-- Characterize queued-file read-failure behavior and per-image alignment timing; the saved artifacts establish the successful AddImage path but do not settle failure handling.
-- Resolve the image-adjustment objective, concrete receiver vtables and semantics for SeamFinderGraphcut's +0x58/100 and +0x50/80 calls, and final mask feathering/normalization.
-- Recover runtime GlobalFlowSolver/tracker defaults. Optical-flow pixel-to-camera-ray conversion is now mapped; point/line bundle-adjustment coordinate units and residual scales remain unresolved.
-- Verify the target device supplies the native converter's expected NV21-compatible layout; JNI does not receive the Android format enum.
-- Check for any additional session.meta writer and capture a runtime metadata file.
-- Evaluate exact target totals for a specified camera model and FOV.
+- Determine whether the JNI caller repeats AlignNextImage when a missing path remains queued, and characterize per-image scheduling/timing.
+- Identify concrete receiver types/methods for SeamFinderGraphcut's +0x58/100 and +0x50/80 calls; locate any final seam feathering or weight normalization.
+- Recover runtime AlignmentTracker and GlobalFlowSolver defaults.
+- Trace point/line row producers to establish coordinate units/calibration and identify the point scalar's units.
+- Verify the target device's preview byte format; the native JNI call omits Android's format enum.
+- Check for additional session.meta writers and capture a runtime metadata file.
+- Evaluate target totals for a specified camera model and FOV.
