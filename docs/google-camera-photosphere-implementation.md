@@ -1811,3 +1811,188 @@ abs(chroma - 128) >= 78
 ```
 
 The exact class-to-function mapping between this function and `ExposureUnaryCostComputer` / `LaplacianCbCrDiffComputer` is still being resolved before assigning the final semantic name.
+
+
+### 2026-10-07 — Target-manager state machine and exact overlap parameters
+
+This pass resolves the concrete Photo Sphere target-manager parameters and state machine.
+
+#### Exact Photo Sphere overlap parameters
+
+The Photo Sphere branch in `capture/session_manager.cc` constructs the target manager with:
+
+```text
+CreatePhotoSphereTargetManager(
+    0.4f,
+    0.325f,
+    0.4f,
+    camera_model)
+```
+
+Tracing those three values into `PhotosphereTargetGenerator` proves their roles:
+
+| Parameter | Exact value | Role |
+| --- | ---: | --- |
+| center-ring overlap | **0.400** | overlap used when generating the starting latitude ring |
+| other-ring overlap | **0.325** | horizontal overlap used for non-center latitude rings |
+| vertical overlap | **0.400** | overlap between latitude bands |
+
+The generator mode field is initialized to `0`, selecting full 360-degree rings rather than the odd/symmetric partial-ring generator.
+
+Therefore the latitude spacing is exactly:
+
+```text
+latitude_step = vertical_fov * (1 - 0.4)
+              = 0.6 * vertical_fov
+```
+
+The center ring uses:
+
+```text
+ring_count =
+    floor((2*pi / horizontal_fov)
+          / (1 - 0.4)
+          * cos(latitude))
+```
+
+while non-center rings use:
+
+```text
+ring_count =
+    floor((2*pi / horizontal_fov)
+          / (1 - 0.325)
+          * cos(latitude))
+```
+
+subject to the previously documented pole collapse and latitude-range termination.
+
+#### Exact target-manager strategy stack
+
+Photo Sphere constructs this target-management stack:
+
+```text
+StartAtIdentity(
+    PhotosphereTargetGenerator(...)
+)
+    +
+InitFirst
+    +
+ActivateAsYouGo
+```
+
+Recovered behavior:
+
+1. **StartAtIdentity** anchors the generated target field to the initial camera orientation.
+2. **InitFirst** clears activation output and changes the first generated target from inactive to active.
+3. **ActivateAsYouGo** activates graph-neighbor targets after a target is captured.
+4. Its inverse path is used during undo to deactivate targets made reachable by the undone capture.
+
+This confirms the dots are not simply all active from the beginning. Capture proceeds through a graph.
+
+#### Exact target states
+
+Each target record is 72 bytes. The integer at record offset `+0x40` is the target state:
+
+| State | Meaning |
+| ---: | --- |
+| **0** | inactive / not currently eligible |
+| **1** | active / eligible for capture |
+| **2** | captured |
+
+When a target is captured:
+
+1. its index is appended to the captured-target history;
+2. its state changes to `2`;
+3. `ActivateAsYouGo` walks its neighbor IDs;
+4. eligible neighboring records change from `0 -> 1`.
+
+Undo performs the corresponding reverse activation update.
+
+#### Exact target-hit and in-range thresholds
+
+`TargetManagerCommon` initializes two angular thresholds:
+
+- `cos(3°) = 0.9986295104`
+- `cos(15°) = 0.9659258127`
+
+They have different jobs:
+
+- **3°** is the native default capture-hit radius.
+- **15°** is the separate “target in range” radius.
+
+Java continuously overrides the 3° default with its dynamic **2.75° .. 3.50°** hit radius through `SetTargetHitAngleRadians()`.
+
+The 15° in-range threshold remains separate and is what `GetTargetInRange()` uses.
+
+#### Exact nearest-target / hit algorithm
+
+For every tracking pose, `TargetManagerCommon`:
+
+1. forms the camera forward ray from the current 3x3 pose;
+2. computes a dot product against every target direction;
+3. selects the target with maximum dot product;
+4. stores that index as the nearest target;
+5. if `max_dot > cos(15°)`, stores it as the in-range target; otherwise stores `-1`;
+6. reports a **capture hit** only when:
+   - the selected target state is exactly `1`; and
+   - `max_dot > cos(current_hit_angle)`.
+
+Equivalent pseudocode:
+
+```text
+nearest = argmax_i dot(camera_forward, target[i].direction)
+max_dot = dot(camera_forward, target[nearest].direction)
+
+nearest_target = nearest
+in_range_target = nearest if max_dot > cos(15°) else -1
+
+target_hit =
+    target[nearest].state == ACTIVE
+    && max_dot > cos(dynamic_hit_angle)
+```
+
+This confirms target acceptance is purely angular at the target-manager layer; movement and device-orientation rejection are applied afterward by `ProcessFrame()`.
+
+#### Target-manager vtable recovered
+
+| Vtable offset | Role |
+| ---: | --- |
+| +0x10 | reset target manager |
+| +0x18 | generate / initialize targets |
+| +0x20 | set capture-hit angle |
+| +0x28 | set in-range angle |
+| +0x30 | evaluate nearest/in-range/capture-hit state |
+| +0x38 | return in-range target |
+| +0x40 | return nearest target |
+| +0x48 | mark target captured + run activation strategy |
+| +0x50 | target-state update delegate |
+| +0x58 | return captured/related target vector |
+| +0x60 | return active/related target vector |
+| +0x68 | clear in-range target |
+| +0x70 | captured-target count |
+| +0x78 | total-target count |
+| +0x80 | complex undo/export helper; final API label still being resolved |
+
+#### CaptureSessionBuilder vtable recovered further
+
+| Vtable offset | Role |
+| ---: | --- |
+| +0x10 | initialize targets |
+| +0x18 | add accepted image / pose |
+| +0x20 | align next image |
+| +0x28 | undo added image |
+| +0x40 | can undo |
+| +0x48 | target-hit evaluator |
+| +0x50 | get target in range |
+| +0x58 | get targets |
+| +0x60 | number of captured targets |
+| +0x68 | total target count |
+| +0x70 | set target-hit angle |
+| +0x78 | device-orientation status |
+| +0x80 | geometry/calibration-grid helper, not fully named yet |
+| +0x88 | return builder field at +0x10 |
+| +0x90 | return first-image/session-orientation flag |
+| +0x98 | return session pointer |
+| +0xa0 | release/take session pointer |
+
+One surprising result: in this exact 8.8 build, JNI `ResetTargets()` is effectively a **no-op**; normal target reset/reinitialization happens through the session/target-manager lifecycle instead.
