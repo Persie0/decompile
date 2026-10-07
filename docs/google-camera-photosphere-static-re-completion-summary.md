@@ -1,6 +1,6 @@
 # Pixel Camera 8.8 Photo Sphere static reverse engineering — completion summary
 
-Updated through checkpoint 25, this document summarizes the current static reverse-engineering pass for the audited artifacts.
+Updated through checkpoint 26, this document summarizes the current static reverse-engineering pass for the audited artifacts.
 
 It does **not** claim that Google's proprietary C++ source code has been recovered. The audited native library is stripped. Several exact constants and object fields still require deeper decompilation or runtime instrumentation. The current work is an engineering reconstruction of the Photo Sphere architecture, Java/JNI control flow, native object boundaries, major algorithm families, and many exact constants.
 
@@ -45,6 +45,7 @@ Running / checkpoint documents:
 - `docs/google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md`
 - `docs/google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md`
 - `docs/google-camera-photosphere-checkpoint-25-post-solve-output-validation.md`
+- `docs/google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md`
 - this completion summary
 
 ## Recovered high-level architecture
@@ -204,7 +205,7 @@ RTTI recovers these AutoDiffCostFunction dimensions:
 | RollPitchSensorResidual | 2 | [4, 2, 1] |
 | SensorResidual | 1 | [4, 2, 1] |
 
-Checkpoint 23 recovers the residual equations and scale placement for the traced GlobalFocalLength path; the scales' source meanings and units remain open. Checkpoint 24 shows that input-record +0x30 selects the sensor-prior form and +0x34 permits NO_CONVERGENCE through the first post-solve gate. Their source-level field names and the vendor-specific option tail remain open. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md), and [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
+Checkpoint 23 recovers the residual equations and scale placement for the traced GlobalFocalLength path; the scales' source meanings and units remain open. Checkpoint 24 shows that input-record +0x30 selects the sensor-prior form and +0x34 permits NO_CONVERGENCE through the first post-solve gate. Their source-level field names remain open. Checkpoint 26 corrects the post-+280 vector/string offsets, while the raw +432 value and remaining vendor-specific ABI differences stay unresolved. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md), [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md), and [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
 
 
 Confirmed residual families:
@@ -309,7 +310,7 @@ These remain unresolved after the current static pass:
 - complete image-pyramid pixel-generation and filter/downsample settings; the traced matcher uses three levels and coordinate factors `[1, 2, 4]`;
 - RANSAC settings outside the traced `compute_rotation.cc` call path;
 - exact graph-edge memory layout and graph-component pruning threshold;
-- source meaning/units of per-observation Ceres residual scales; vendor-specific option-tail details; source names of input `+0x30` and `+0x34`; and configurations of other bundle-adjuster paths;
+- source meaning/units of per-observation Ceres residual scales; the raw vendor-specific Ceres option value at +432 and remaining tail differences; source names of input `+0x30` and `+0x34`; and configurations of other bundle-adjuster paths;
 - exact blend pyramid level count;
 - exact seam cost weights;
 - exact exposure/gamma adjustment coefficients;
@@ -367,7 +368,7 @@ The caller writes a concrete Ceres configuration for the traced `BundleAdjusterG
 - function, gradient, and parameter tolerances `1e-6`, `1e-10`, and `1e-8`;
 - `max_num_iterations = 50`, copied from bundle-adjuster input-record +0x2c.
 
-This is a static caller trace, not runtime output. The binary's option tail after +280 does not fully match the pinned upstream Ceres 2.2.0 header. Some later writes remain raw offsets; see [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md) and [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md). Checkpoint 23 recovers the residual equations and scale placement for this path; the scale fields' source meaning and units remain unknown.
+This is a static caller trace, not runtime output. The binary's option tail after +280 does not fully match the pinned upstream Ceres 2.2.0 header. Checkpoint 26 corrects the integer-vector and string boundaries; the raw +432 value and other vendor-specific differences remain unresolved. See [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md), [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), and [checkpoint 26](google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md). Checkpoint 23 recovers the residual equations and scale placement for this path; the scale fields' source meaning and units remain unknown.
 
 ## Checkpoint 23 update — GlobalFocalLength residuals
 
@@ -382,3 +383,7 @@ For the traced GlobalFocalLength path, input-record `+0x30 = 1` chooses between 
 ## Checkpoint 25 update — post-solve output validation
 
 For the traced GlobalFocalLength path, the optimized focal parameter must be positive and the shared image center must remain within the returned image dimensions. With a nonzero count from the fourth argument, a separate nested-object scalar must lie in `[10, 150]`; its source-level name and units are unknown, and interpreting it as a view-angle/FOV value remains an inference. The passing path normalizes per-image quaternions and writes back transforms. The adjuster returns 1 for the accepted path and 0 for rejection. See [checkpoint 25](google-camera-photosphere-checkpoint-25-post-solve-output-validation.md).
+
+## Checkpoint 26 update — Ceres option-tail copy layout
+
+The options-copy helper confirms the integer vector at candidate +384..+407 and the dump-directory string at +408..+431, correcting checkpoint 22. The +436 gradient-check flag is false; the doubles at +440/+448 are 0.1; the callback vector at +464..+487 is empty. The +432 raw value 0x3f800000 positionally matches the public dump-format field but is not a public Ceres 2.2.0 enum value. The actual traced caller leaves the vector empty, so the conditional dump path is skipped. The caller writes one zero byte at +376; its role is unknown. See [checkpoint 26](google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md).
