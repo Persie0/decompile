@@ -390,7 +390,7 @@ Input-record +0x2c resolves to max_num_iterations=50. Input-record +0x30 is 1 an
 
 ### Current next targets
 
-- Resolve the Google Camera Ceres tail ABI after +280, the semantics of raw writes at +64/+336/+432, and the input-record +0x30 guard's semantic field name.
+- Resolve the Google Camera Ceres tail ABI after +280 and the semantics of raw writes at +64/+336/+432.
 - Recover residual equations/weights and the semantic name of the bundle-adjuster +0x30 guard flag.
 - Trace optical-flow weights and identify their effects on pose constraints.
 - Check whether other detector construction paths override the -1 non-max-radius sentinel, and recover image-pyramid filtering/downsampling.
