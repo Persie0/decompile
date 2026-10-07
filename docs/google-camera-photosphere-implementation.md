@@ -1218,6 +1218,91 @@ Active analysis runs:
 
 This section will be updated incrementally as additional constants, formulas and internal call graphs are recovered.
 
+### 2026-10-07 — Target-generator formulas recovered
+
+Focused Ghidra decompilation of the native target generator completed successfully (Playground run `37601412924`).
+
+The previously unknown native constants are now identified exactly from the binary:
+
+- `DAT_00161a10 = π/2`
+- `DAT_00161b48 = 2π`
+
+The Photo Sphere target generator constructs an equatorial band and then attempts up to five latitude bands in each direction. The latitude step is:
+
+```text
+latitude_step = vertical_fov * (1 - vertical_overlap)
+```
+
+Each requested latitude band can terminate generation once the band has moved sufficiently beyond a pole.
+
+Two native ring-layout formulas were recovered.
+
+#### Full-circle ring layout
+
+For the layout-selector branch `0`:
+
+```text
+c = cos(latitude)
+
+if c < -0.25 * vertical_fov:
+    stop generating further bands
+
+if c < 0.05 * vertical_fov:
+    latitude = sign(latitude) * π/2
+    target_count = 1
+    azimuth_step = 0
+else:
+    target_count =
+        floor((2π / horizontal_fov) /
+              (1 - horizontal_overlap) *
+              c)
+
+    azimuth_step = 2π / target_count
+```
+
+The targets are then placed around the full ring at successive multiples of `azimuth_step`, with wraparound neighbor links.
+
+#### Symmetric half-ring layout
+
+For the nonzero layout-selector branch:
+
+```text
+c = cos(latitude)
+
+if c < -0.25 * vertical_fov:
+    stop generating further bands
+
+if c < 0.05 * vertical_fov:
+    latitude = sign(latitude) * π/2
+    half_count = 0
+    target_count = 1
+    azimuth_step = 0
+else:
+    half_count =
+        floor(((π/2) / horizontal_fov) /
+              (1 - horizontal_overlap) *
+              c)
+
+    target_count = 2 * half_count + 1
+    azimuth_step = (π/2) / half_count
+
+azimuth(i) = (i - half_count) * azimuth_step
+```
+
+This produces an odd, symmetric target row spanning approximately `-π/2 ... +π/2`.
+
+The generator also explicitly links neighboring targets within a band and links adjacent latitude bands, so the target set is a graph rather than just an unordered list of dot orientations.
+
+The exact default value of the layout selector for standard Photo Sphere is still being traced through the session-parameter constructors. Until that is confirmed, both recovered formulas are documented rather than assuming which branch the production Photo Sphere mode chooses.
+
+#### Reset/render constants clarified
+
+The common native capture reset path passes **1600** as an internal processing/matching width.
+
+It also constructs helper objects with float ranges `0.0 -> 0.2` during capture setup and `0.2 -> 0.95` during final rendering. These are now believed to be **progress-callback partitions**, not image-quality thresholds. The earlier progress-log wording that could be read as renderer tuning bounds should therefore be interpreted as progress-range plumbing.
+
+
+
 
 ### 2026-10-07 — Target-generator decompilation completed
 
