@@ -1,6 +1,6 @@
 # Pixel Camera 8.8 Photo Sphere static reverse engineering — completion summary
 
-Updated through checkpoint 27, this document summarizes the current static reverse-engineering pass for the audited artifacts.
+Updated through checkpoint 28, this document summarizes the current static reverse-engineering pass for the audited artifacts.
 
 It does **not** claim that Google's proprietary C++ source code has been recovered. The audited native library is stripped. Several exact constants and object fields still require deeper decompilation or runtime instrumentation. The current work is an engineering reconstruction of the Photo Sphere architecture, Java/JNI control flow, native object boundaries, major algorithm families, and many exact constants.
 
@@ -46,6 +46,8 @@ Running / checkpoint documents:
 - `docs/google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md`
 - `docs/google-camera-photosphere-checkpoint-25-post-solve-output-validation.md`
 - `docs/google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md`
+- `docs/google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md`
+- `docs/google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md`
 - this completion summary
 
 ## Recovered high-level architecture
@@ -392,3 +394,8 @@ The options-copy helper confirms the integer vector at candidate +384..+407 and 
 ## Checkpoint 27 update — Ceres line-search integer pair
 
 The candidate options qword at +64 is `0x0000000500000014`; the little-endian words are 20 at +64 and 5 at +68. These match the public Ceres 2.2.0 line-search trial-limit and direction-restart fields and defaults. The caller uses a 64-bit load/store to copy these integers, not a floating-point value. This corrects checkpoint 22. The separate qword at +336 is `0x000001f400000000` (words 0 and 500 at +336/+340) and remains semantically unnamed. The pointer-backed null pair at +312/+320 also remains a Google-build ABI difference. See [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md).
+
+
+## Checkpoint 28 update — Ceres trust-region dispatch
+
+The candidate options prefix at +0..+12 is initialized to `[1, 2, 1, 0]`. Pinned Ceres 2.2.0 enum declarations identify +0 as `TRUST_REGION`; the copied value selects the RTTI-identified `TrustRegionPreprocessor` in the solver factory. This confirms the trust-region path alongside `DOGLEG` / `SUBSPACE_DOGLEG`. Vendor-specific fields +312/+320, +336/+340 and +376 remain unresolved. See [checkpoint 28](google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md).

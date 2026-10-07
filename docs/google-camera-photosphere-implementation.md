@@ -532,7 +532,7 @@ A close reproduction should therefore model each source image as a camera orient
 
 #### Ceres solver settings — one traced path
 
-The caller writes `DENSE_SCHUR` with `DOGLEG` / `SUBSPACE_DOGLEG`, uses one solver thread, leaves the user ordering null, and sets `max_num_iterations=50` from input-record +0x2c. It also writes trust-region radii `1e4 / 1e16 / 1e-8` and tolerances `1e-6 / 1e-10 / 1e-8`. The qword at +64 decomposes into line-search integers 20 and 5 at +64/+68, matching public Ceres 2.2.0 fields; later offsets after +280 still include unresolved vendor-layout differences. See [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md) and [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md).
+The caller initializes `minimizer_type=TRUST_REGION` at options +0, then writes `DENSE_SCHUR` with `DOGLEG` / `SUBSPACE_DOGLEG`, uses one solver thread, leaves the user ordering null, and sets `max_num_iterations=50` from input-record +0x2c. It also writes trust-region radii `1e4 / 1e16 / 1e-8` and tolerances `1e-6 / 1e-10 / 1e-8`. The qword at +64 decomposes into line-search integers 20 and 5 at +64/+68, matching public Ceres 2.2.0 fields; later offsets after +280 still include unresolved vendor-layout differences. The `TRUST_REGION` value is independently corroborated by dispatch to the RTTI-identified `TrustRegionPreprocessor`. See [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md), [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md), and [checkpoint 28](google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md).
 
 #### GlobalFocalLength loss selection — one traced path
 
@@ -2060,3 +2060,8 @@ For the traced GlobalFocalLength options object, the copy helper confirms an emp
 ### 2026-10-07 — Ceres line-search integer pair
 
 The caller loads rodata qword `0x0000000500000014` and stores it at solver options `+64`, yielding little-endian int32 values 20 at +64 and 5 at +68. Those positions and values match the Ceres 2.2.0 line-search iteration and direction-restart members. The qword stored at +336 is `0x000001f400000000` (words 0 and 500 at +336/+340) and remains unmapped. Full evidence is in [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md).
+
+
+### 2026-10-07 — Ceres minimizer type and preprocessor dispatch
+
+The candidate options record begins with `[1, 2, 1, 0]` at +0..+12. Under the pinned Ceres 2.2.0 enums, +0 selects `TRUST_REGION`; the copied value dispatches through the solver factory to the RTTI-identified `TrustRegionPreprocessor` at `0x1ad7f4`. This confirms the trust-region path for the explicit `DOGLEG` / `SUBSPACE_DOGLEG` settings. The fields at +312/+320, +336/+340, and +376 remain unresolved. See [checkpoint 28](google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md).
