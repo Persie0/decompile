@@ -1,6 +1,6 @@
 # Pixel Camera 8.8 Photo Sphere static reverse engineering — completion summary
 
-Updated through checkpoints 17–18, this document summarizes the current static reverse-engineering pass for the audited artifacts.
+Updated through checkpoints 17–19, this document summarizes the current static reverse-engineering pass for the audited artifacts.
 
 It does **not** claim that Google's proprietary C++ source code has been recovered. The audited native library is stripped. Several exact constants and object fields still require deeper decompilation or runtime instrumentation. The current work is an engineering reconstruction of the Photo Sphere architecture, Java/JNI control flow, native object boundaries, major algorithm families, and many exact constants.
 
@@ -155,7 +155,10 @@ Nexus 5 special path for <10 ms: approximately `0.01`.
 - detector family: FAST-9
 - FAST base threshold schedule: **[90, 55, 20, 15]**
 - dark-image threshold multiplier: `0.1 + 0.9 * mean / 50` below a sampled mean of 50; otherwise `1.0`
-- non-max radius: read from detector object offset `+0x14`; configured value remains unknown
+- traced matcher detector non-max radius: constructor initializes object `+0x14` to `-1`; matcher setup does not override it, and the wrapper calls suppression only for values at least 2
+- traced matcher detector point limits across three levels: `[3000, 751, 189]`
+- matcher per-level match-index cap: `30`
+- matcher maximum squared patch distance: `140625` from a configured `375.0`; best/second-best squared-distance ratio: `0.64000005`
 - feature record size: `0x40`
 - feature-set record size: `0x30`
 - orientation bins: `16`
@@ -280,10 +283,9 @@ A clean-room implementation should follow this architecture:
 
 These remain unresolved after the current static pass:
 
-- configured FAST non-max radius and requested feature-count value;
+- whether other FAST detector construction paths override the traced matcher path's `-1` non-max-radius sentinel or use different point caps;
 - exact patch size / descriptor length in every configuration path;
-- `PatchPairwiseMatcher +0x130` maximum descriptor-distance default;
-- complete pyramid scale settings used per input image;
+- complete image-pyramid pixel-generation and filter/downsample settings; the traced matcher uses three levels and coordinate factors `[1, 2, 4]`;
 - RANSAC settings outside the traced `compute_rotation.cc` call path;
 - exact graph-edge memory layout and graph-component pruning threshold;
 - exact Ceres residual weights and solver options / iteration limits;
