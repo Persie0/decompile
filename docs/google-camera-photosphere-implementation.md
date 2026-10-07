@@ -940,6 +940,8 @@ Native static inspection came from `liblightcycle.so` in the same APK. Particula
 - `cityblock/portable/panorama/capture/target_generator.cc`
 - `cityblock/portable/panorama/capture/session_manager.cc`
 - `cityblock/portable/panorama/alignment/alignment_estimator.cc`
+- `cityblock/portable/panorama/alignment/fast_9.cc`
+- `cityblock/portable/panorama/alignment/compute_rotation.cc`
 - `cityblock/portable/panorama/alignment/spherical_pairwise_match.cc`
 - `cityblock/portable/panorama/alignment/patch_pairwise_matcher.cc`
 - `cityblock/portable/panorama/alignment/line_align/line_aligner.cc`
