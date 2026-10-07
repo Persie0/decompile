@@ -512,16 +512,18 @@ The feature-gated autofocus path allows up to three trials after a pitch change 
 
 Focused Ghidra runs [37693894574](https://github.com/Persie0/Playground/actions/runs/37693894574) and [37694151104](https://github.com/Persie0/Playground/actions/runs/37694151104) completed successfully. The parallel reviews traced the correct PreviewFrameProcessorImpl JNI dispatch and its converted RGB ring-buffer consumer. JNI passes selector 1 to the frame processor; this is separate from Android's preview-format enum. NV21 is a strong input-layout inference from the plane/chroma handling and coefficients, but the binary does not name the format.
 
-Alignment graph nodes and symmetric pair adjacency are confirmed, as are the lazy largest-component cache and tied-largest acceptance. The line-alignment RANSAC controls, fixed-point five-tap pyramid downsampler, LineMatchResidual equation, and seam-cost equations are resolved. The numeric blend-level input remains unknown; it is read from an upstream runtime object at +48.
+Alignment graph nodes and symmetric pair adjacency are confirmed, as are the lazy largest-component cache and tied-largest acceptance. CaptureSessionBuilderImpl constructs and attaches AlignmentEstimator to SessionImpl; builder AddImage enqueues records, then SessionImpl worker raw 0x11b18c calls per-record processor raw 0x11be38, which dispatches through estimator vtable slot +0x28 to AddImage raw 0x11d570 when the queued file exists and reads successfully. The virtual edge is recovered from the relocation at 0x3fdcc8, although Ghidra's call graph does not resolve it. The line-alignment RANSAC controls, fixed-point five-tap pyramid downsampler, LineMatchResidual and PointMatchResidual equations, and two seam-cost equations are recovered. Point and line residual state units remain unknown, and the 0.125 pairwise match-data scale is not tied to the PointMatchResidual scalar.
+
+Optical-flow fields are mapped: tracker threshold × 16.0 is the gradient gate, the tracker holds a sample cap, and GlobalFlowSolver has solver-type/max/min iteration fields; their runtime values are unresolved. GammaAdjuster builds the exact 256-entry transfer pow(i/255, gamma)*255 and applies it in place to each byte of 3-byte pixels. Raw 0x31c618 obtains a vector through an indirect method on x22 and passes it to clone helper 0x39a19c, which copies each double into a GammaAdjuster object; the caller, vector producer, numeric values, and Photo Sphere provenance remain unknown. The blend-level field is read at input-object +0x30 by caller raw 0x31cae4, but the source object and numeric initializer are unresolved.
 
 The native session.meta writer appends nine rows, while its parser recognizes source_photos_count in addition. Java also expects timestamps and pose_heading; no Java preseed/write was found. The resulting key-set mismatch is bounded to the inspected paths, and a second dynamic-path append is not ruled out. See [checkpoint 41](../google-camera-photosphere-checkpoint-41-native-input-graph-renderer-and-metadata.md).
 
 ### Remaining targets
 
 - Recover oriented-feature descriptor patch dimensions and byte count.
-- Locate the AlignmentEstimator construction/attachment behind the builder's virtual AddImage method.
-- Trace blend-level configuration, gamma/exposure settings, seam weights, and final seam feathering.
+- Characterize queued-file failure behavior and per-image alignment timing in a runtime capture.
+- Trace the blend-level input object's initializer, the raw 0x31c618 caller, upstream gamma-vector producer/values and Photo Sphere provenance, exposure setup, graph-cut weights, and final seam feathering/normalization.
 - Verify the target device's preview format and corresponding native byte layout.
-- Resolve optical-flow runtime thresholds and point/line scalar units.
+- Recover optical-flow runtime values and point/line residual scalar initialization/coordinate units.
 - Check for any additional session.meta writer and capture a runtime metadata file.
 - Evaluate exact target totals for a specified camera model and FOV.
