@@ -186,6 +186,20 @@ Recovered robust-loss enum:
 | 1 | `HuberLoss(35)` |
 | 2 | `SoftLOneLoss(35)` |
 
+For one traced BundleAdjusterGlobalFocalLength call path, the options record selects enum 1 at both observed loss-construction sites, so both use HuberLoss(35). This is path-specific; the enum values alone do not establish selections by other callers.
+
+RTTI recovers these AutoDiffCostFunction dimensions:
+
+| Functor | Residual scalars | Parameter block sizes |
+| --- | ---: | --- |
+| LineMatchResidual | 4 | [4, 4, 2, 1] |
+| PointMatchResidual | 2 | [4, 4, 2, 1] |
+| RollPitchSensorResidual | 2 | [4, 2, 1] |
+| SensorResidual | 1 | [4, 2, 1] |
+
+Residual formulas, applied weights, and Ceres solver settings remain unresolved. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md).
+
+
 Confirmed residual families:
 
 - point-match residuals
