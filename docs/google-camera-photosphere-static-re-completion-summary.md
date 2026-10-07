@@ -186,7 +186,7 @@ Recovered robust-loss enum:
 | 1 | `HuberLoss(35)` |
 | 2 | `SoftLOneLoss(35)` |
 
-For one traced BundleAdjusterGlobalFocalLength call path, the options record selects enum 1 at both observed loss-construction sites, so both use HuberLoss(35). This is path-specific; the enum values alone do not establish selections by other callers.
+For one traced BundleAdjusterGlobalFocalLength call path, the options record selects enum 1 at both observed loss-construction sites, so both use HuberLoss(35). This is path-specific; the enum values alone do not establish selections by other callers. The binary's embedded build fingerprint identifies Ceres 2.2.0 with Eigen 3.4.90, no LAPACK, SuiteSparse 4.5.4, and METIS 5.1.0.
 
 RTTI recovers these AutoDiffCostFunction dimensions:
 
