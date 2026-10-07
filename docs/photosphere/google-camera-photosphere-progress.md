@@ -474,3 +474,15 @@ The caller object's `+44` field from checkpoint 35 is part of the `LineAlignerIm
 - Compare other line-record producers, rescalers, and GlobalFocalLength consumers.
 - Compare remaining point-record producers and consumers.
 - Continue reviewing feature, pyramid, and low-level processing helpers.
+
+
+## 2026-10-07 — checkpoint 37: line-record helper call-site audit
+
+The Ghidra call-reference listing shows one direct caller of the line-record utility at raw VA `0x316154`: the `LineAlignerImpl` method at raw VA `0x303cf8`. Its first float argument comes from instance offset `+44`, initialized to **25.0** in checkpoint 36. This rules out another direct caller supplying a different scalar to this helper in the analyzed binary. It does not rule out other code constructing or editing 36-byte records independently, so 25.0 remains scoped to this producer. The field's name, units, and semantic role remain unknown. See [checkpoint 37](../google-camera-photosphere-checkpoint-37-line-record-helper-callsite-audit.md).
+
+### Next targets
+
+- Search for all stores to offset `+32` across 36-byte line-record paths, including direct appends and postprocessing.
+- Trace whether GlobalFocalLength applies this scalar directly to line residuals or normalizes it later.
+- Compare remaining point-record producers and consumers.
+- Continue reviewing feature, pyramid, and low-level processing helpers.
