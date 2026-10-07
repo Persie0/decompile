@@ -201,7 +201,7 @@ RTTI recovers these AutoDiffCostFunction dimensions:
 | RollPitchSensorResidual | 2 | [4, 2, 1] |
 | SensorResidual | 1 | [4, 2, 1] |
 
-Residual formulas, applied weights, and effective Ceres solver settings remain unresolved. The solve-call trace likely identifies the `Solver::Options` object and maps prefix plus ABI-derived fields, but not effective caller-specific values. See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md) and [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver-options-handoff.md).
+Residual formulas and applied weights remain unresolved. Checkpoint 22 recovers a concrete caller-written Ceres configuration for one GlobalFocalLength path, but the vendor-specific option tail and input-dependent max-iteration value remain open. See [checkpoints 20–22](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md).
 
 
 Confirmed residual families:
@@ -306,7 +306,7 @@ These remain unresolved after the current static pass:
 - complete image-pyramid pixel-generation and filter/downsample settings; the traced matcher uses three levels and coordinate factors `[1, 2, 4]`;
 - RANSAC settings outside the traced `compute_rotation.cc` call path;
 - exact graph-edge memory layout and graph-component pruning threshold;
-- exact Ceres residual weights and solver options / iteration limits;
+- exact Ceres residual weights, vendor-specific option-tail details, and input-specific iteration limits;
 - exact blend pyramid level count;
 - exact seam cost weights;
 - exact exposure/gamma adjustment coefficients;
