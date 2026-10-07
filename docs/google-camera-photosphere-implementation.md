@@ -2050,7 +2050,7 @@ The traced matcher construction paths set `+0x128 = 30`, `+0x12c = 3000`, and `+
 
 ### 2026-10-07 — GlobalFocalLength post-solve validation
 
-The traced solve path checks that the optimized focal scalar is positive and that the shared image center stays within the returned width/height bounds. When the fourth-argument count is nonzero, a separate nested-object scalar returned from vtable slot `+64` must be within `[10, 150]`; its exact name and units remain unresolved, though a view-angle/FOV interpretation is plausible. Passing paths normalize each image quaternion and issue an indexed transform update. The return bit is 1 for an accepted path and 0 for rejection. See [checkpoint 25](google-camera-photosphere-checkpoint-25-post-solve-output-validation.md).
+The traced solve path checks that the optimized focal scalar is positive and that the shared image center stays within the returned width/height bounds. When the fourth-argument count is nonzero, it clones camera model zero, applies the optimized focal scalar to the model's X/Y focal fields, then reads its horizontal field of view through vtable slot `+0x40`. Linear/fisheye models return degrees converted from the stored radians; equirectangular models return 360°. The finite accepted range is `[10°, 150°]`. This gate checks the camera model's own FOV, independently of the optimized focal scalar. Passing paths normalize each image quaternion and issue an indexed transform update. The return bit is 1 for an accepted path and 0 for rejection. See [checkpoint 25](google-camera-photosphere-checkpoint-25-post-solve-output-validation.md) and [checkpoint 31](google-camera-photosphere-checkpoint-31-camera-model-field-of-view.md).
 
 ### 2026-10-07 — Ceres option-tail offsets corrected
 
