@@ -35,28 +35,28 @@ A 3-by-3 grid of sample points is prepared for the current image pair. For each 
 | `+20` | image-B index |
 | `+24` | selected `0.25` or `0.125` multiplier |
 
-The image indices are written at `0x11df0c`, and the multiplier at `0x11df14`. The two coordinate pairs are copied as 64-bit values at `0x11df00` and `0x11df08`. `0x122384` appends exactly 28 bytes to the edge's point vector, using a `0x1c) stride. This identifies the producer-side values for `+16/+20) in this path; the GlobalFocalLength cost builder still reads only the four coordinates and `+24).
+The image indices are written at `0x11df0c`, and the multiplier at `0x11df14`. The two coordinate pairs are copied as 64-bit values at `0x11df00` and `0x11df08`. `0x122384` appends exactly 28 bytes to the edge's point vector, using a `0x1c` stride. This identifies the producer-side values for `+16/+20` in this path; the GlobalFocalLength cost builder still reads only the four coordinates and `+24`.
 
 ## Separate post-estimator downweight
 
-After a successful virtual graph-estimator call, the caller passes `0.125` to `0x316420` at `0x11ed58`..`0x11ed60`. The helper skips factors greater than or equal to 1.0. It walks 128-byte graph edges, reads edge type at `+64) and image indices at `+68/+72), and groups types 5 and 9 by unordered image pair. For a matched type-5/type-9 pair, it visits the type-5 edge's point vector at edge offset `+80) and multiplies each point record's `+24) field by the passed factor. It does not touch the line vector at `+104).
+After a successful virtual graph-estimator call, the caller passes `0.125` to `0x316420` at `0x11ed58`..`0x11ed60`. The helper skips factors greater than or equal to 1.0. It walks 128-byte graph edges, reads edge type at `+64` and image indices at `+68/+72`, and groups types 5 and 9 by unordered image pair. For a matched type-5/type-9 pair, it visits the type-5 edge's point vector at edge offset `+80` and multiplies each point record's `+24` field by the passed factor. It does not touch the line vector at `+104`.
 
 This is a distinct, in-place point-only scaling pass. The trace does not fully resolve the graph lineage between this estimator input and every point record produced by the earlier grid-matching loop, so the two scale operations are not assumed to compose for every record.
 
 ## Remaining limits
 
-- The source-level names and units of the `+24) multiplier remain unknown.
+- The source-level names and units of the `+24` multiplier remain unknown.
 - The normalized angle score's virtual inputs and divisor are not class-named.
-- The line-record multiplier at `+32) still lacks a traced producer.
-- Image-index fields `+16/+20) are identified for this producer; other producers and consumers remain to compare.
+- The line-record multiplier at `+32` still lacks a traced producer.
+- Image-index fields `+16/+20` are identified for this producer; other producers and consumers remain to compare.
 - These are static findings for the audited binary; runtime execution was unavailable.
 
 ## Evidence
 
-- `0x11dda8) passes threshold `0.9`; `0x11ddb0`..`0x11ddc8` chooses `0.125` or `0.25`.
-- `0x316a40) compares the score with the supplied threshold; `0x316a64) derives an `acosf) angle and divides by a virtual scalar.
-- `0x11def0) invokes the matcher for an image pair and sampled coordinate; `0x11df00`..`0x11df18` assembles coordinates, image indices, and multiplier.
-- `0x122384) appends a 28-byte record; `0x12245c`..`0x122494` copies it at 28-byte stride.
-- `0x11ed50) gates the post-estimator call; `0x11ed58`..`0x11ed60` passes `0.125` to `0x316420).
-- `0x3167e4`..`0x31686c` scales only point-record `+24) values on matching type-5 edges.
+- `0x11dda8` passes threshold `0.9`; `0x11ddb0`..`0x11ddc8` chooses `0.125` or `0.25`.
+- `0x316a40` compares the score with the supplied threshold; `0x316a64` derives an `acosf` angle and divides by a virtual scalar.
+- `0x11def0` invokes the matcher for an image pair and sampled coordinate; `0x11df00`..`0x11df18` assembles coordinates, image indices, and multiplier.
+- `0x122384` appends a 28-byte record; `0x12245c`..`0x122494` copies it at 28-byte stride.
+- `0x11ed50` gates the post-estimator call; `0x11ed58`..`0x11ed60` passes `0.125` to `0x316420`.
+- `0x3167e4`..`0x31686c` scales only point-record `+24` values on matching type-5 edges.
 - See [checkpoint 33](google-camera-photosphere-checkpoint-33-global-focal-match-record-layouts.md) for the GlobalFocalLength record readers.
