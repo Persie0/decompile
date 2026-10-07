@@ -385,7 +385,7 @@ Full trace: [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver
 
 The caller's stack writes recover a strong core configuration for this GlobalFocalLength path: DENSE_SCHUR, DOGLEG with SUBSPACE_DOGLEG, one solver thread, trust-region radii `1e4 / 1e16 / 1e-8`, function/gradient/parameter tolerances `1e-6 / 1e-10 / 1e-8`, and a 50-iteration limit copied from input-record `+0x2c`. The user ordering is null; dense algebra is EIGEN and the sparse-library enum is SUITE_SPARSE. The gradient-check flag is false.
 
-Input-record +0x2c resolves to max_num_iterations=50. Input-record +0x30 is 1 and activates a residual-construction guard based on a cos(10°) direction test, a count floor of 7, and an asin-derived 10° pitch-like test. The guard field name and raw option writes at +64 and after +280 remain open; [checkpoint 22](google-camera-photosphere-checkpoint-22-ceres-solver-options-values.md) records the trace.
+Input-record +0x2c resolves to max_num_iterations=50. Input-record +0x30=1 selects the one-scalar pitch or two-scalar pitch/roll prior using a cos(10°) direction test, a count threshold of 7, and an asin-derived 10° pitch-like test. Input-record +0x34=1 allows NO_CONVERGENCE through the first post-solve status gate; FAILURE remains rejected. The source names and raw Ceres option writes at +64 and after +280 remain open; see [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
 
 
 ## 2026-10-07 — checkpoint 23: GlobalFocalLength residual equations
@@ -397,7 +397,7 @@ Full trace: [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal
 ### Current next targets
 
 - Resolve the Google Camera Ceres tail ABI after +280 and the semantics of raw writes at +64/+336/+432.
-- Recover the semantic name of the bundle-adjuster +0x30 guard and the source meaning/units of the residual scales; verify whether other bundle-adjuster paths share these residuals.
+- Recover source-level names for the +0x30 sensor-prior selector and +0x34 nonconvergence flag; trace the source meaning/units of residual scales and verify whether other bundle-adjuster paths share these residuals.
 - Trace optical-flow weights and identify their effects on pose constraints.
 - Check whether other detector construction paths override the -1 non-max-radius sentinel, and recover image-pyramid filtering/downsampling.
 - Resolve additional RANSAC paths and graph-component pruning.
