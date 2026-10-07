@@ -518,12 +518,19 @@ Optical-flow fields are mapped: the tracker uses +0x50 times 16.0 as a gradient 
 
 The native session.meta writer appends nine rows, while its parser recognizes source_photos_count in addition. Java also expects timestamps and pose_heading; no Java preseed/write was found. The resulting key-set mismatch is bounded to the inspected paths, and a second dynamic-path append is not ruled out. See [checkpoint 41](../google-camera-photosphere-checkpoint-41-native-input-graph-renderer-and-metadata.md).
 
+
+
+## 2026-10-07 — checkpoint 42: oriented-patch feature records
+
+The traced extractor setup at raw 0x125ae4 initializes 16 rotated patterns from a centered 8×8 grid; each pattern has 64 integer coordinate pairs. Builder raw 0x3a2020 consumes 12-byte {score,x,y} detector records and writes 64-byte feature records containing position at +8, optional gradient orientation at +0x10, and a 64-byte descriptor vector at +0x28/+0x30 for the observed configuration. Its sampler mean-centers each 64-byte patch, scales by 64/sample-standard-deviation, adds 128, and clamps to [0,255]. The AddImage path calls the extractor wrapper before passing the feature collection and image entries to the matcher. The exact settings behind alternate descriptor/orientation modes remain unknown.
+
+The same follow-up mapped optical-flow point pixels into normalized camera-plane coordinates, while leaving bundle-adjustment units separate. Graph-cut code makes two +0x58 receiver calls with argument 100, then two +0x50 mask calls with argument 80 after labels are applied; receiver types and feathering semantics remain unresolved. The available session artifacts still do not identify an extra session.meta writer or queued-file read-failure outcome. Full trace: [checkpoint 42](../google-camera-photosphere-checkpoint-42-oriented-patch-feature-records.md).
+
 ### Remaining targets
 
-- Trace the producer that converts 12-byte keypoints into 64-byte matcher records, writing descriptor byte-vector begin/end pointers at +0x28/+0x30; length is dynamic in the matcher, while fixed size, patch dimensions, sampling, and packing remain unknown.
-- Characterize queued-file failure behavior and per-image alignment timing in a runtime capture.
-- Resolve the higher-level interpretation of the image-adjustment linear system, mode-specific renderer routing, SeamFinderGraphcut receiver vtables/argument-100 semantics, final seam feathering/normalization, point/line coordinate units, and runtime point-row values.
-- Verify the target device supplies the native converter's expected NV21-compatible layout; JNI does not receive the active Android format enum.
-- Recover optical-flow runtime values and point/line residual scalar initialization/coordinate units.
+- Characterize queued-file read-failure behavior and per-image alignment timing; the saved artifacts establish the successful AddImage path but do not settle failure handling.
+- Resolve the image-adjustment objective, concrete receiver vtables and semantics for SeamFinderGraphcut's +0x58/100 and +0x50/80 calls, and final mask feathering/normalization.
+- Recover runtime GlobalFlowSolver/tracker defaults. Optical-flow pixel-to-camera-ray conversion is now mapped; point/line bundle-adjustment coordinate units and residual scales remain unresolved.
+- Verify the target device supplies the native converter's expected NV21-compatible layout; JNI does not receive the Android format enum.
 - Check for any additional session.meta writer and capture a runtime metadata file.
 - Evaluate exact target totals for a specified camera model and FOV.
