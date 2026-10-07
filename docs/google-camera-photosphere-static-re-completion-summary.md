@@ -201,7 +201,7 @@ RTTI recovers these AutoDiffCostFunction dimensions:
 | RollPitchSensorResidual | 2 | [4, 2, 1] |
 | SensorResidual | 1 | [4, 2, 1] |
 
-Residual formulas and applied weights remain unresolved. Checkpoint 22 recovers a concrete caller-written Ceres configuration for one GlobalFocalLength path, but the vendor-specific option tail and input-dependent the name of the input-record +0x30 guard remain open. See [checkpoints 20–22](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md).
+Residual formulas and applied weights remain unresolved. Checkpoint 22 recovers a concrete caller-written Ceres configuration for one GlobalFocalLength path, but the vendor-specific option tail and semantic name of the input-record +0x30 guard remain open. See [checkpoints 20–22](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md).
 
 
 Confirmed residual families:
