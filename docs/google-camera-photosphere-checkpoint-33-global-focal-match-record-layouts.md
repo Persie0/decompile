@@ -11,22 +11,22 @@ This pass extends checkpoint 23's `BundleAdjusterGlobalFocalLength` trace. It ve
 
 ## Point records
 
-The point-match setup walks 28-byte records (stride `0x1c`). The GlobalFocalLength cost builder reads:
+The point-match setup walks 28-byte records (stride `0x1c``. The GlobalFocalLength cost builder reads:
 
 | Record offset | Use in this path |
 | ---: | --- |
-| `+0`, `+4` | source point `(x, y)` |
-| `+8`, `+12` | target point `(x, y)` |
+| `+0`, `+4` | source point `(x, y`` |
+| `+8`, `+12` | target point `(x, y`` |
 | `+16`, `+20` | image indices in the producer traced in checkpoint 34; not read by this cost builder |
 | `+24` | float multiplier copied into the cost data |
 
-The builder widens the two coordinate pairs to double and copies the `+24` float unchanged. The PointMatchResidual then multiplies each of its two reprojection-error components by that value. A separate routine at `0x318990` also loads the float at `+24` while accumulating per-image totals (below).
+The builder widens the two coordinate pairs to double and copies the `+24` float unchanged. The PointMatchResidual then multiplies each of its two reprojection-error components by that value. A separate routine at `0x318990` also loads the float at `+24` while accumulating per-image totals (below`.
 
 This establishes the byte position and two observed uses of the multiplier. Checkpoint 34 traces a producer that writes the two image indices at `+16` and `+20`. The GlobalFocalLength cost builder and the per-image aggregation helper do not read those fields; source-level names and uses in other paths remain unresolved.
 
 ## Line records
 
-The line-match setup walks 36-byte records (stride `0x24`). Each row supplies four 2D endpoints and one float multiplier:
+The line-match setup walks 36-byte records (stride `0x24``. Each row supplies four 2D endpoints and one float multiplier:
 
 | Record offset | Contents |
 | ---: | --- |
@@ -58,4 +58,5 @@ Thus the point-record multiplier contributes directly to the GlobalFocalLength p
 - `0x1246e8`: pairwise-edge copy path preserves point vectors at `+80` and line vectors at `+104`; their record sizes are 28 and 36 bytes.
 - `0x318990`..`0x318a98`: per-image sums of point-record `+24` values for both edge endpoints.
 - `0x303f74`..`0x3040b0`: caller consumes the per-image totals in thresholded pairwise-image bookkeeping.
-- The producer-side point fields and per-pair multiplier selection: [checkpoint 34](google-camera-photosphere-checkpoint-34-point-record-weight-source.md).\n- Residual equations and loss placement: [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md).
+- The producer-side point fields and per-pair multiplier selection: [checkpoint 34](google-camera-photosphere-checkpoint-34-point-record-weight-source.md).
+- Residual equations and loss placement: [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md).
