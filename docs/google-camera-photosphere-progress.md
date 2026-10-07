@@ -376,15 +376,9 @@ One traced BundleAdjusterGlobalFocalLength path initializes the robust-loss sele
 Full trace: [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md).
 
 ### Current next targets
+
 - Determine the semantic names and caller-specific values of the remaining bundle-adjustment option fields; recover residual equations/weights and Ceres solver settings.
 - Trace optical-flow weights and identify their effects on pose constraints.
 - Check whether other detector construction paths override the -1 non-max-radius sentinel, and recover image-pyramid filtering/downsampling.
 - Resolve additional RANSAC paths and graph-component pruning.
 - Continue renderer work on blend-level count, seam costs, and exposure coefficients.
-
-
-- Determine whether other detector construction paths override the `-1` non-max-radius sentinel.
-- Recover image-pyramid pixel generation and filter/downsample details beyond the three matcher coordinate scales.
-- Identify exact optical-flow and Ceres option values, other RANSAC paths, and graph-component pruning.
-- Continue renderer work on blend-level count, seam costs, and exposure coefficients.
-
