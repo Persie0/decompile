@@ -314,7 +314,7 @@ These remain unresolved after the current static pass:
 - complete image-pyramid pixel-generation and filter/downsample settings; the traced matcher uses three levels and coordinate factors `[1, 2, 4]`;
 - RANSAC settings outside the traced `compute_rotation.cc` call path;
 - exact graph-edge memory layout and graph-component pruning threshold;
-- source meaning/units of per-observation Ceres residual scales, remaining vendor-tail differences, source names of input `+0x30` and `+0x34`, and configurations of other bundle-adjuster paths;
+- source meaning/units of per-observation Ceres residual scales, unmapped option fields in other bundle-adjuster paths, source names of input `+0x30` and `+0x34`, and configurations of other bundle-adjuster paths;
 - exact blend pyramid level count;
 - exact seam cost weights;
 - exact exposure/gamma adjustment coefficients;
@@ -411,3 +411,8 @@ The candidate qword at `+336/+340` is `[0, 500]`. The target's own Ceres options
 ## Checkpoint 30 update — Ceres inner-iteration ordering and logging fields
 
 Candidate `+312/+320` is the null `inner_iteration_ordering` shared pointer; the validator connects it to `use_inner_iterations` at `+304` and `inner_iteration_tolerance` at `+328`. The caller disables inner iterations and sets the tolerance to `0.001`. Candidate `+372=1` and `+376=0` map to `logging_type=PER_MINIMIZER_ITERATION` and `minimizer_progress_to_stdout=false`, immediately before the known dump vector at `+384`. The field names follow the target's pointer-copy and validator behavior plus the matching Ceres 2.2.0 member sequence and defaults. See [checkpoint 30](google-camera-photosphere-checkpoint-30-ceres-inner-iteration-and-logging-fields.md).
+
+
+## Checkpoint 32 update — Ceres SPSE and Jacobi options
+
+The traced GlobalFocalLength path's candidate options `+344=5), `+348=false), `+352=0.1), `+360=0.1), and `+368=true) map to `max_num_spse_iterations), `use_spse_initialization), `spse_tolerance), `eta), and `jacobi_scaling). The target validator names the first four fields; the final field matches Ceres 2.2.0 member order and is copied as a bool into linear-solver options. Checkpoint 30 maps the following `+372/+376) logging fields. These values match the pinned Ceres defaults. See [checkpoint 32](google-camera-photosphere-checkpoint-32-ceres-spse-and-jacobi-options.md).
