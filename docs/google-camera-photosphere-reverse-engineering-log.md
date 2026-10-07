@@ -26,15 +26,15 @@ Current status: Java control flow is largely mapped; the JNI facade has been dis
 - Disassembled the important JNI entry points.
 - Ran an angr CFG/decompiler pass over JNI roots and depth-2 internal call graphs.
 - Identified exact native global state bytes used by capture-status queries.
-- Identified the native output-resolution enum value used by `SetOutputResolutionLarge()`.
+- Identified the native output-resolution enum value used by `SetOutputResolutionLarge(``.
 
 ### In progress
 
 - Resolve capture-session vtable slot numbers to concrete internal functions.
 - Trace all writes to native status bytes.
-- Recover `ProcessFrame()` capture-decision conditions.
+- Recover `ProcessFrame(`` capture-decision conditions.
 - Recover Photo Sphere target generator constructor arguments and target lattice.
-- Recover final render option values passed by `RenderNextSession()`.
+- Recover final render option values passed by `RenderNextSession(``.
 - Recover bundle-adjustment, RANSAC, seam and blend option constants.
 
 ---
@@ -111,13 +111,13 @@ This is the active native capture/session/target-controller object.
 
 Examples:
 
-- `AlignNextImage()` directly dispatches vtable slot `+0x20`.
-- `NumImagesInQueue()` dispatches vtable slot `+0x30`.
-- `NumImagesTotal()` dispatches vtable slot `+0x38`.
-- `GetTargetInRange()` dispatches vtable slot `+0x50`.
-- `GetTargets()` dispatches vtable slot `+0x58`.
-- `SetTargetHitAngleRadians()` dispatches vtable slot `+0x70`.
-- `FinishCapture()` invokes additional slots including `+0x98`, `+0xA0`, then destroys/nulls the object.
+- `AlignNextImage(`` directly dispatches vtable slot `+0x20`.
+- `NumImagesInQueue(`` dispatches vtable slot `+0x30`.
+- `NumImagesTotal(`` dispatches vtable slot `+0x38`.
+- `GetTargetInRange(`` dispatches vtable slot `+0x50`.
+- `GetTargets(`` dispatches vtable slot `+0x58`.
+- `SetTargetHitAngleRadians(`` dispatches vtable slot `+0x70`.
+- `FinishCapture(`` invokes additional slots including `+0x98`, `+0xA0`, then destroys/nulls the object.
 
 Resolving this object's vtable is one of the highest-value remaining tasks.
 
@@ -133,7 +133,7 @@ There is no Java/JNI-side preprocessing in this call. All incremental alignment 
 
 ### Target operations are native object methods — confirmed
 
-`InitTargets()`, `GetTargets()`, `GetTargetInRange()`, and `SetTargetHitAngleRadians()` all dispatch into the same active-session object. Target generation/selection is therefore part of the capture-session abstraction, not a separate Java subsystem.
+`InitTargets(``, `GetTargets(``, `GetTargetInRange(``, and `SetTargetHitAngleRadians(`` all dispatch into the same active-session object. Target generation/selection is therefore part of the capture-session abstraction, not a separate Java subsystem.
 
 ### SetOutputResolutionLarge enum value — confirmed
 
@@ -157,7 +157,7 @@ The other enum values still need to be mapped from the sibling JNI setters.
 2. returns its current value;
 3. increments it by one.
 
-No rendering object is created by this JNI method itself. The returned integer is a queue/session identifier consumed later by `RenderNextSession(id)`.
+No rendering object is created by this JNI method itself. The returned integer is a queue/session identifier consumed later by `RenderNextSession(id``.
 
 ### RenderNextSession passes two exact float constants — confirmed
 
@@ -189,7 +189,7 @@ This confirms that the high-rate filtered pose entering LightCycle is a 3x3 rota
 5. obtains a native string;
 6. returns that path as a Java string.
 
-This is consistent with the Java-side observation that `AddImage(pose)` reserves the destination filename for the full-resolution JPEG.
+This is consistent with the Java-side observation that `AddImage(pose`` reserves the destination filename for the full-resolution JPEG.
 
 ### FinishCapture lifecycle behavior — confirmed
 
@@ -208,9 +208,9 @@ This proves that the active capture object is deliberately torn down after it ha
 
 ### Gyro calibration is delegated to separate native objects — confirmed
 
-`StartGyroCalibration()` obtains a native object from one global manager and calls a calibration object with the supplied FOV.
+`StartGyroCalibration(`` obtains a native object from one global manager and calls a calibration object with the supplied FOV.
 
-`EndGyroCalibration()`:
+`EndGyroCalibration(``:
 
 - copies three Java floats;
 - passes the sample count and the 3-vector into a native calibration method;
@@ -244,7 +244,7 @@ The exact bias estimator math remains below those native virtual calls.
 1. Locate writes to `0x8170D8..0x8170DB` from AArch64 ADRP/ADD pairs and resolve the surrounding functions.
 2. Recover the active-session vtable behind global `0x8170D0`.
 3. Label its slots and follow `+0x20`, `+0x50`, `+0x58`, `+0x70`, `+0x98`, `+0xA0`.
-4. Resolve the constructor at `0x340560` used by `RenderNextSession()` and prove what the 0.2/0.95 values mean.
+4. Resolve the constructor at `0x340560` used by `RenderNextSession(`` and prove what the 0.2/0.95 values mean.
 5. Recover sibling output-resolution JNI setters to map the enum around value 3.
 6. Cross-reference parameter strings with data references to recover exact target, RANSAC, bundle, seam, and blend constants.
 
@@ -325,9 +325,9 @@ The Java facade in this build only exposes/uses the large setter in the normal P
 
 ### ResetTargets is a no-op in this build — confirmed
 
-The exported JNI `ResetTargets()` consists only of a return instruction.
+The exported JNI `ResetTargets(`` consists only of a return instruction.
 
-Target reset/reinitialization must therefore happen through session reset/`InitTargets()` state rather than this exported method in the audited build.
+Target reset/reinitialization must therefore happen through session reset/`InitTargets(`` state rather than this exported method in the audited build.
 
 ### ProcessFrame Java contract — confirmed
 
@@ -344,11 +344,11 @@ if valid && take && noStillCurrentlyPending:
     request full-resolution still
 ```
 
-On an accepted frame, the first nine returned floats are copied into the renderer's matrix representation and passed back through `AddImage()`.
+On an accepted frame, the first nine returned floats are copied into the renderer's matrix representation and passed back through `AddImage(``.
 
-Therefore `ProcessFrame()` returns at least a **3x3 pose/rotation representation**, with `-1.0f` in element zero acting as an invalid-frame sentinel.
+Therefore `ProcessFrame(`` returns at least a **3x3 pose/rotation representation**, with `-1.0f` in element zero acting as an invalid-frame sentinel.
 
-The boolean passed to `ProcessFrame()` is true only after the Java gyro-calibration state has completed and the capture bridge is in its corresponding enabled state. Its exact native semantic is still being resolved.
+The boolean passed to `ProcessFrame(`` is true only after the Java gyro-calibration state has completed and the capture bridge is in its corresponding enabled state. Its exact native semantic is still being resolved.
 
 ### Gyro calibration timing — confirmed
 
@@ -360,20 +360,20 @@ When its progress reaches the final UI slot, Java calls:
 EndGyroCalibration(integratedGyro, sampleCount, elapsedMs)
 ```
 
-and marks calibration complete. This provides the boolean state later forwarded into `ProcessFrame()`.
+and marks calibration complete. This provides the boolean state later forwarded into `ProcessFrame(``.
 
 ### SetSensorMovementTooFast is a separate native input — confirmed
 
-`SetSensorMovementTooFast(boolean)` is a very small JNI setter that writes a dedicated native boolean state through a GOT-backed global.
+`SetSensorMovementTooFast(boolean`` is a very small JNI setter that writes a dedicated native boolean state through a GOT-backed global.
 
 It is separate from the four output-state bytes returned by:
 
-- `TargetHit()`
-- `TakeNewPhoto()`
-- `MovingTooFast()`
-- `PhotoSkippedTooFast()`
+- `TargetHit(``
+- `TakeNewPhoto(``
+- `MovingTooFast(``
+- `PhotoSkippedTooFast(``
 
-Thus the Java exposure/gyro threshold supplies an **input constraint**, while `ProcessFrame()` combines that input with its own visual/target logic and produces the four output flags.
+Thus the Java exposure/gyro threshold supplies an **input constraint**, while `ProcessFrame(`` combines that input with its own visual/target logic and produces the four output flags.
 
 ### Additional active-session vtable slots — confirmed at JNI boundary
 
@@ -400,7 +400,7 @@ The concrete C++ class/method names behind these slots are still being resolved 
 
 ### GetFrameGeometry output shape — confirmed
 
-`GetFrameGeometry(width, height)` allocates:
+`GetFrameGeometry(width, height`` allocates:
 
 ```text
 3 * width * height
@@ -408,7 +408,7 @@ The concrete C++ class/method names behind these slots are still being resolved 
 
 floats, invokes active-session vtable slot `+0x80`, then applies a coordinate transform to each 3-float vertex before returning the Java array.
 
-This is a dense 3D geometry field used by the preview/GL path, not the 3x3 capture pose returned by `ProcessFrame()`.
+This is a dense 3D geometry field used by the preview/GL path, not the 3x3 capture pose returned by `ProcessFrame(``.
 
 ### DeviceOrientationStatus — confirmed structure
 
@@ -428,11 +428,11 @@ Clamping the overlap per image to ...
 The corresponding function:
 
 1. computes horizontal/vertical camera FOV from image dimensions and focal length using an expression equivalent to:
-   `2 * atan((dimension / 2) / focal)`;
+   `2 * atan((dimension / 2` / focal)`;
 2. adds a **20° margin** to the requested wide-angle field;
 3. computes the overlap needed to cover that field with a **3x3 target grid**;
 4. clamps per-image overlap to the exact float:
-   `0.4f` (`0x3ECCCCCD`) when the requested field is too wide;
+   `0.4f` (`0x3ECCCCCD`` when the requested field is too wide;
 5. constructs exactly **9 target records**.
 
 The target backing storage is `0x288 = 648` bytes, and each target entry is **72 bytes**, confirming `648 / 72 = 9`.
@@ -483,7 +483,7 @@ These values are recorded now but intentionally not named beyond what the receiv
 The same internal constructor near `0x340560` is called with:
 
 - `0.0f, 0.2f` during capture/session setup;
-- `0.2f, 0.95f` by `RenderNextSession()`.
+- `0.2f, 0.95f` by `RenderNextSession(``.
 
 The native binary also contains RTTI for `RangeProgressUpdater`.
 
@@ -505,7 +505,7 @@ The first two intervals are supported by call-site constants; the interpretation
 2. Recover active-session concrete vtable/typeinfo and replace numeric slot labels with C++ method names.
 3. Resolve the Photo Sphere full-circle rodata constant and exact target-ring formula.
 4. Resolve the parameter constructors receiving 360/180/120, 160, 512, 384 and 682.
-5. Follow `ProcessFrame()` into the state writer that computes target-hit/take-photo/motion flags.
+5. Follow `ProcessFrame(`` into the state writer that computes target-hit/take-photo/motion flags.
 6. Resolve the render progress updater type to promote the 0.0/0.2/0.95 interpretation from strong inference to confirmed.
 
 
@@ -555,7 +555,7 @@ The JNI method `ProcessFrame @ 0xEEEF4` performs the following native state upda
 6. checks the Java-supplied `calibrationActive` boolean;
 7. if calibration is active and `TargetHit` is true:
    - if `MovingTooFast` is true, set `PhotoSkippedTooFast = true`;
-   - otherwise call active-object virtual method `+0x78`, `DeviceOrientationStatus(rotation)`;
+   - otherwise call active-object virtual method `+0x78`, `DeviceOrientationStatus(rotation``;
    - if that status is nonzero, set `PhotoSkippedTooFast = true`;
    - if that status is zero, set `TakeNewPhoto = true`.
 
@@ -585,13 +585,13 @@ The second public name is somewhat misleading: the same flag is used when the de
 
 ### MovingTooFast is exactly the Java-supplied sensor gate — confirmed
 
-`SetSensorMovementTooFast(boolean)` writes directly to:
+`SetSensorMovementTooFast(boolean`` writes directly to:
 
 `0x4170DA`
 
-and `MovingTooFast()` reads that exact same byte.
+and `MovingTooFast(`` reads that exact same byte.
 
-So the native JNI layer does **not** maintain a separate hidden visual-speed flag under that name. The Java exposure-dependent gyro threshold feeds the exact state queried by `MovingTooFast()`.
+So the native JNI layer does **not** maintain a separate hidden visual-speed flag under that name. The Java exposure-dependent gyro threshold feeds the exact state queried by `MovingTooFast(``.
 
 The native capture gate then combines that externally supplied motion state with target hit and orientation validity.
 
@@ -701,7 +701,7 @@ cosf(input_angle_radians)
 
 and stores the result at manager offset:
 
-`+0x88` (decimal 136)
+`+0x88` (decimal 136`
 
 Therefore the Java dynamic hit radius of 2.75°..3.50° is converted once per update into a dot-product threshold:
 
@@ -709,7 +709,7 @@ Therefore the Java dynamic hit radius of 2.75°..3.50° is converted once per up
 hit if directional cosine >= cos(hit_angle)
 ```
 
-The neighboring method `0x11239C` similarly stores `cosf(angle)` at manager offset `+0x8C`. This is a second angular threshold, likely the broader “target in range”/activation threshold, but its exact public meaning is still being resolved.
+The neighboring method `0x11239C` similarly stores `cosf(angle`` at manager offset `+0x8C`. This is a second angular threshold, likely the broader “target in range”/activation threshold, but its exact public meaning is still being resolved.
 
 ### Target record size and counts — confirmed
 
@@ -717,13 +717,13 @@ The target-manager target vector uses records of exactly:
 
 **72 bytes per target**
 
-`GetNumTotalTargets()` computes the vector length as:
+`GetNumTotalTargets(`` computes the vector length as:
 
 ```text
 (end - begin) / 72
 ```
 
-The captured-target list is a vector of 32-bit IDs, and `GetNumCapturedTargets()` computes:
+The captured-target list is a vector of 32-bit IDs, and `GetNumCapturedTargets(`` computes:
 
 ```text
 (end - begin) / 4
@@ -746,7 +746,7 @@ Confirmed behavior:
   **20°, 90°, 160°, 200°, 270°, 340°**;
 - returns values including `-1`, `0`, and `+1`.
 
-In `ProcessFrame()`, **only zero permits a still capture**.
+In `ProcessFrame(``, **only zero permits a still capture**.
 
 The exact interpretation of the -1/+1 sectors is not yet named; the next pass is decoding the branch intervals precisely.
 
@@ -804,7 +804,7 @@ else:
     current_in_range = -1
 ```
 
-where `in_range_cos = cos(15°)` by default.
+where `in_range_cos = cos(15°`` by default.
 
 The method returns true only when:
 
@@ -890,7 +890,7 @@ The Photo Sphere generator:
 
 1. reads image width, height, and focal length from the camera/intrinsics provider;
 2. computes horizontal and vertical FOV using:
-   `2 * atan((dimension / 2) / focal)`;
+   `2 * atan((dimension / 2` / focal)`;
 3. selects the relevant FOV according to device/orientation geometry;
 4. uses the generator fields:
    - `0.4`
@@ -931,7 +931,7 @@ Their exact role in pole handling/ring termination is still being resolved.
 
 - computes a pitch-like angle;
 - converts using exact `180/π = 57.29577951308232`;
-- if `abs(pitch) > 40°`, returns **0** immediately;
+- if `abs(pitch` > 40°`, returns **0** immediately;
 - otherwise computes and normalizes a second orientation angle.
 
 For the second angle:
@@ -940,7 +940,7 @@ For the second angle:
 - returns **+1** for `90° < angle < 160°` and `270° < angle < 340°`;
 - returns **0** in the remaining sectors around 0°/180°.
 
-Only status **0** allows `ProcessFrame()` to set `TakeNewPhoto`.
+Only status **0** allows `ProcessFrame(`` to set `TakeNewPhoto`.
 
 The sign likely tells the UI/orientation controller which way the phone is misoriented, but that sign interpretation is not yet assigned a semantic label.
 
@@ -1002,11 +1002,11 @@ Full trace: [checkpoint 21](google-camera-photosphere-checkpoint-21-ceres-solver
 
 ### Bundle-adjuster sensor-prior selector and solve-termination flag — behavior traced
 
-The record assembled at `0x11ed64` carries `+0x2c = 50`, `+0x30 = 1`, and `+0x34 = 1`. The first value feeds Ceres `max_num_iterations`. The `+0x30` value selects the sensor residual form. If it is 1, any of the following chooses the two-scalar `RollPitchSensorResidual`: `0x316b8c` reports all checked normalized 3D-sample dot products are at least `cos(10°)`; the computed count `w25` is below 7; or `0x316c8c` reports all checked asin-derived pitch-like differences are at most 10°. Otherwise, or when `+0x30` is not 1, the builder uses the one-scalar `SensorResidual`. Sensor residual creation is not skipped. After Ceres returns, `+0x34` allows termination type `NO_CONVERGENCE` through the first status gate; `FAILURE` is still rejected, and later validation can still fail. Source-level names for both fields remain unresolved. Full decision trace: [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md).
+The record assembled at `0x11ed64` carries `+0x2c = 50`, `+0x30 = 1`, and `+0x34 = 1`. The first value feeds Ceres `max_num_iterations`. The `+0x30` value selects the sensor residual form. If it is 1, any of the following chooses the two-scalar `RollPitchSensorResidual`: `0x316b8c` reports all checked normalized 3D-sample dot products are at least `cos(10°``; the computed count `w25` is below 7; or `0x316c8c` reports all checked asin-derived pitch-like differences are at most 10°. Otherwise, or when `+0x30` is not 1, the builder uses the one-scalar `SensorResidual`. Sensor residual creation is not skipped. After Ceres returns, `+0x34` allows termination type `NO_CONVERGENCE` through the first status gate; `FAILURE` is still rejected, and later validation can still fail. Source-level names for both fields remain unresolved. Full decision trace: [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior-selection-and-termination.md`.
 
 ## Pass N6 — GlobalFocalLength residual equations
 
-The shared helper `0x12a97c` transfers image points between orientation quaternions using the shared center and focal blocks. `PointMatchResidual` `0x12cbe8` returns two scale-weighted reprojection errors. `LineMatchResidual` `0x129fb0` returns four scale-weighted line-incidence errors, two in each transfer direction. `RollPitchSensorResidual` `0x12cffc` returns pitch and roll errors, with the roll term gated above 81° absolute target pitch; `SensorResidual` `0x12d4c8` returns a pitch error with sine-over-cosine normalization. Match blocks use HuberLoss(35); sensor blocks use TrivialLoss.
+The shared helper `0x12a97c` transfers image points between orientation quaternions using the shared center and focal blocks. `PointMatchResidual` `0x12cbe8` returns two scale-weighted reprojection errors. `LineMatchResidual` `0x129fb0` returns four scale-weighted line-incidence errors, two in each transfer direction. `RollPitchSensorResidual` `0x12cffc` returns pitch and roll errors, with the roll term gated above 81° absolute target pitch; `SensorResidual` `0x12d4c8` returns a pitch error with sine-over-cosine normalization. Match blocks use HuberLoss(35`; sensor blocks use TrivialLoss.
 
 The per-record scales are applied directly, but their source field meanings and units are not identified. Full trace and equations: [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md).
 
@@ -1022,58 +1022,58 @@ Full trace: [checkpoint 24](google-camera-photosphere-checkpoint-24-sensor-prior
 
 The `BundleAdjusterGlobalFocalLength` path checks the optimized focal parameter at `sp+0x4a8` for positivity, then checks the shared center at `sp+0x4b0`/`sp+0x4b8` against the dimension values returned by indexed accessors. For a nonzero count from the fourth argument's `+24` virtual slot, a separate nested-object value returned at vtable slot `+64` must lie in `[10, 150]`. The value's source name and units are unresolved; a view-angle/FOV meaning is an inference. The passing path normalizes each per-image quaternion and issues an indexed transform update. Return bit 1 marks the accepted path; 0 marks rejection. A zero-count path copies the center pair and returns accepted without the per-image update.
 
-This narrows the meaning of checkpoint 24's downstream checks: `NO_CONVERGENCE` can pass the termination gate and still fail output validation. Full trace: [checkpoint 25](google-camera-photosphere-checkpoint-25-post-solve-output-validation.md).
+This narrows the meaning of checkpoint 24's downstream checks: `NO_CONVERGENCE` can pass the termination gate and still fail output validation. Full trace: [checkpoint 25](google-camera-photosphere-checkpoint-25-post-solve-output-validation.md`.
 
 ## Pass N9 — Ceres option-tail copy layout
 
 The solver options copy helper at `0x153094` corrects the tail boundaries recorded in checkpoint 22. It copies the empty four-byte-element vector from candidate offset `+384`, invokes the string copy constructor from `+408`, and copies the callback vector from `+464` with eight-byte elements. The caller writes zero at `+376`, and the copy helper copies that single byte before the vector at `+384`; it appears boolean-like, but its source name and meaning remain unidentified.
 
-The downstream path at `0x150cb8` checks the vector, then tests `+432` before reading the directory string. The caller stores 1 at `+432`, matching public Ceres 2.2.0 `TEXTFILE` at the dump-format position. The `0x3f800000` constant at options `+256` is float32 1.0 inside the subset-preconditioner hash container at +224; helper `0x137294` reads the corresponding container float at offset +32 during capacity calculation. `+368` and `+372` each receive 1. The observed caller leaves the vector empty, so the conditional dump path is skipped. `+436` is the gradient-check switch; `+440` and `+448` each hold `0.1`, and the callback vector is empty. Full trace: [checkpoint 26](google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md).
+The downstream path at `0x150cb8` checks the vector, then tests `+432` before reading the directory string. The caller stores 1 at `+432`, matching public Ceres 2.2.0 `TEXTFILE` at the dump-format position. The `0x3f800000` constant at options `+256` is float32 1.0 inside the subset-preconditioner hash container at +224; helper `0x137294` reads the corresponding container float at offset +32 during capacity calculation. `+368` and `+372` each receive 1. The observed caller leaves the vector empty, so the conditional dump path is skipped. `+436` is the gradient-check switch; `+440` and `+448` each hold `0.1`, and the callback vector is empty. Full trace: [checkpoint 26](google-camera-photosphere-checkpoint-26-ceres-option-tail-copy-layout.md`.
 
 
 ## Pass N10 — Ceres line-search integer pair and raw tail correction
 
 The 8-byte value stored at candidate options `+64` comes from rodata address `0x61b80`: `0x0000000500000014`. Caller code at `0x129398` loads it and `0x12940c` stores it at stack `sp+752`, which is candidate base `sp+0x2b0` plus 64. Interpreted as little-endian memory words, the store writes int32 20 at `+64` and int32 5 at `+68`. These positions and values match the pinned Ceres 2.2.0 `max_num_line_search_step_size_iterations` and `max_num_line_search_direction_restarts` fields and defaults. The `ldr d0` / `str d0` instructions copy the bits; no floating-point arithmetic occurs. This removes +64/+68 from the unresolved-field list and corrects checkpoint 22's earlier double attribution.
 
-The store at +336 is also an 8-byte bit copy, from rodata `0x61a60`: `0x000001f400000000`, giving words 0 at +336 and 500 at +340. No source field name or use was found for those words. The observed null pair at +312/+320 remains pointer-backed in the solver path, unlike the pinned public Ceres scalar field at +312. See [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md).
+The store at +336 is also an 8-byte bit copy, from rodata `0x61a60`: `0x000001f400000000`, giving words 0 at +336 and 500 at +340. No source field name or use was found for those words. The observed null pair at +312/+320 remains pointer-backed in the solver path, unlike the pinned public Ceres scalar field at +312. See [checkpoint 27](google-camera-photosphere-checkpoint-27-ceres-line-search-integer-pair.md`.
 
 
 ## Pass N11 — Ceres trust-region mode and preprocessor dispatch
 
-The options initializer at `0x129264` loads rodata `0x622f0` and stores 16 bytes at candidate options `+0`. The values are `[1, 2, 1, 0]`: `TRUST_REGION`, `LBFGS`, `WOLFE`, and `FLETCHER_REEVES` under the pinned Ceres 2.2.0 enums. The copy helper at `0x153094` copies this prefix. At `0x1527e8`, the copied `minimizer_type` is passed to factory `0x15ee4c`; enum 1 selects vptr `0x401470`, whose RTTI identifies `TrustRegionPreprocessor` and whose `+0x10` method is `0x1ad7f4`. This confirms the trust-region mode for the traced `DENSE_SCHUR` / `DOGLEG` path. The vendor fields at +312/+320, +336/+340 and +376 remain unresolved. See [checkpoint 28](google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md).
+The options initializer at `0x129264` loads rodata `0x622f0` and stores 16 bytes at candidate options `+0`. The values are `[1, 2, 1, 0]`: `TRUST_REGION`, `LBFGS`, `WOLFE`, and `FLETCHER_REEVES` under the pinned Ceres 2.2.0 enums. The copy helper at `0x153094` copies this prefix. At `0x1527e8`, the copied `minimizer_type` is passed to factory `0x15ee4c`; enum 1 selects vptr `0x401470`, whose RTTI identifies `TrustRegionPreprocessor` and whose `+0x10` method is `0x1ad7f4`. This confirms the trust-region mode for the traced `DENSE_SCHUR` / `DOGLEG` path. The vendor fields at +312/+320, +336/+340 and +376 remain unresolved. See [checkpoint 28](google-camera-photosphere-checkpoint-28-ceres-trust-region-dispatch.md`.
 
 
 ## Pass N12 — Ceres linear-solver iteration limits
 
-The caller loads qword `0x000001f400000000` from rodata `0x61a60` and stores it at candidate options `+336`, giving int32 values 0 at `+336` and 500 at `+340`. The solver passes the candidate object to its options validator at `0x14e798`. In the trust-region validation path, the binary checks both offsets for nonnegative values and then enforces `+336 <= +340`. The error paths use the explicit field names `min_linear_solver_iterations` and `max_linear_solver_iterations`; the diagnostic value prefixes are at rodata `0x5b1f7` and `0x5d9e4`. Pinned Ceres 2.2.0 `TrustRegionOptionsAreValid` applies the same checks in the same order, and its `solver.h` defaults are 0 and 500. This resolves the raw qword from Pass N10. The target's member offsets differ from the public header, so this is a diagnostic/control-flow mapping, not an offset projection. The pointer-backed pair at `+312/+320` and byte at `+376` remain open. Full trace: [checkpoint 29](google-camera-photosphere-checkpoint-29-ceres-linear-solver-iteration-limits.md).
+The caller loads qword `0x000001f400000000` from rodata `0x61a60` and stores it at candidate options `+336`, giving int32 values 0 at `+336` and 500 at `+340`. The solver passes the candidate object to its options validator at `0x14e798`. In the trust-region validation path, the binary checks both offsets for nonnegative values and then enforces `+336 <= +340`. The error paths use the explicit field names `min_linear_solver_iterations` and `max_linear_solver_iterations`; the diagnostic value prefixes are at rodata `0x5b1f7` and `0x5d9e4`. Pinned Ceres 2.2.0 `TrustRegionOptionsAreValid` applies the same checks in the same order, and its `solver.h` defaults are 0 and 500. This resolves the raw qword from Pass N10. The target's member offsets differ from the public header, so this is a diagnostic/control-flow mapping, not an offset projection. The pointer-backed pair at `+312/+320` and byte at `+376` remain open. Full trace: [checkpoint 29](google-camera-photosphere-checkpoint-29-ceres-linear-solver-iteration-limits.md`.
 
 
 ## Pass N13 — Ceres inner-iteration ordering and logging fields
 
 The target validator reads candidate `+304` as a boolean gate; when it is true, it checks the double at `+328` for nonnegativity and formats the diagnostic `Solver::Options::inner_iteration_tolerance >= 0.0`. Pinned Ceres 2.2.0 performs this check under `use_inner_iterations`, with a `shared_ptr<ParameterBlockOrdering> inner_iteration_ordering` between that boolean and the tolerance. The options-copy helper treats candidate `+312/+320` as a reference-counted 16-byte pointer pair; caller initialization zeros both words. The caller also stores `0.001` at +328, matching the upstream tolerance default.
 
-The tail copy helper copies candidate +376 as a single byte, then copies the known dump-iteration vector beginning at +384. The caller's +372 int is 1 and +376 byte is 0. With the following dump vector, directory string, dump-format enum, and gradient-check fields already mapped, the upstream member sequence identifies +372 as `logging_type=PER_MINIMIZER_ITERATION` and +376 as `minimizer_progress_to_stdout=false`. This removes both fields from the unresolved list. Full trace: [checkpoint 30](google-camera-photosphere-checkpoint-30-ceres-inner-iteration-and-logging-fields.md).
+The tail copy helper copies candidate +376 as a single byte, then copies the known dump-iteration vector beginning at +384. The caller's +372 int is 1 and +376 byte is 0. With the following dump vector, directory string, dump-format enum, and gradient-check fields already mapped, the upstream member sequence identifies +372 as `logging_type=PER_MINIMIZER_ITERATION` and +376 as `minimizer_progress_to_stdout=false`. This removes both fields from the unresolved list. Full trace: [checkpoint 30](google-camera-photosphere-checkpoint-30-ceres-inner-iteration-and-logging-fields.md`.
 
 
 ## Pass N14 — CameraModel field-of-view identity
 
-The GlobalFocalLength post-solve check clones camera model zero, calls vtable slot `+0x58` with a pair containing the optimized focal scalar, then reads slot `+0x40`. In the LinearCamera vtable these resolve to `0x331368) and `0x330e1c): the first updates focal X/Y and reciprocals, while the second converts the model's stored float at `+8) from radians to degrees using 57.29577951308232. It does not overwrite `+8). Fisheye uses the same getter; equirectangular variants override the slot to return 360°.
+The GlobalFocalLength post-solve check clones camera model zero, calls vtable slot `+0x58` with a pair containing the optimized focal scalar, then reads slot `+0x40`. In the LinearCamera vtable these resolve to `0x331368` and `0x330e1c`: the first updates focal X/Y and reciprocals, while the second converts the model's stored float at `+8` from radians to degrees using 57.29577951308232. It does not overwrite `+8`. Fisheye uses the same getter; equirectangular variants override the slot to return 360°.
 
-The constructor at `0x331118) and LinearCamera degree setter at `0x331a24) convert degrees to radians with π/180, and the intrinsic computation uses image width divided by `2*tan(fov/2)`. The field is therefore the horizontal camera FOV: public/input units are degrees and the model stores radians. The post-solve comparisons enforce an inclusive 10°..150° range for finite values. This resolves the FOV interpretation from checkpoint 25. Full trace: [checkpoint 31](google-camera-photosphere-checkpoint-31-camera-model-field-of-view.md).
+The constructor at `0x331118` and LinearCamera degree setter at `0x331a24` convert degrees to radians with π/180, and the intrinsic computation uses image width divided by `2*tan(fov/2``. The field is therefore the horizontal camera FOV: public/input units are degrees and the model stores radians. The post-solve comparisons enforce an inclusive 10°..150° range for finite values. This resolves the FOV interpretation from checkpoint 25. Full trace: [checkpoint 31](google-camera-photosphere-checkpoint-31-camera-model-field-of-view.md`.
 
 
 ## Pass N15 — Ceres SPSE, eta, and Jacobi option fields
 
-The caller at `0x1287c0) writes 5 to candidate `+344), false to `+348), duplicates double 0.1 into `+352/+360), and writes true at `+368). Validator paths identify `+344) as `max_num_spse_iterations` (minimum 1), `+348) as `use_spse_initialization` (checked for an explicit-Schur incompatibility), `+352) as `spse_tolerance` (nonnegative), and `+360) as `eta` (positive). These diagnostics match the pinned Ceres 2.2.0 declarations and default values.
+The caller at `0x1287c0` writes 5 to candidate `+344`, false to `+348`, duplicates double 0.1 into `+352/+360`, and writes true at `+368`. Validator paths identify `+344` as `max_num_spse_iterations` (minimum 1`, `+348` as `use_spse_initialization` (checked for an explicit-Schur incompatibility`, `+352` as `spse_tolerance` (nonnegative`, and `+360` as `eta` (positive`. These diagnostics match the pinned Ceres 2.2.0 declarations and default values.
 
-The next byte, `+368), is passed as a boolean into the internal linear-solver options conversion at `0x154764). Its place after eta in the Ceres member sequence identifies `jacobi_scaling=true`. Combined with checkpoint 30's `+372=logging_type=PER_MINIMIZER_ITERATION` and `+376=minimizer_progress_to_stdout=false`, this resolves the remaining compact Ceres option group for this caller. Other bundle-adjuster constructors remain to be compared. Full trace: [checkpoint 32](google-camera-photosphere-checkpoint-32-ceres-spse-and-jacobi-options.md).
+The next byte, `+368`, is passed as a boolean into the internal linear-solver options conversion at `0x154764`. Its place after eta in the Ceres member sequence identifies `jacobi_scaling=true`. Combined with checkpoint 30's `+372=logging_type=PER_MINIMIZER_ITERATION` and `+376=minimizer_progress_to_stdout=false`, this resolves the remaining compact Ceres option group for this caller. Other bundle-adjuster constructors remain to be compared. Full trace: [checkpoint 32](google-camera-photosphere-checkpoint-32-ceres-spse-and-jacobi-options.md`.
 
 
 ## Pass N16 — GlobalFocalLength match layouts and point-scale aggregation
 
-The BA input edge stores point records at `+80` and line records at `+104`. GlobalFocalLength consumes point records at a 28-byte stride: source and target coordinates at `+0..+12`, multiplier at `+24`, and `+16/+20` unused by this cost builder. Line records use a 36-byte stride, with four endpoint pairs at `+0..+28` and multiplier at `+32`. Helper `0x318990` sums each point record's `+24` value into both endpoint images' totals across incident pairwise edges; the caller consumes those totals in thresholded pairwise-image bookkeeping. The trace establishes the stored offsets and uses but not the source-level meanings or units. Full evidence: [checkpoint 33](google-camera-photosphere-checkpoint-33-global-focal-match-record-layouts.md).
+The BA input edge stores point records at `+80` and line records at `+104`. GlobalFocalLength consumes point records at a 28-byte stride: source and target coordinates at `+0..+12`, multiplier at `+24`, and `+16/+20` unused by this cost builder. Line records use a 36-byte stride, with four endpoint pairs at `+0..+28` and multiplier at `+32`. Helper `0x318990` sums each point record's `+24` value into both endpoint images' totals across incident pairwise edges; the caller consumes those totals in thresholded pairwise-image bookkeeping. The trace establishes the stored offsets and uses but not the source-level meanings or units. Full evidence: [checkpoint 33](google-camera-photosphere-checkpoint-33-global-focal-match-record-layouts.md`.
 
 
 ## Pass N17 — point-observation scale source
 
-The pair-grid path at `0x11dd90` compares a score from `0x316a64) against `0.9` through `0x316a40). Below the threshold it stores `0.25); otherwise it stores `0.125). On each successful matcher result, the caller appends a 28-byte point row with coordinate pairs at `+0..+12`, image indices at `+16/+20), and the chosen multiplier at `+24). This resolves the producer-side values in those two fields for this path. A later successful estimator call supplies `0.125` to `0x316420), which groups type-5 and type-9 128-byte edges by unordered image pair and scales the point `+24) values in matching type-5 vectors. The helper leaves line vectors untouched. Graph lineage between the two scaling contexts and the line multiplier producer remain open. Full trace: [checkpoint 34](google-camera-photosphere-checkpoint-34-point-record-weight-source.md).
+The pair-grid path at `0x11dd90` compares a score from `0x316a64` against `0.9` through `0x316a40`. Below the threshold it stores `0.25`; otherwise it stores `0.125`. On each successful matcher result, the caller appends a 28-byte point row with coordinate pairs at `+0..+12`, image indices at `+16/+20`, and the chosen multiplier at `+24`. This resolves the producer-side values in those two fields for this path. A later successful estimator call supplies `0.125` to `0x316420`, which groups type-5 and type-9 128-byte edges by unordered image pair and scales the point `+24` values in matching type-5 vectors. The helper leaves line vectors untouched. Graph lineage between the two scaling contexts and the line multiplier producer remain open. Full trace: [checkpoint 34](google-camera-photosphere-checkpoint-34-point-record-weight-source.md).
