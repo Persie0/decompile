@@ -26,6 +26,12 @@ The target reads fields from that base at several offsets. The prefix offsets be
 | +208 | `linear_solver_type` |
 | +212 | `preconditioner_type` |
 | +216 | `visibility_clustering_type` |
+| +264 | `dense_linear_algebra_library_type` |
+| +268 | `sparse_linear_algebra_library_type` |
+| +272 | `linear_solver_ordering_type` |
+| +280 | `linear_solver_ordering` (`shared_ptr`) |
+| +304 | `min_linear_solver_iterations` |
+| +312 | `max_num_spse_iterations` |
 
 The prefix fields through +216 do not depend on the STL container layout. The later assignments use the 64-bit Android libc++ layout for the intervening `std::unordered_set` member (40 bytes for this stateless-hash/equality/allocator instantiation). They are strong ABI-based mappings, not confirmed against the exact compiler/STL build used for this ELF. The Android libc++ `__hash_table` member layout is available in the [NDK source](https://chromium.googlesource.com/android_ndk/+/401019bf85744311b26c88ced255cd53401af8b7/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__hash_table). Reads at +436 and +440 remain unmapped; at least one may be part of a wider copy rather than a standalone option-field access.
 
