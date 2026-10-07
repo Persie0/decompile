@@ -38,7 +38,7 @@ level 1: 751
 level 2: 189
 ```
 
-The detector method at `0x39e9dc` reads detector offset `+0x14` as the non-max radius and calls its suppression helper only when the value is at least two. The constructor initializes that field to `-1`; neither of the traced matcher setup paths overrides it. Therefore this constructed detector skips radius-based non-max suppression unless a later writer changes the field. This statement is scoped to those construction paths.
+The detector wrapper at `0x39f0d8` reads detector offset `+0x14` as the non-max radius and calls its suppression helper only when the value is at least two. The constructor initializes that field to `-1`; neither of the traced matcher setup paths overrides it. Therefore this constructed detector skips radius-based non-max suppression unless a later writer changes the field. This statement is scoped to those construction paths.
 
 The existing FAST threshold schedule and brightness adaptation remain as recorded in [checkpoint 17](google-camera-photosphere-checkpoint-17-fast-threshold-schedule.md).
 
@@ -67,6 +67,6 @@ These values are directly recovered for the traced `PatchPairwiseMatcher` setup 
 - `0x125998`: matcher constructor, defaults, nested detector allocation.
 - `0xf0e48–0xf0ecc` and `0x11c86c–0x11c8c0`: repeated matcher configuration.
 - `0x39e9ac` and `0x39f558`: detector constructor and point-limit setter.
-- `0x39e9dc–0x39ecf0`: FAST threshold schedule and non-max-radius gate.
-- `0x1263f0–0x1262e8` and `0x3a2560–0x3a2774`: three-level matching loop, count schedule, coordinate rescaling.
+- `0x39e9dc–0x39ed44`: FAST threshold schedule; `0x39f0d8–0x39f4f4`: non-max-radius gate.
+- `0x1261a0–0x1262e8`, `0x1263f0–0x126598`, and `0x3a2560–0x3a2774`: three-level matching loop, count schedule, coordinate rescaling.
 - `0x125f04–0x12600c` and `0x126614–0x126848`: match-list cap, squared-distance cutoff, and ratio test.
