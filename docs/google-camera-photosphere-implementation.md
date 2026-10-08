@@ -2183,3 +2183,12 @@ The public Playground four-track [follow-up sweep](https://github.com/Persie0/Pl
 The flow constructor `FUN_001f327c` assigns `*(uint64_t *)(solver+0x0c)=0x0000000f00000003`, implying **default three iterations** at `+0x0c` (the loop bound) and `15` at `+0x10`. Later overrides remain possible. `FUN_002158fc` calculates FOV angles from dimensions/focal values before target generation; `FUN_001ef8f8` creates `NewTarget(int,float[9])` from 40-byte native entries.
 
 Full evidence and next targets: [checkpoint 51](google-camera-photosphere-checkpoint-51-native-gaps-and-dispatch.md).
+
+
+## 36. 2026-10-08: thumbnail source/output paths, session pixels, and blend format
+
+Parallel [Playground sweep #37774803025](https://github.com/Persie0/Playground/actions/runs/37774803025) and [readback #37775166760](https://github.com/Persie0/Playground/actions/runs/37775166760) establish native thumbnail `CreateThumbnailImage` reading a source filename, preparing the image and writing the specified destination with **JPEG quality 90** via `FUN_00447c9c`. File helper `FUN_00447a54` checks complete binary reads; `FUN_00447884` checks file existence only. Neither provides full source-photo-to-target mapping.
+
+Session `FUN_0021874c` selects three pixel-budget size presets, with an **8-million-pixel fallback** for invalid size codes, and delegates size transformation to `FUN_0041c5e0`. Target-generator choice `FUN_002189d8` remains truncated. The output image wrapper `FUN_00425770` checks **8-bit depth**. Boundary helper `FUN_004252b0` is malformed by allocator decompilation; resolving the `FUN_00423310` virtual output blend remains the main final-weight lead.
+
+See [checkpoint 52](google-camera-photosphere-checkpoint-52-thumbnail-io-and-session-size.md).
