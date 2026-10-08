@@ -761,3 +761,10 @@ All three public [helper jobs #37784150244](https://github.com/Persie0/Playgroun
 `FUN_00422ffc` seeds the first image section's bytes to `0x80`, subsequent levels' 16-bit elements to `0x8000`. `FUN_0042a6a4` applies masks to the multi-level sections, zeroing coefficients where masks are zero; `FUN_00423f2c` contains contrast matching but not yet a proven universal final normalized blend-weight formula. The Ghidra allocator branch and portions of the large image accumulator remain decompiler-truncated.
 
 Full verified interpretation: [checkpoint 61](../google-camera-photosphere-checkpoint-61-signed-unary-and-pyramid-initialization.md).
+
+
+## 2026-10-08 — checkpoint 62: exact post-solve cut labels recovered
+
+The independent public [AArch64 extraction #37785008166](https://github.com/Persie0/Playground/actions/runs/37785008166) passed and recovered `FUN_0043bd94` **after** the allocator where Ghidra cut off its C. Graph solver virtual **`+0x30`** executes the cut. The function allocates a zeroed int32 label array of length `num_nodes` and for each node invokes solver virtual **`+0x40`**, storing **1 exactly when the native class result equals 1, otherwise 0** (`cmp w0,#1; cset w9,eq; str w9`). Native terminal double capacity multipliers `±1,000,000` are verified from bits `0xc12e848000000000`/`0x412e848000000000` and `fcvtzs` integer truncation at `0x33bdf8`. This completes the **graph solver → binary pixel labels → two seam masks** handoff together with checkpoint 60's mask writeback.
+
+Remaining: concrete solver class slot meanings/source-sink orientation, edge capacity conventions, and **final normalized multiband color blending** and runtime lens/photo metadata. [Checkpoint 62](../google-camera-photosphere-checkpoint-62-exact-cut-label-readback.md).
