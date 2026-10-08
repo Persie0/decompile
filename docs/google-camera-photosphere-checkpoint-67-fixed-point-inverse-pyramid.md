@@ -78,7 +78,7 @@ Implementation warnings:
 `FUN_0042cc34` in the successful Ghidra job has a compact, fully decompiled body. When width is **at least 6** and image height is positive, it processes each 16-bit image row, updates a few samples near the **left and right borders**, and never runs across the entire row's interior. At its simplest first update:
 
 ```cpp
-row[1] = clamp(int32_t(row[0]) + row[1] + row[2]) / 3;
+row[1] = clamp_to_signed_32767((int32_t(row[0]) + row[1] + row[2]) / 3);
 ```
 
 The actual C divides the **sum** by 3 first (C truncation toward zero) then clamps into `[-32767,32767]`. It subsequently updates `row[0]`, `row[width-1]`, and `row[width-2]` with similar three-sample averages, reusing earlier updated values; hence update order affects results. The parent `FUN_0042cb18` invokes this helper **twice for every descending level**. Raw ELF `0x32cc34..0x32cd54` corroborates signed-short loads/stores, integer multiply/shift division by 3, clamps and row strides.
