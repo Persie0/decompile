@@ -80,3 +80,9 @@ The `std::min` above represents the direct native conditional under valid nonneg
 4. Compare a captured native panorama against Rust Photosphere output for quantitative quality, seams, and performance. The independent Rust implementation need not reproduce native bitwise output, but its intended visual parity must be tested.
 
 **Conclusion:** Confirmed unit-binary final masks for two native mask-generator classes; recovered *factory-provided*, not guessed, contrast/feather threshold formula. Actual capture-profile parameters and the remaining mask-generator variant are still open.
+
+
+## Addendum — contrast-level reference test validation
+
+The [public stage test run #37812820833](https://github.com/Persie0/Playground/actions/runs/37812820833) passed **24/24** deterministic tests, adding three checks for the exact `FUN_0041c618` factory expression: disabled contrast→0; enabled with cap below `levels-1`→cap; enabled with cap above top pyramid level→`levels-1` (including the single-level edge case). The tests confirm the **reference formula** behaves consistently; they do **not** establish the Google Camera session's actual configured flag/cap or test native binary output.
+
