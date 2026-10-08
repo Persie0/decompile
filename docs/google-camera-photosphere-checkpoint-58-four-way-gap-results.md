@@ -42,7 +42,7 @@ The `seam-cut` sweep also recovered **vtable `0x0050d760`** with `+0x18 → FUN_
 
 `FUN_00423310` confirms the source mapping object is passed as `param_4` to `FUN_0043e930`. The 72-byte output mapper factory retains that pointer at instance **`+0x08`**; `FUN_0043ea50` calls **`[source_mapper_vtable+0x10]`** at every coarse grid vertex and when a cell crosses an image-validity boundary. The converter projects one camera image index and two float panorama coordinates to two source-image floats; successful results feed `FUN_00216f7c` for 3-channel byte bilinear sampling.
 
-The candidate native mapper vtables **`0x0050d988` and `0x0050d9b8`** have overlapping function pointers `FUN_0043df98`, `FUN_0043e53c`, `FUN_0043e5a4`, but **they are not yet linked to the concrete object passed as `param_4`**. Classifying them as the true source callback would be premature. Further work must trace the allocation/constructor of the object supplied at the `FUN_00423310` call site or a confirmed runtime call target.
+**Correction from checkpoint 59:** Candidate tables **`0x0050d988` and `0x0050d9b8`** contain methods from **`research/bigml/mrf/maxflow/ibfs.cc`**, including `FUN_0043df98`, `FUN_0043e53c`, and `FUN_0043e5a4`. They belong to IBFS graph-cut/min-cut machinery, **not the source-camera mapper**. The concrete object passed as `param_4` is still unidentified. Further work must trace the allocation/constructor of the object supplied at the `FUN_00423310` call site or a confirmed runtime call target.
 
 ## 5. Unresolved/high-value next steps
 
@@ -52,3 +52,5 @@ The candidate native mapper vtables **`0x0050d988` and `0x0050d9b8`** have overl
 4. **Worker details:** `FUN_0044b6b0` join, `FUN_00448048` actual worker count, `FUN_00448978` enqueue/callback; note the pool's single-start invariant `!started_`.
 
 This checkpoint records **verified incremental subroutines** and does not claim graph-cut labels or final weight normalization have been reconstructed. No changes were made to the clean-room Rust Photo Sphere implementation during this evidence pass.
+
+**Checkpoint 59 update:** `FUN_0044b6b0` is explicitly **`pthread_join`**, so the pool's worker-completion join is now confirmed rather than tentative. `FUN_0049c5d8`'s RLE receiver vptr is exactly `0x0050ed00`; `FUN_0049ce64` expands active inclusive runs into uint8 mask pixels. See [checkpoint 59](google-camera-photosphere-checkpoint-59-ibfs-graphcut-and-joined-workers.md).
