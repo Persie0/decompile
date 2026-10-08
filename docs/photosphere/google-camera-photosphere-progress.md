@@ -607,3 +607,11 @@ The companion constructor `FUN_00443e74` verifies image/camera/orientation cardi
 A four-track Ghidra matrix was started in the **public Playground** repository (run [37771126182](https://github.com/Persie0/Playground/actions/runs/37771126182)): rosette retyping, seam/blender, flow/line matching, and targets/metadata. Results must be reviewed before promoting further algorithmic claims.
 
 Full detail: [checkpoint 48](../google-camera-photosphere-checkpoint-48-rosette-allocator-boundary.md).
+
+## 2026-10-08 — checkpoint 49: raw ARM64 closes preview-rosette construction
+
+The previous helper boundary `FUN_004440ec` is **now recovered from raw AArch64**: Ghidra's original function body omitted two normal-path ranges as well as misclassifying returning allocator `FUN_004f19f4`. Full raw extraction [37771553339](https://github.com/Persie0/Playground/actions/runs/37771553339) establishes the count check, `8 * count` camera-model pointer array allocation, per-element provider vcall `+0x10`, `0x40`-byte rosette allocation, `FUN_00443e74` construction with model pointers/orientations/image accessor, cleanup, and return. **Those are camera-model pointers, not JPEG/image pointers**; downstream source-image identity/order remains unresolved.
+
+The four-track [public Playground run 37771126182](https://github.com/Persie0/Playground/actions/runs/37771126182) finished with four successful jobs (rosette, seams, flow-line, targets-meta). The existing seam pyramid update is not a final seam-weight formula. The line-processing path newly establishes a `NEON_scvtf(...,4)` fixed-point-to-float intermediate (divide by 16), followed by per-feature coordinate mapper processing; bundle-adjustment row calibration remains unknown. Metadata xrefs distinguish a known native writer, parser, and path consumer without proving dynamic runtime appends. Runtime camera format/FOV, actual `session.meta` values, and autonomous retry behavior remain device/session questions.
+
+Full detail: [checkpoint 49](../google-camera-photosphere-checkpoint-49-rosette-raw-and-gap-sweep.md).
