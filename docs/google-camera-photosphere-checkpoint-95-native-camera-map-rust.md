@@ -56,3 +56,33 @@ Known real session-storage paths `FUN_0041a6bc` and `AddExistingSession` instant
 4. Validate orientation matrix direction and optional correction on true saved **`orientations.txt` + numbered JPEGs** and native stitched output, including pixel residuals and device-memory limits.
 
 **Status:** A complete **no-correction, explicitly parameterized panorama↔source mapping chain** is implemented and has reproducible Rust tests. **Full automatic device lens calibration and end-to-end native pixel equivalence remain unverified**.
+
+
+## 5. Follow-up implementation: native FOV constructor plus real import-object bridge
+
+Added `google_linear_intrinsics_from_fov(fov_degrees,width,height)` to [`PhotosphereRust/src/projection.rs`](https://github.com/Persie0/PhotosphereRust/blob/main/src/projection.rs) and exported it publicly from `lib.rs`. The function implements native `FUN_00431118 → FUN_00431954` no-correction linear-camera geometry:
+
+```text
+fov_rad = float(double(fov_degrees) * pi / 180)
+f       = (float(width) / 2) / tanf(fov_rad / 2)
+fx=fy=f
+cx=(width-1)/2
+cy=(height-1)/2
+```
+
+It rejects nonfinite or nonpositive values and FOV outside the clean-room supported open interval **(0°,180°)** rather than manufacturing a lens state. The Rust tangent operation is a safe numeric reference and not claimed bitwise equal to the original C++ math library.
+
+The [`src/google_lightcycle.rs`](https://github.com/Persie0/PhotosphereRust/blob/main/src/google_lightcycle.rs) `LightCycleImage` now exposes **`panorama_pixel_to_source()`** and **`source_pixel_to_panorama()`**. These call the verified mapping chain using each imported JPEG's original `native_rotation:[f32;9]` from `orientations.txt` and a **caller-supplied camera calibration**; they do not reinterpret the native matrix as a Rust quaternion or guess absent distortion parameters. These are stack-only per-pixel math paths; the indexed file importer remains lazily decoded.
+
+Latest implementation commit **`cdd10c6e2d35dbbbbef951de84342c79da2e8a1b`** includes the new mapping tests; the root exports were updated at `ef064a515acd73471f5bd959172741a364f72e70`. The final [public integrated Rust validation #37844833962](https://github.com/Persie0/Playground/actions/runs/37844833962) **passed all 3 configurations** (default, portable/no-default-features, Android-JNI). Each job ran **21/21 projection tests** and **20/20 Google-format session/importer tests**, followed by feature-appropriate compilation checks. This establishes the **compiled and tested source-JPEG mapping API**; it is not a Google Camera native differential test.
+
+## 6. Results of the parallel native camera calibration audit
+
+All three public [Ghidra source camera lanes #37844041675](https://github.com/Persie0/Playground/actions/runs/37844041675) **passed**, as did both independent [Capstone constructor/correction jobs #37844278064](https://github.com/Persie0/Playground/actions/runs/37844278064). The results clarify the supported recovery boundary:
+
+- `FUN_001f0fc8` for an FOV-calibration attempt supplies current FOV seed and image dimensions from calibrator offsets `+0x1a0/+0x1a4/+0x1a8` to linear camera `FUN_00431344`. The alignment loop `FUN_001f1d48` creates a camera instance via camera factory virtual `+0x10` per source JPEG, sets its per-photo width/height virtual `+0x70` and width virtual `+0x68`, and passes the camera to the registration controller. This is **evidence of per-source image dimensions and a shared candidate FOV in the calibration attempt**, not proof an individual photo has independently optimized distortion coefficients.
+- `FUN_00431344` initially sets `camera+0x30 = nullptr`; `FUN_00431b54` and `FUN_00431c38` call optional correction virtual slots `+0x20` and `+0x28` respectively if a correction object was later installed. Resizing via `FUN_00431690` or `FUN_004317bc` notifies optional correction virtual `+0x18`. Neither native-analysis branch recovered concrete production distortion coefficients or established that the pointer is always null.
+- `FUN_00441dc0` is an adjuster factory forwarding constants **1.0 and 1.75** plus iteration count **5** to `FUN_00440994`; these do not constitute recovered lens calibration. Other render adapter factories are allocator-truncated and must not be mislabeled as active physical lens correction implementations.
+- The restored-session helper `FUN_0021a34c` continues using `session_storage+0x10` to recover native 3×3 orientation matrices and then builds a linear camera in its allocator-truncated success path, corroborated by independent prior checkpoint 91 ARM64.
+
+The priority is now **real captured data** and a trace of the live constructor or optional distortion assignment. The current API is explicitly suitable for measured/calibrated intrinsics and mathematically correct rotation, but cannot infer source calibration from `session.meta`/indexed JPEGs alone.
