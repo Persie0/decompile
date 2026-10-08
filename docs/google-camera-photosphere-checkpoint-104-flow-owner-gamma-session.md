@@ -31,7 +31,38 @@ The `gamma-sampling-consumer-104` lane follows `FUN_004404ec`, `FUN_00441048`, t
 
 The `metadata-session-104` lane follows storage init/read/write, path accessors and ownership to distinguish native `session.meta` append semantics from Java `orientations.txt` truncation, and to seek actual metadata reset or source photo count production.
 
-**Pending result interpretation:** Neither two lanes should be labeled as successful or revealing specific logic until their Ghidra logs have been read. A successful workflow alone establishes valid decompilation, **not** that a formerly missing algorithm was solved.
+## Gamma-sampling consumer lane — completed and passing
+
+The `gamma-sampling-consumer-104` lane **passed** and, importantly, recovers which source accessor is supplied to the previously proven 39-band/1,982-nominal-ray sampler. In decompiled `FUN_0041c618` (`cityblock/portable/panorama/rendering/render_util.cc`), formal input pointers `param_2` and `param_3` are explicitly checked by original string assertions **`aligned_ptr != nullptr`** and **`thumbnail_ptr != nullptr`**, and their camera counts must match.
+
+When render-options byte at `param_1+0x3c` is nonzero:
+
+```cpp
+FUN_00441dc0(thumbnail_ptr, &sample_directions_or_intermediate);
+FUN_0049a19c(&sample_directions_or_intermediate);
+```
+
+The `FUN_00441dc0` wrapper calls the sample constructor `FUN_00440994(1.0, 1.75, thumbnail_ptr, 5, ...)`. Thus **the original native gamma sampling is initialized from the thumbnail accessor**, not the aligned/full-resolution accessor. This is a meaningful source-selection fact for clean-room porting and on-device memory use. The specific per-camera subimage decoder, photometric sample rejection and frame transform are **still not determined**, because Ghidra remains allocator-truncated in `FUN_00440994` and `FUN_0049a19c`.
+
+The same factory confirms render/mask constructors for different mode selector `param_1+0x34`, native contrast start `min(levels-1, cap)` when contrast is enabled and otherwise 0, and previously established pyramid parameters. Do not turn Ghidra's error-path allocator truncations into claims about the successful sampling path.
+
+## Session metadata lane — completed and passing
+
+The `metadata-session-104` lane **passed**. It again confirms:
+
+- `FUN_0041aa40` is the **metadata-path formatter**, embedding literal `session.meta` and joining it to the session root with `FUN_004478b8`. **It is not the metadata reset/truncate routine**.
+- `FUN_00419b74` obtains that file path by virtual `+0x50`, opens via `fopen(filename,"a")`, emits nine ordered `key,value\\n` records and closes via `fclose`. The confirmed keys are `version`, `filepath`, `full_pano_width`, `full_pano_height`, `cropped_area_width`, `cropped_area_height`, `cropped_area_left`, `cropped_area_top`, `yaw_correction_deg`; the last field is formatted with the native `%d` format (do not infer floating-point serialization from the `_deg` name).
+- `FUN_00419d40` is the metadata reader, with explicit integer and floating parsing primitives and the earlier optional `source_photos_count` field. No standalone native metadata reset was found **in this inspected caller set**, which is not proof none exists.
+- `FUN_0021a0e8` is the **render caller**, invoking `thunk_FUN_0041c618`, the resulting stitcher/mosaic operations and cleanup. It is not a proven metadata-clear routine.
+- Source session construction and reimport is accessed from both `CalibrateFieldOfViewDeg` JNI and `AddExistingSession` JNI; this substantiates separate runtime consumers but does not identify file-truncation during capture.
+
+**Critical distinction:** Original Java `exm` positively truncates `orientations.txt` on initial capture or undo (checkpoints 102–103). Native `session.meta` writer positively appends; these are separate artifacts. Its lifecycle reset remains **unproven**, not implicitly guaranteed by the Java orientation writer.
+
+## Test status and remaining goals
+
+[All three public matrix jobs #37856452790](https://github.com/Persie0/Playground/actions/runs/37856452790) **passed (3/3)**. New firm results: flow owner `FUN_001f2af8` to global solver; gamma constructor **thumbnail pointer**; metadata helper **path formatter, not truncate**. The run verifies static decompilation/caller identity; it does **not** establish new real-device camera intrinsic values, gamma pixel parity, or existence/absence of every possible session metadata reset.
+
+Next: trace thumbnail pixel accessor vtable through `FUN_00440994` and `FUN_0049a19c` using a decompiler no-return correction or independent ARM64 as needed, trace the actual calibration-mode type selectors, and build a captured native Photo Sphere regression ZIP containing original source JPEGs, `orientations.txt`, `session.meta` and original panorama.
 
 ## Validation boundary
 
