@@ -34,6 +34,10 @@ The same estimator-owned collection at offset +0x68 is passed into the extractio
 - **Graph-cut masks:** Checkpoint 45 maps all four SeamFinderGraphcut receivers to SimpleRunLengthImage. Raw 0x33b804/0x33b81c use slot +0x58 with value 100; the target raw 0x39ce64 fills active runs in a dense byte map. Raw 0x33b958/0x33b96c use slot +0x50 with dense mask pointers; target raw 0x39ca90 ingests a dense image into run-length form. The receiver vptr is raw 0x40ed00 (Ghidra 0x50ed00), not ExposureUnaryCostComputer's 0x50d8c8 address point. The outer path performs RLE crop/update, bounds dilation, and projection-mask generation, but no feather/ramp consumer or post-label numeric normalization was identified.
 - **Session artifacts:** The current rodata/disassembly artifacts do not prove another session.meta writer or establish whether queued-file read failures are skipped, retried, or fatal. The successful AddImage path is traced elsewhere; the failure branch and any runtime-only writer remain open.
 
+## Later follow-up
+
+Checkpoint 46 traces the AddImage point-row cap and scalar and distinguishes stored base-image-grid coordinates from temporary camera-converted records used in robust fitting. See [checkpoint 46](google-camera-photosphere-checkpoint-46-point-rows-target-rings-and-runtime-leads.md) for the updated boundary.
+
 ## Remaining limits
 
 - Whether external callers overwrite the recovered native tracker/solver constructor defaults.
