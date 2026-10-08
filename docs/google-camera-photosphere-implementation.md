@@ -2146,3 +2146,27 @@ The main point-row producer computes `sqrt(num_inliers / point_cap)`; the residu
 Target evidence distinguishes JNI capture selector `0`, PhotoSphereTargetGenerator constructor selector `0` (fisheye uses `1`), and generic generator config mode at `+0x14`. The constructor branch and `0.40/0.325/0.40` Photo Sphere overlaps support the full-ring layout. Java `InitTargets(float[])` and the native keyed 9-float orientation return path are known, and the `FUN_0020f448` merge uses 0x28-byte records. The generic config object's provenance and connection to the Photo Sphere constructor remain unresolved. Generic mode 1 uses `int(2π / ((1-overlap) * FOV))`; mode 0 truncates before multiplying by `cos(latitude)`, with one target near poles. Runtime totals still need device FOV.
 
 The latest focused Ghidra run [37715269158](https://github.com/Persie0/Playground/actions/runs/37715269158) completed successfully; the native and Android source readback is in [reader run 37715715351](https://github.com/Persie0/Playground/actions/runs/37715715351). The recovered pyramid routine includes a bounded contrast-matching coefficient update, while final per-pixel seam weights/normalization remain open. FIFO processing and count/shared-index checks support synchronized records. The preview helper's ordered pointer collection and wrapper copies are recovered, but pointer-to-image identity is not. The focused flow scan confirms constructor defaults but does not exclude later native, indirect, or external writes.
+
+
+## 32. 2026-10-08 correction: rosette helper allocator decompiler error
+
+**Correction to section 30 and checkpoint 47:** The focused decompile of `FUN_004440ec` (raw ELF `0x3440ec`) **incorrectly marked allocator `FUN_004f19f4` as non-returning**, hiding the helper's successful allocation path. The exported allocator repeatedly calls `malloc`, returning when memory is obtained. Raw AArch64 confirms that the rosette helper calls it at `0x344138`, then consumes `x0` at `0x34413c` to compute the end pointer of an `8 * image_count` allocation and calls `memset`.
+
+Thus, the earlier statement that this helper had only error/throw paths or lacked a normal image-construction path is **withdrawn**. Its output signature, complete caller/return ABI, and pointer-to-JPEG mapping are still pending a corrected full decompile. The adjacent rosette constructor `FUN_00443e74` checks image/camera/orientation counts and populates copied pointer and orientation ranges.
+
+See [checkpoint 48](google-camera-photosphere-checkpoint-48-rosette-allocator-boundary.md) for exact instructions, confidence boundaries and the public Playground four-track analysis run.
+
+
+## 33. 2026-10-08: complete successful preview-rosette constructor control flow
+
+Checkpoint 49 resolves the misleading Ghidra `FUN_004440ec` decompile using raw ELF `0x3440ec..0x3441df`: the helper obtains thumbnail image count via image-accessor vcall `+0x20`, builds an **ordered camera-model pointer** array from provider vcall `+0x10`, allocates a 64-byte rosette, constructs it with model pointers/orientations/image accessor via `FUN_00443e74`, releases its temporary allocation, and returns the new rosette. `SessionImpl` stores this at `session+0x60` as `preview_rosette_`. The previous Ghidra body's omitted successful blocks were a function-body segmentation problem, not just the false `noReturn` flag.
+
+The camera-model pointer array is **not an image/JPEG pointer array**. Individual accessor-to-source-JPEG identity and target index mapping are not yet proven, although cardinality and collection order are validated.
+
+Additionally, native line-feature preprocessing converts intermediate signed fixed-point endpoint coordinates via `NEON_scvtf(...,4)` (1/16 resolution) before camera mapping and line-direction processing. This does not establish final residual space. Four parallel Playground jobs completed successfully for rosette, seams, flow-line and target/metadata. See [checkpoint 49](google-camera-photosphere-checkpoint-49-rosette-raw-and-gap-sweep.md).
+
+## 34. 2026-10-08: graph-cut seam costs and per-mode target generator
+
+New output from public Playground reader run `37771812144` identifies `FUN_004390a8` (three-channel seam image difference: `abs(d0) + sqrt(d1² + d2²)`) and `FUN_00439600` (unary luminance penalty `scale * max(abs(0.2989*c0 + 0.5871*c1 + 0.114*c2 - 128) - 78, 0)`). `FUN_00421718` is an output-channel interleaver, not the normalization operator. The derived costs do not yet give final graph-cut labels or multiband blender normalized pixel weights.
+
+`FUN_002159fc` uses target mode at `config+0x14` (mode 1 generating from `trunc(C / ((1-config.x10)*spacing))`; mode 0 delegating to `FUN_002147c4`). JNI `InitTargets` forwards a 36-byte config through session-builder virtual method `+0x10`, but concrete runtime selection is not yet shown. `FUN_001ffc30` loops according to mutable field `solver+0x0c`, so an initializer value alone is insufficient to establish active iteration count. Details: [checkpoint 50](google-camera-photosphere-checkpoint-50-seam-cost-and-flow-targets.md).
