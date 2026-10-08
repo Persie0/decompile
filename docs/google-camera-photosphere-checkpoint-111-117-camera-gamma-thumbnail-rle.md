@@ -153,3 +153,25 @@ Hence **the native runtime thumbnail width originates upstream at options-object
 ## Scope and evidence correction
 
 The 113 JADX report's `FILES_WITH_IDENTIFIERS 4` counts any of several search tokens, **not** actual `CreateThumbnailImage` callsites; in particular the stock `LightCycleNative.java` was selected because it declares `CalibrateFieldOfViewDeg`. Inspection found **no Java declaration for the native CreateThumbnailImage export** in that class and no same-identifier occurrences in other decompiled Java source. This limits normal-code reachability via *that exact identifier*; it does not rule out reflection or indirect native entry mechanisms, nor rule out other thumbnail producers. The positively identified runtime path remains `SimpleThumbnailCreator::FUN_003193fc`.
+
+## Checkpoints 120–121 — thumbnail width option object packed from a 64-bit argument
+
+[Public 3-lane native checkpoint 120 #37861769784](https://github.com/Persie0/Playground/actions/runs/37861769784) **passed 3/3** and [checkpoint 121 original reset-argument trace #37861897463](https://github.com/Persie0/Playground/actions/runs/37861897463) **passed**.
+
+The `FUN_0011a204` session factory receives its 12-byte source-image options as parameter `x2`. It passes `*(uint32*)(x2+4)` as the **`SimpleThumbnailCreator` target thumbnail width** into native `FUN_00319308`. A newly resolved caller is `FUN_0010f310`, reached via `0x10f3cc`, which builds this exact options object on the stack:
+
+```asm
+0010f350 mov x26,x1            ; packed image options from call argument x1
+0010f36c str x26,[sp,#0x30]  ; first 8 bytes of image options
+0010f370 str w25,[sp,#0x38]  ; separate 32-bit third option
+0010f3b8 add x2,sp,#0x30     ; address of options object
+0010f3cc bl  0x11a204        ; create runtime session
+...
+0011a22c mov x19,x2          ; options pointer
+0011a2d0 ldr w0,[x19,#4]   ; upper 32 bits of packed x26
+0011a2d4 bl  0x319308       ; instantiate SimpleThumbnailCreator(width)
+```
+
+Hence **the target thumbnail width is the upper 32-bit word of the packed `x1` argument into `FUN_0010f310`**, not the 32-bit third option, the scalar FOV, or a fixed value stored in `SimpleThumbnailCreator`. Another `FUN_0011a204` call at `0x11a40c` is an `AddExistingSession` path with externally supplied options; session re-import may therefore carry different dimensions.
+
+**Remaining uncertainty:** This proves register/field origin but *not yet the numeric width of stock capture*. The packed value itself comes from the upstream reset/capture parameter chain. It is inappropriate to change `PhotosphereRust`'s 640px pragmatic default based solely on this intermediate field layout. Follow-up public [checkpoint 122 workflow](https://github.com/Persie0/Playground/blob/main/.github/workflows/photosphere-checkpoint-122.yml) traces the upstream packed dimension creation; label its conclusions only after checking logs.
