@@ -21,7 +21,7 @@ GlobalFocalLength setup raw 0x1287c0 walks 0x80-byte match records, reading type
 | Point | 0x1c (7 floats) | Forwards row fields 0–3 as two double pairs and field 6 as a float; fields 4–5 are not read in this setup path. |
 | Line | 0x24 (9 floats) | Converts endpoint fields to double, forms segment differences, and scales line coefficients by field 8 divided by segment length. |
 
-RTTI identifies PointMatchResidual as two residuals and LineMatchResidual as four, each with parameter blocks [4,4,2,1]. Their raw evaluator bodies are line 0x129fb0 and point 0x12cbe8, located by vtable relocations 0x3fdfe0 and 0x3fe060. Both call shared projective helper raw 0x12ab44, which divides transformed coordinates by depth. The line evaluator projects four endpoints and combines them with the normalized line payload. The point evaluator uses the two projected coordinate differences and multiplies them by the stored payload scalar. No fixed pixel-dimension or degree/radian conversion appears in these setup/evaluator paths. Checkpoint 44 traces the producers: AddImage point features reach matching at level-zero scale, and the point-row scalar is formed from an inlier-count ratio. The line writer copies prepared endpoints and uses 25.0 on the traced constructor path. Whether the coordinates are pixels or pre-normalized/calibrated values, and the point scalar's residual meaning, remain unknown.
+Whether line coordinates are pixels or pre-normalized/calibrated values remains unknown. Checkpoint 23 establishes that the point scalar multiplies both point residuals; its source-level meaning remains open.
 
 ## Image-adjustment system assembly
 
@@ -55,12 +55,16 @@ The embedded GlobalFlowSolver begins at AlignmentTracker +0x78. Constructor raw 
 
 Containing-object constructor callers are raw 0x0ed94c and 0x0edb58; the processing path uses the same tracker subobject. No later native field writer or option setter was found in the scanned class paths. These values are native constructor defaults; external mutation is not ruled out.
 
+## Residual-equation follow-up
+
+Checkpoint 23 resolves the residual bodies omitted here: point rows produce two weighted reprojection differences; line rows produce four bidirectional line-incidence residuals with the row scalar folded into each normalized line triple. Checkpoint 20 establishes HuberLoss(35) for both match block types on this GlobalFocalLength path; checkpoint 23 confirms TrivialLoss for sensor priors. Point-scalar source meaning and final line-coordinate units/calibration remain open.
+
 ## Bounded remaining questions
 
 - Whether the Java caller repeats AlignNextImage when a missing path remains at queue head; the JNI thunk only dispatches, and no explicit Java retry/backoff was found.
 - Whether any caller overwrites the native constructor defaults for AlignmentTracker +0x50/+0x54 = 20.0/300 or solver +0x08/+0x0c/+0x10 = 0/50/3; no later native writer was found in the scanned class paths.
 - Any final mask feathering/weight normalization after the SimpleRunLengthImage conversions and projection-mask generation.
-- Point-row coordinates are now traced as matcher-emitted float base-image-grid/pixel-coordinate values; exact pixel-center semantics and the scalar's later residual-weighting meaning remain open. Line-row units/calibration and residual equations remain unresolved (checkpoint 46).
+- Point-row coordinates are matcher-emitted base-image-grid/pixel-coordinate values; exact pixel-center semantics and the scalar's source-level meaning remain open. Line-row units/calibration remain unresolved. Checkpoint 23 recovers point/line residual equations and HuberLoss(35).
 - The complete session.meta writer set and whether another path adds keys consumed by Java; current focused exports do not settle this, and runtime capture would.
 - The Android preview format on a target device; native conversion is NV21-compatible, but JNI does not receive the format enum.
 - Exact target totals still require a concrete camera/FOV and a verified mapping from the Photo Sphere constructor arguments to the generator config (checkpoint 46).
