@@ -31,7 +31,7 @@ The evaluator projects B0/B1 into A's view and A0/A1 into B's view. For each end
 r = c + a * projected[0] - b * projected[1]
 ```
 
-This produces four line residuals. Point and line match blocks both use `HuberLoss(35)`; the pitch and roll sensor blocks use `TrivialLoss`. The point scalar multiplies both point residuals, but its source-level meaning remains unknown. Final units/calibration of line-row coordinates also remain unknown. These equations and losses are specific to the observed GlobalFocalLength path; other bundle-adjuster paths were not established.
+This produces four line residuals. Point and line match blocks both use `HuberLoss(35)`; the pitch and roll sensor blocks use `TrivialLoss`. The main point-row producer computes `sqrt(num_inliers / point_cap)`; the residual evaluator multiplies both point residuals by it, so it is a known residual scale although its source-level field name is unknown. The separate `0.25/0.125` branch remains semantically unlabeled. Camera-model conversion writes ray-like triples to separate temporary outputs; row `+24` is not ray-z. The line path scales endpoints by camera-model dimension divided by feature dimension before record copy, but final physical units/calibration remain unknown. These equations and losses are specific to the observed GlobalFocalLength path; other bundle-adjuster paths were not established.
 
 See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-selection.md) and [checkpoint 23](google-camera-photosphere-checkpoint-23-global-focal-residual-equations.md).
 
@@ -39,7 +39,7 @@ See [checkpoint 20](google-camera-photosphere-checkpoint-20-global-focal-loss-se
 
 Native `SessionImpl::AlignNextImage` processes one queued item per invocation. An empty queue returns false. If the front path is missing, the call returns false without removing the entry. If the file exists, the entry is consumed before per-record processing; a later read/process failure returns false after consumption. The final batch drain also advances before processing and stops at a failure. See [checkpoint 5](google-camera-photosphere-checkpoint-5-align-next-image.md) and [checkpoint 43](google-camera-photosphere-checkpoint-43-queue-residual-and-render-follow-up.md).
 
-The Java source audit found that `p000.exf` drains completed source-image paths into incremental `AlignNextImage()` calls and contains no explicit stitch retry/backoff. It does not establish exact call timing or whether the worker invokes AlignNextImage again after a false result with a missing path still queued. The separate up-to-three-trial autofocus path is not stitch retry behavior. See [checkpoint 40](google-camera-photosphere-checkpoint-40-java-preview-session-artifacts.md).
+The source-only JADX decompile shows `p000.exf` draining queued paths into a batch and calling native `AlignNextImage()` inside the per-path loop. The JNI declaration is `void`, so Java receives no success boolean; no explicit stitch retry/backoff is visible. Native missing-path handling leaves the item queued, but later worker scheduling is not established. JADX reports 41 reconstruction errors, so exact local control-flow timing is qualified. The separate up-to-three-trial autofocus path is not stitch retry behavior. See [checkpoint 40](google-camera-photosphere-checkpoint-40-java-preview-session-artifacts.md).
 
 ## Target indexing
 
@@ -53,7 +53,7 @@ The loop uses angular step `2π/N` and connects each target to its previous and 
 
 The separate wide-angle path Ghidra 0x215fd0 (raw ELF 0x115fd0) adds a 20° margin to the requested field of view, clamps per-image overlap to 0.4 when needed, then calls Ghidra 0x2161fc (raw ELF 0x1161fc). That routine creates nine 0x48-byte target records for a 3×3 grid and assigns wrapped neighbor IDs through Ghidra 0x216948 (raw ELF 0x116948). The wide-angle helper has no direct caller in the saved xref list, so its use for an executed capture is unproven.
 
-The Photo Sphere reset JNI at raw 0x0edb8c passes capture selector 0 to shared helper FUN_001ed84c, which stores it in PTR_DAT_00512018 and creates the session-builder object through a session-manager vcall. Later InitTargets passes six Java-array values through the target manager's indirect +0x10 method and retrieves targets through +0x58. This shows the reset-to-target-manager path, but the indirect calls do not expose the generator config's +0x14 value. Capture selector 0 is not generator mode 0/1, and the constructor overlap values remain unmapped. The saved code still does not identify the strategy selected in a real runtime capture or how generated targets correspond to saved-image order.
+The native capture-mode switch separately identifies the PhotoSphereTargetGenerator constructor selector `0` for Photo Sphere and selector `1` for fisheye, with Photo Sphere overlap fields `0.40/0.325/0.40`. This constructor selector is distinct from the JNI capture selector `0` and from generic target config mode `+0x14`. The generic helper uses mode 1 count `int(2π / ((1-overlap) * FOV))`; mode 0 applies nested truncation before cosine and forces one target near poles. InitTargets' indirect calls do not establish that the generic config object is the one initialized by the constructor switch. The actual target count still depends on device FOV, and generated-target IDs are not mapped to saved-image order.
 
 ## Session/rosette sequence and cardinality guards
 
@@ -67,12 +67,12 @@ Taken together, these bodies establish FIFO processing, same-record inputs to th
 
 ## Remaining work
 
-- Determine exact `exf` call cadence and behavior after `AlignNextImage()` returns false.
-- Resolve line-row coordinate units/calibration and the source-level meaning of point-row scale values.
-- Identify any final seam feathering or normalized blend-weight stage; the traced blender setup and output methods do not expose it.
-- Verify the target device's preview callback format and capture runtime metadata to enumerate writers.
-- Establish which target-generator strategy/config instance is used and how generated target indices map to saved session images.
-- Check for external or indirect writes that override recovered native flow defaults.
+- Determine whether later native worker invocations revisit a missing-path item; Java's void wrapper shows no explicit retry/backoff.
+- Resolve line-row physical calibration and the semantic label of the alternate point-scale branch; the main point-row scale formula/role is known.
+- Identify any final per-pixel seam feathering or normalized blend-weight stage; public Playground run 37710458655 is still pending.
+- Verify the device's active preview format and capture runtime metadata to check for additional `session.meta` appends/values.
+- Compute concrete target totals using actual camera FOV and establish the generic config linkage through InitTargets; map target IDs to images only if the runtime path permits it.
+- Search beyond the focused caller chain for external or indirect writes to recovered flow defaults.
 
 ## Evidence
 
