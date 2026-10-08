@@ -2156,3 +2156,11 @@ Thus, the earlier statement that this helper had only error/throw paths or lacke
 
 See [checkpoint 48](google-camera-photosphere-checkpoint-48-rosette-allocator-boundary.md) for exact instructions, confidence boundaries and the public Playground four-track analysis run.
 
+
+## 33. 2026-10-08: complete successful preview-rosette constructor control flow
+
+Checkpoint 49 resolves the misleading Ghidra `FUN_004440ec` decompile using raw ELF `0x3440ec..0x3441df`: the helper obtains thumbnail image count via image-accessor vcall `+0x20`, builds an **ordered camera-model pointer** array from provider vcall `+0x10`, allocates a 64-byte rosette, constructs it with model pointers/orientations/image accessor via `FUN_00443e74`, releases its temporary allocation, and returns the new rosette. `SessionImpl` stores this at `session+0x60` as `preview_rosette_`. The previous Ghidra body's omitted successful blocks were a function-body segmentation problem, not just the false `noReturn` flag.
+
+The camera-model pointer array is **not an image/JPEG pointer array**. Individual accessor-to-source-JPEG identity and target index mapping are not yet proven, although cardinality and collection order are validated.
+
+Additionally, native line-feature preprocessing converts intermediate signed fixed-point endpoint coordinates via `NEON_scvtf(...,4)` (1/16 resolution) before camera mapping and line-direction processing. This does not establish final residual space. Four parallel Playground jobs completed successfully for rosette, seams, flow-line and target/metadata. See [checkpoint 49](google-camera-photosphere-checkpoint-49-rosette-raw-and-gap-sweep.md).
