@@ -2164,3 +2164,9 @@ Checkpoint 49 resolves the misleading Ghidra `FUN_004440ec` decompile using raw 
 The camera-model pointer array is **not an image/JPEG pointer array**. Individual accessor-to-source-JPEG identity and target index mapping are not yet proven, although cardinality and collection order are validated.
 
 Additionally, native line-feature preprocessing converts intermediate signed fixed-point endpoint coordinates via `NEON_scvtf(...,4)` (1/16 resolution) before camera mapping and line-direction processing. This does not establish final residual space. Four parallel Playground jobs completed successfully for rosette, seams, flow-line and target/metadata. See [checkpoint 49](google-camera-photosphere-checkpoint-49-rosette-raw-and-gap-sweep.md).
+
+## 34. 2026-10-08: graph-cut seam costs and per-mode target generator
+
+New output from public Playground reader run `37771812144` identifies `FUN_004390a8` (three-channel seam image difference: `abs(d0) + sqrt(d1² + d2²)`) and `FUN_00439600` (unary luminance penalty `scale * max(abs(0.2989*c0 + 0.5871*c1 + 0.114*c2 - 128) - 78, 0)`). `FUN_00421718` is an output-channel interleaver, not the normalization operator. The derived costs do not yet give final graph-cut labels or multiband blender normalized pixel weights.
+
+`FUN_002159fc` uses target mode at `config+0x14` (mode 1 generating from `trunc(C / ((1-config.x10)*spacing))`; mode 0 delegating to `FUN_002147c4`). JNI `InitTargets` forwards a 36-byte config through session-builder virtual method `+0x10`, but concrete runtime selection is not yet shown. `FUN_001ffc30` loops according to mutable field `solver+0x0c`, so an initializer value alone is insufficient to establish active iteration count. Details: [checkpoint 50](google-camera-photosphere-checkpoint-50-seam-cost-and-flow-targets.md).
