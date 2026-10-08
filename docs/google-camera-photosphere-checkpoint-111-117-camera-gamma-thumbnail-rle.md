@@ -117,3 +117,39 @@ Raw ARM64 `0x30aef4..0x30af40` performs the float64 dimension ratio and `FCVTZS`
 Consequently, GammaAdjuster source thumbnail dimensions are **not arbitrary**: their width is the `SimpleThumbnailCreator+8` configured integer, and their height is this exact rounded source-aspect value. The actual **numeric configuration of `creator+8`** in the selected stock runtime remains to be traced; do **not** set it to 640 just because Rust currently uses 640. The resample kernel `FUN_00117b10` is under separate checkpoint 118 verification, so avoid claiming bilinear vs nearest/downscale filtering yet.
 
 As a runtime cross-check, the original capture queue `FUN_0011b5f4` invokes `FUN_0011be38` per saved image, which invokes thumbnail creator `+0x10`; the supplied rosette is assembled only after cameras and thumbnails are available. This helps distinguish production thumbnail flow from the JNI routine with quality 90.
+
+## Checkpoints 118–119: actual width ownership and resampling dispatch
+
+Independent SHA-verified public [two-lane checkpoint 118 #37861570078](https://github.com/Persie0/Playground/actions/runs/37861570078) **2/2 passed**, and [checkpoint 119 exact constructor-caller #37861660372](https://github.com/Persie0/Playground/actions/runs/37861660372) **passed**.
+
+**Concrete thumbnail creator constructor:** raw **`FUN_00319308`**, from original `SimpleThumbnailCreator`. Its real allocator implementation includes:
+
+```asm
+00319314  mov w20,w0
+00319318  mov w0,#0x20               ; 32-byte object
+0031931c  bl  malloc_wrapper
+00319320  adrp x8,#0x40c000
+00319328  add x8,x8,#0xbd8           ; SimpleThumbnailCreator vptr 0x40cbd8
+0031932c  str w20,[x0,#8]            ; configured target_thumbnail_width
+00319338  str x8,[x0]               ; vptr
+00319350  bl  FUN_0034619c           ; in-memory image collection
+00319358  str x20,[x19,#0x10]        ; collection ownership
+```
+
+There is **exactly one direct BL** to this constructor in the inspected ELF: at raw `0x11a2d4`, in session factory `FUN_0011a204`. Immediately before calling it the session factory does:
+
+```asm
+0011a2d0  ldr w0,[x19,#4]     ; read configured target width from a session/input options object
+0011a2d4  bl  0x319308        ; SimpleThumbnailCreator(width)
+0011a2e4  str x8,[x22,#0x50]  ; install at capture/session +0x50
+```
+
+Hence **the native runtime thumbnail width originates upstream at options-object `+0x04`**. There is no universal literal width in the `SimpleThumbnailCreator` constructor. The next required step is to map the creator's `x19` input options object and the Java/JNI source of its `+4` word for the selected Photo Sphere capture type. Do **not** assume Rust's current 640 is equivalent.
+
+**Resize/filter dispatcher:** `FUN_00117b10` checks input and output image widths/heights. When the source is at least as large in **both dimensions**, it calls optimized RGB8 kernel **`FUN_0039e91c`**; otherwise it tail-branches to generic `FUN_00117bbc`, which contains explicit 3-byte pixel operations and multi-stage scaling. This establishes **two size-dependent native resampling implementations**, but not yet their complete numeric pixel weights or whether their outputs are bitwise equal under all scale factors. The memory-resize path may differ from the JNI's crop/resample path; do not ascribe its ±8 ROI crop to production.
+
+**Important distinction:** the expression `target_width * source_height / source_width + 0.5` in `FUN_0030aee4` uses binary64 arithmetic followed by `FCVTZS` of the positive result. `(W,H)` are native RGB8 image dimensions at source image header `+8/+12`. Thus a clean-room port may reproduce aspect shape exactly once it knows source pixel dimensions and the runtime-configured width.
+
+## Scope and evidence correction
+
+The 113 JADX report's `FILES_WITH_IDENTIFIERS 4` counts any of several search tokens, **not** actual `CreateThumbnailImage` callsites; in particular the stock `LightCycleNative.java` was selected because it declares `CalibrateFieldOfViewDeg`. Inspection found **no Java declaration for the native CreateThumbnailImage export** in that class and no same-identifier occurrences in other decompiled Java source. This limits normal-code reachability via *that exact identifier*; it does not rule out reflection or indirect native entry mechanisms, nor rule out other thumbnail producers. The positively identified runtime path remains `SimpleThumbnailCreator::FUN_003193fc`.
