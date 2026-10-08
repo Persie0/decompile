@@ -73,3 +73,14 @@ The **numeric inverse pyramid reconstruction, normalization/feathering and final
 4. Validate with pixel-level test fixtures and real camera sessions; static method mapping alone is not pixel parity.
 
 All new analysis tooling was pushed directly to public Playground main and docs to `Persie0/decompile` main without PRs.
+
+
+## 5. Completed pyramid-collapse readback
+
+The independently successful public [pyramid-collapse Ghidra run #37787296307](https://github.com/Persie0/Playground/actions/runs/37787296307) decompiled both previously unresolved branch destinations. The numerical reconstruction is now narrowed to **three inner methods**, each reached from the final per-channel pyramid output:
+
+- **`FUN_0042b348(section)`** walks the section's level-pointer vector **backward** from the penultimate level, repeatedly creates a temporary 56-byte image wrapper with `FUN_00425c40`, and calls **`FUN_0042bf50(0x10,temp,level)`** at each step. It then calls **`FUN_0042b438(0x10,temp,section_base_image)`**, deallocates extra levels, and shrinks the stored level vector to one.
+- **`FUN_0042cb18(section, extra_flag)`** performs the same downward level walk but calls **`FUN_0042cc34(section,level_index,temp)` twice** before processing the next lower level with `FUN_0042bf50`. At level 0 it similarly calls **`FUN_0042b438`**, releases upper levels, and leaves one.
+- These calls are consistent with inverse fixed-point multilevel image reconstruction, but **the upsampling arithmetic, two-pass special correction and final image quantization are not determined just from the outer loops**. The decompiler in the second variant also does not faithfully show the second argument's use; confirm inside `FUN_0042cc34`.
+
+A distinct [kernel Ghidra run](https://github.com/Persie0/Playground/actions/workflows/photosphere-reconstruction-kernels.yml) now examines **`FUN_0042bf50`, `FUN_0042b438`, `FUN_0042cc34`** in parallel. Until their arithmetic is recovered, do not mark normalized multiband output or byte accuracy as complete.
