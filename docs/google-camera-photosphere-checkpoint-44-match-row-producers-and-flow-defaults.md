@@ -8,9 +8,9 @@ Addresses below distinguish raw ELF VAs from Ghidra VAs where both are useful. T
 
 ## AddImage point-row producer
 
-AddImage at raw 0x11d570 (Ghidra 0x21d570) calls feature wrapper raw 0x126188. That wrapper calls extractor raw 0x3a2560 (Ghidra 0x4a2560). In its per-level loop, raw 0x3a2730–0x3a2750 computes 1 << level and multiplies the two position floats at feature-record offset +8, using a 0x40-byte feature-record stride. AddImage then passes the same per-image feature slots into matcher raw 0x120600. This proves feature coordinates are restored to level-zero scale before matching; it does not establish whether their absolute units are pixels, normalized camera coordinates, or another image-space unit.
+AddImage at raw 0x11d570 (Ghidra 0x21d570) calls feature wrapper raw 0x126188. That wrapper calls extractor raw 0x3a2560 (Ghidra 0x4a2560). In its per-level loop, raw 0x3a2730–0x3a2750 computes 1 << level and multiplies the two position floats at feature-record offset +8, using a 0x40-byte feature-record stride. AddImage then passes the same per-image feature slots into matcher raw 0x120600. The extractor's scale restoration and row-copy path support describing stored matcher coordinates as float base-image-grid/pixel-coordinate values (medium confidence); exact pixel-center semantics are not proven.
 
-The main matcher path appends rows through raw 0x122384 (Ghidra 0x222384). The helper copies 0x1c bytes and advances the row end by that stride. Each row holds two coordinate pairs at +0/+8, image identifiers at +0x10/+0x14, and one scalar at +0x18. Raw matcher instructions 0x120e94–0x120eb0 convert an inlier-count result and the integer loaded from *param_3 to floats, divide, and take a square root. The stored value is therefore sqrt(num_inliers / *param_3). The count is returned through the out-parameter passed to raw 0x30f860 (Ghidra 0x40f860). Ghidra's pseudo-expression with a zero numerator is a recovery artifact and is contradicted by the raw instructions. The denominator's source-level meaning and the scalar's residual interpretation remain unresolved.
+The main matcher path appends rows through raw 0x122384 (Ghidra 0x222384). The helper copies 0x1c bytes and advances the row end by that stride. Each row holds two coordinate pairs at +0/+8, image identifiers at +0x10/+0x14, and one scalar at +0x18. Raw matcher instructions 0x120e94–0x120eb0 convert an inlier-count result and the integer loaded from *param_3 to floats, divide, and take a square root. The stored value is sqrt(num_inliers / point_cap): *param_3 is the maximum point-row count, while param_3[3] (+0x0c) is a separate minimum raw-match threshold used by an early fallback branch. The count is returned through the out-parameter passed to raw 0x30f860 (Ghidra 0x40f860). Ghidra's pseudo-expression with a zero numerator is a stack/register recovery artifact and is contradicted by the raw instructions. The row writer copies the original matcher coordinates. Camera vtable +0x88 converts matched coordinates into temporary three-float records for robust fitting; it does not transform the stored point rows. The denominator is the point-row cap; the scalar's later role in residual weighting remains unresolved.
 
 A second AddImage branch calls the same row helper at raw 0x11df1c. It writes two coordinate pairs and image identifiers returned by a virtual matcher, then stores s8. Raw 0x11db38–0x11db4c sets s8 to 0.25 or 0.125 according to a metric test with threshold 0.9; the metric is obtained through raw 0x316a40. This establishes the gate and literal row values, not their source-level weight meaning or coordinate units.
 
@@ -40,10 +40,14 @@ Containing-object constructor callers in the loaded native code are raw 0x0ed94c
 
 ## Remaining boundaries
 
-- Point/line coordinates still lack proven absolute units and calibration state; upstream helper bodies are missing.
-- The point scalar's denominator meaning and residual interpretation remain unknown.
+- Point rows preserve float base-image-grid/pixel-coordinate values; exact pixel-center semantics and the scalar's later residual-weighting role remain unknown.
+- Line-row coordinates undergo feature-scale and mapper/camera processing, but their final units/calibration remain unresolved. The line residual formula and robust-loss attachment/scale are not recovered.
 - The alternate point-row writer's 0.125/0.25 values are traced to a metric gate, but their source-level semantics remain unknown.
 - External writes to tracker/solver fields are not ruled out by the native constructor/call-path scan.
+
+## Checkpoint 46 correction and follow-up
+
+Checkpoint 46 refines this checkpoint's point-row interpretation: *param_3 is the row cap, param_3[3] is a separate minimum-match threshold, and stored point coordinates remain base-image-grid floats after camera conversion is applied only to temporary robust-fit records. See [checkpoint 46](google-camera-photosphere-checkpoint-46-point-rows-target-rings-and-runtime-leads.md).
 
 ## Related traces
 
