@@ -69,7 +69,7 @@ Taken together, these bodies establish FIFO processing, same-record inputs to th
 
 - Determine whether later native worker invocations revisit a missing-path item; Java's void wrapper shows no explicit retry/backoff.
 - Resolve line-row physical calibration and the semantic label of the alternate point-scale branch; the main point-row scale formula/role is known.
-- Identify any final per-pixel seam feathering or normalized blend-weight stage; public Playground run 37710458655 is still pending.
+- Final per-pixel seam weights/normalization remain unresolved. The full `FUN_00423f2c` export in Ghidra run [37712254892](https://github.com/Persie0/Playground/actions/runs/37712254892), printed by reader run [37712635044](https://github.com/Persie0/Playground/actions/runs/37712635044), recovers contrast-matched coefficient gain and saturating pyramid accumulation, not the final seam-weight equation.
 - Verify the device's active preview format and capture runtime metadata to check for additional `session.meta` appends/values.
 - Compute concrete target totals using actual camera FOV and establish the generic config linkage through InitTargets; map target IDs to images only if the runtime path permits it.
 - Search beyond the focused caller chain for external or indirect writes to recovered flow defaults.
