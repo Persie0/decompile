@@ -832,7 +832,7 @@ The 100-vs-1 mask gap is narrowed: `FUN_0049ca90` re-encodes dense masks into **
 
 ## 2026-10-08 — checkpoint 72: linear camera focal fields, projected RLE mask bounds, seven clean-room fixtures
 
-[Three-track public Ghidra #37794642499](https://github.com/Persie0/Playground/actions/runs/37794642499) passed **3/3**. `FUN_00430978` initializes a **fisheye camera** model (corrected in checkpoint 73) with `angle = field_of_view * DAT_00161ae0`, `focal = width/angle`, principal center `((width-1)/2,(height-1)/2)`, and two `focal` plus two `1/focal` fields. `FUN_00431118` is the separate **linear camera** initializer; it also initializes width/height/center/field-of-view, calling `FUN_00431954`. The literal FOV scale constant and which model is used for each captured photo still need checking; no universal pinhole distortion model inferred.
+[Three-track public Ghidra #37794642499](https://github.com/Persie0/Playground/actions/runs/37794642499) passed **3/3**. `FUN_00430978` initializes a **fisheye camera** model (corrected in checkpoint 73) with `angle = field_of_view * DAT_00161ae0`, `focal = width/angle`, principal center `((width-1)/2,(height-1)/2)`, and two `focal` plus two `1/focal` fields. `FUN_00431118` is the separate **linear camera** initializer; it also initializes width/height/center/field-of-view, calling `FUN_00431954`. The FOV scale constant is independently confirmed as π/180 in checkpoint 74; which model is used for each captured photo still needs checking; no universal pinhole distortion model inferred.
 
 `FUN_004380dc` merges per-image RLE **coverage masks** with their rectangles, including wraparound for negative-left rectangles, then clips to mosaic dimensions. `FUN_00437e68` constructs per-image projection-mask RLE objects using `FUN_004364fc`; `FUN_00437ab8` computes dilated/rectified bounds with even coordinate alignment. They are coverage constructors, not a proven 100→1 alpha conversion; blender decoder fill byte remains unresolved.
 
@@ -846,3 +846,25 @@ Public [camera model vtable #37795409381](https://github.com/Persie0/Playground/
 **Correction to checkpoint 72:** `FUN_00430978` installs separate **fisheye** vptr raw **0x40d470**, as proven by member `FUN_00430c24` source path `fisheye_camera.cc`; `FUN_00430c24` and `FUN_00430ddc` are **height/FOV setter methods**, **not** rosette source pixel projection. Actual per-capture camera model identity, fisheye distortion and mosaic pano XY↔ray remain unknown.
 
 Updated [public fixture tests](https://github.com/Persie0/Playground/blob/main/scripts/photosphere_stage_fixtures.py) for negative-Z camera forward/inverse, center and invalid Z: **10/10 passed** in [public CI #37796120534](https://github.com/Persie0/Playground/actions/runs/37796120534). No native pixel-parity comparison yet. Full [checkpoint 73](../google-camera-photosphere-checkpoint-73-linear-projection-fisheye-distinction.md).
+
+
+## 2026-10-08 — checkpoint 74: exact equirectangular Photo Sphere panorama XY ↔ 3D ray
+
+Public [3-way equirectangular Ghidra run #37807744614](https://github.com/Persie0/Playground/actions/runs/37807744614) passed all **3 tracks**; [3-way camera object and mask provenance run #37807552369](https://github.com/Persie0/Playground/actions/runs/37807552369) passed all **3 tracks**. For Photo Sphere output mode `FUN_002189d8` constructs `FUN_004305bc(obj,512)` with equirectangular vptr **raw `0x40d3c8`**. `FUN_00430668` sets **W** and cached **H=W>>1**. Its concrete virtual **`+0x80=FUN_00430800`** maps 3D ray `(x,y,z)` to pixel, while **`+0x88=FUN_004308c0`** maps pixel to ray. From Ghidra:
+
+```text
+longitude = atan2f(x,-z)
+latitude  = atan2f(y,hypotf(x,-z))
+u = (longitude/π+1)*H-0.5
+v = ((π/2-latitude)/π)*H-0.5
+
+theta = (u+0.5)/H*π
+phi   = (1-2*(v+0.5)/H)*π/2
+world_ray = (-sin(theta)*cos(phi), sin(phi), cos(theta)*cos(phi))
+```
+
+Actual native code uses float32 transcendental functions, double intermediate angular factors, and final float32 values; the formulas above represent its math rather than guaranteeing bitwise float parity. Native ELF [constant reader #37808273452](https://github.com/Persie0/Playground/actions/runs/37808273452) independently verifies `DAT_001617a8=π`, `DAT_00161a10=π/2`, `DAT_00161ae0=π/180`, `DAT_00161b48=2π` with exact 64-bit values.
+
+The **full panorama-to-source coordinate dispatch** is now `mosaic XY → equirect +0x88 → R_k·ray → source camera model +0x80`. Reverse is `source model +0x88 → R_k^T·ray → equirect +0x80`. This resolves the *output panorama* mapping gap but not source lens distortion or per-capture model selection. Projection-mask provenance `FUN_004364fc` additionally shows bounds sampling through `FUN_00436a40` and interior probes through `FUN_004371a8`; RLE-to-blender **fill byte** still not proved.
+
+After correcting a pole-longitude test that incorrectly imposed unique X at ±Y poles (longitude geometrically undefined), [public clean-room tests #37808507523](https://github.com/Persie0/Playground/actions/runs/37808507523) passed **14/14**: previous rosette/feather/mask tests plus equirectangular center, cardinals/poles, nonunit ray and seam equivalence. These are **reference tests**, not native image parity. [Full checkpoint 74](../google-camera-photosphere-checkpoint-74-equirectangular-pixel-ray-equations.md).
