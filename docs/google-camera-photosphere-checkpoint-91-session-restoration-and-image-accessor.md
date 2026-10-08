@@ -77,3 +77,28 @@ This is **independent evidence of end-to-end native importing of an existing Pho
 One lane of the public [three-job Ghidra JNI run #37831980692](https://github.com/Persie0/Playground/actions/runs/37831980692), `session-jni-calibration-91`, has already **passed**. Its `Java_com_google_android_apps_lightcycle_panorama_LightCycleNative_CalibrateFieldOfViewDeg` decompile verifies the third JNI argument is retrieved as a UTF string, its length is computed with `strlen`, and the string is copied into a native tagged buffer and passed to `FUN_004195c8(path, length)`. The call is followed by allocation of a 448-byte (`0x1c0`) native calibration object. Ghidra still truncates this latter success path at a returning allocator, so the actual FOV optimization run is outside this checkpoint. This adds independent proof that **the constructor's root string comes from the JNI caller**, not from a hard-coded path.
 
 The other two JNI lanes were still running at this readback; their results should be consulted before treating the full Ghidra matrix as complete.
+
+
+## 6. All three JNI Ghidra tracks subsequently passed
+
+The public [parallel JNI run #37831980692](https://github.com/Persie0/Playground/actions/runs/37831980692) has now **completed with all 3/3 jobs successful**. The higher-level decompilations independently confirm these details:
+
+**`Java_com_google_android_apps_lightcycle_panorama_LightCycleNative_AddExistingSession`** (Ghidra `0x001ee5d4`) extracts **three native UTF strings from JNI arguments**, forms a native LightCycle session through `FUN_0021a34c`, then configures its target camera and rendering options. On its shown path it calls the output-camera factory `FUN_002189d8(...,1)` and renderer virtual `+0x18` with the newly restored session and caller-supplied destination/parameters. This means AddExistingSession performs **restoration followed by actual rendering setup**, rather than merely loading metadata.
+
+**`FUN_0021a34c`** shows (before its allocator-truncated success continuation) precisely:
+
+```c
+storage = FUN_004195c8(storage_root, root_length);
+rosette_T_cams = empty_vector;
+image_accessor = nullptr;
+ok = storage->vtable[+0x10](storage, &rosette_T_cams, &image_accessor);
+if (!ok) native_assert("session_storage->GetSessionData(&rosette_T_cams, &image_accessor)");
+image_accessor->vtable[+0x28](image_accessor, ...dimensions...);
+... creates restored native camera and session (proven by raw ARM64) ...
+```
+
+**`FUN_0021a0e8`** is a distinct **render/output utility**, not proven to be the constructor's raw `0x11a2b0` enclosing function: its Ghidra C passes aligned/thumbnail context into `thunk_FUN_0041c618`, configures stitcher virtual `+0x28`, invokes stitcher virtual `+0x18` to render to a supplied path, cleans up the temporary stitcher and returns its boolean status. Its distinct role matters to correctly identifying native lifecycle phases. The direct raw constructor call at `0x11a2b0` is in the adjacent constructor path and must not be relabeled as a render-only method without an address-range match.
+
+The `CalibrateFieldOfViewDeg` lane independently confirms the JNI path string is forwarded to the 56-byte storage constructor and then to a larger native calibration context. Its complete calibration math remains documented separately in checkpoints 80–86.
+
+**Remaining unknowns:** exact on-disk per-image file list records, optional source-photo-count write producer, session.meta truncation behavior and runtime lens calibration. These jobs do not provide native-vs-Rust pixel comparisons.
