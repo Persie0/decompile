@@ -2248,3 +2248,10 @@ The geometric warp's source callback is `[original_source_mapper_vtable+0x10]`, 
 The `FUN_0049c5d8` 40-byte RLE mask object has vtable **`0x0050ed00`**, with actual slots `+0x68=FUN_0049d07c`, `+0x70=FUN_0049d170`, `+0x80=FUN_0049d824`. Their responsibilities are dimension configuration, output extraction, and merging shifted inclusive row-runs with sorted coalescing. `FUN_0049ce64` expands RLE runs to 8-bit pixels. This fills in seam mask composition, not the last graph-cut labeling or multiband normalization.
 
 See [checkpoint 59](google-camera-photosphere-checkpoint-59-ibfs-graphcut-and-joined-workers.md).
+
+
+## 43. 2026-10-08: seam graph-cut node/edge construction and mask output
+
+Native [complete raw graphcut path #37783771481](https://github.com/Persie0/Playground/actions/runs/37783771481) with successful [full readback #37784083006](https://github.com/Persie0/Playground/actions/runs/37784083006) confirms `FUN_0043ad54` in `seam_selection.cc` creates per-pixel **int32 node IDs** from active mask runs; calls `FUN_0043bcd8` to initialize a graph; adds two image-derived unary terms and boundary **10,000,000.0** terminal cost via `FUN_0043bd4c`; adds positive neighboring costs with **+0.01f** via `FUN_0043bd68`; invokes `FUN_0043bd94`; then reads binary graph labels and **clears one of the two dense uint8 seam masks** (initial per-channel mask byte **100**). The label selection is actual AArch64 `cmp w10,#0; csel x10,x23,x24,eq` at raw `0x33b920..0x33b924`. The masks are re-encoded using run-length virtual `+0x50 → FUN_0049ca90`, forming the recovered label-to-seam handoff.
+
+The graph backend is IBFS maxflow (checkpoint 59), but the small wrapper helpers have not yet been fully identified. Do **not** report an exact final normalized multiband weight formula based on the 0/100 seam output alone. [Checkpoint 60](google-camera-photosphere-checkpoint-60-graphcut-labels-to-seam-masks.md).
