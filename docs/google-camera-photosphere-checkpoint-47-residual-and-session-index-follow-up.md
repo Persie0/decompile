@@ -55,23 +55,21 @@ The separate wide-angle path Ghidra 0x215fd0 (raw ELF 0x115fd0) adds a 20° marg
 
 These bodies clarify target indexing, but they do not identify which strategy a real capture selects or how generated target records correspond to the session's saved-image order. The Photo Sphere constructor's overlap values still are not mapped to a concrete generator-config instance.
 
-## Session/rosette cardinality guards
+## Session/rosette sequence and cardinality guards
 
-Session-render queue processor Ghidra 0x21976c (raw ELF 0x11976c) checks:
+Queue enqueue method Ghidra 0x218d54 (raw ELF 0x118d54) appends a record holding a session pointer. SessionImpl worker Ghidra 0x21b18c (raw ELF 0x11b18c) consumes queued file paths FIFO and advances the aligned count after successful processing. Per-record processor Ghidra 0x21be38 (raw ELF 0x11be38) decodes the queued file and passes the same decoded image, path, camera model, and pose metadata first to the thumbnail creator (vcall +0x10), then to AlignmentEstimator (vcall +0x28). This establishes a common successful per-record input path for thumbnails and alignment.
 
-```text
-preview_rosette.GetNumCameras() == queue_entry.session.num_images()
-```
+Finalizer Ghidra 0x21b5f4 (raw ELF 0x11b5f4) finalizes the estimator, checks aligned-camera and thumbnail-image counts, and uses the index-0 pair for image-size setup. It then calls opaque helper Ghidra 0x4440ec (raw ELF 0x3440ec) and stores the returned preview rosette before passing aligned and preview rosettes to the estimator (vcall +0x48). The helper body is not recovered, so the exact transfer of image identities/order into the preview rosette remains unknown.
 
-The string xref at Ghidra 0x219cfc resolves to `session_renderer_queue.cc:0xa2`. A mismatch follows the fatal assertion path. The processor does not construct or reconcile either sequence.
+Ghidra 0x21e3e4 (raw ELF 0x11e3e4) checks matching counts across initial/aligned image accessors, initial/aligned rosettes, and match-success records. Its undo path removes corresponding collection entries together, supporting synchronized cardinality/index bookkeeping. Session-render queue processor Ghidra 0x21976c (raw ELF 0x11976c) checks `preview_rosette.GetNumCameras() == queue_entry.session.num_images()`; the assertion string xref is at Ghidra 0x219cfc and mismatch is fatal. LineAlignerImpl Ghidra 0x403cf8 (raw ELF 0x303cf8) checks equal align/preview rosette camera counts and a matching `image_needs_lines` count, then accesses associated per-image data through shared indices.
 
-LineAlignerImpl Ghidra 0x403cf8 (raw ELF 0x303cf8) checks that align-rosette and preview-rosette camera counts match, and that `image_needs_lines` has the corresponding count. The line-alignment code accesses related per-image data through shared indices. Together, the assertions establish a cardinality/shared-index contract; they do not prove the rosettes contain the same images in the same order or show who populated them.
+Taken together, these bodies establish FIFO processing, same-record inputs to thumbnailing and alignment, and strong count/shared-index constraints. They do not prove end-to-end image identity/order: the upstream queue caller is unresolved, and the preview-rosette construction helper is opaque.
 
 ## Remaining work
 
 - Determine exact `exf` call cadence and behavior after `AlignNextImage()` returns false.
 - Resolve line-row coordinate units/calibration and the source-level meaning of point-row scale values.
-- Identify any final seam feathering or normalized blend-weight stage.
+- Identify any final seam feathering or normalized blend-weight stage; the traced blender setup and output methods do not expose it.
 - Verify the target device's preview callback format and capture runtime metadata to enumerate writers.
 - Establish which target-generator strategy/config instance is used and how generated target indices map to saved session images.
 - Check for external or indirect writes that override recovered native flow defaults.
