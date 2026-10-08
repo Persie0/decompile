@@ -82,3 +82,22 @@ The +0x38 output setter is identified by its exact vtable target **`FUN_0049c8e8
 The seam-mask subsystem now has a verified factory, row-wise run aggregation, horizontal wraparound wrapper and cropped run-length result. **It still does not show optimal-seam graph-cut labels, the source image projection receiver, normalized multiband blend weights, or runtime camera calibration.** Do not identify run-length mask copying with image blending.
 
 **Confidence:** high for 40-byte output object/vptr, inclusive crop-dimension formulas, row bounds, horizontal run clipping and translation, row setter call offset, and ascending-start comparator; medium for all empty-row corner cases until the setter and a runtime session confirm them.
+
+## 5. Output row setter verified in the next successful run
+
+The subsequent successful [public Playground row-setter ARM64 run #37783652564](https://github.com/Persie0/Playground/actions/runs/37783652564) resolves `FUN_0039c8e8` (Ghidra `FUN_0049c8e8`, vtable `+0x38`):
+
+```asm
+39c8e8 ldr x8,[x0,#8]            // first row-container address
+39c8ec mov w9,#0x18               // row-container size = 24
+39c8f0 smaddl x0,w1,w9,x8        // select output row by 32-bit index
+39c8f4 cmp x0,x2                  // self-assignment check
+39c8f8 b.eq 39c904                // no-op when same container
+39c8fc ldp x1,x2,[x2]            // input run vector [begin,end)
+39c900 b 1374e4                  // delegate to vector assignment helper
+39c904 ret
+```
+
+Thus the finalizer passes **output_row_index = source_y - crop.top** and a temporary range of collected run pairs to a genuine per-row **vector assignment** path. The row containers have a verified 24-byte stride, and self-assignment is explicitly avoided. `FUN_001374e4` itself is not independently audited; whether it reuses capacity or allocates is a separate performance/ownership detail, not evidence that the finalizer omits row installation.
+
+The output handoff is now established at the instruction level: **new 40-byte run-length object → initialized row vector → clipped/translated horizontal spans → per-row vector assignment → returned run-length object**. Runtime equivalence for all degenerate crop/mask cases remains to be tested.
