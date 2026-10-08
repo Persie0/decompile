@@ -31,6 +31,18 @@ Thus the native call creates a thumbnail from a **source path to a destination p
 
 `FUN_001ed84c`, the JNI common reset, uses virtual session-manager `+0x10` to create a session with session type passed as `param_2`, a size/parameter object from `FUN_002188b8`, path/config settings, parameter `0x640`, and the explicit low bit of reset flag `param_4`. The `ResetForPhotoSphereCapture` JNI wrapper uses common reset with numeric `param_2=0` and `param_4=1`. **Those values belong to different parameters from the generic target-generator `config+0x14` mode selector**; no equivalence is yet proven.
 
+
+### Raw ARM64 confirmation of type-3 size variants
+
+[Raw ARM64 readback #37775807198](https://github.com/Persie0/Playground/actions/runs/37775807198) supplies the missing pre-allocation instructions in `FUN_002189d8`, which Ghidra's C suppresses. In the case-3 branch, `tst w1,#1` controls **two paired constants** just before an allocation of `0x38` bytes:
+
+| `w1 & 1` | selected `w19` integer | selected `s8` float |
+| --- | ---: | ---: |
+| zero | `0x2aa` = **682** | `0x42f00000` = **120.0** |
+| non-zero | `0x180` = **384** | `0x43200000` = **160.0** |
+
+Native instructions: `0x00218a3c..0x00218a64`. These values could be constructor geometry/size parameters but their **field names and physical meaning are not yet proven**. Since Ghidra omitted the post-`malloc` branch, do **not** assume both values are consumed exactly as shown without completing the constructor trace. This evidence resolves the literal flag-conditioned constants, **not** the runtime Photo Sphere mode or count.
+
 ## 4. Blending data shape and unresolved output pixel method
 
 `FUN_00425770` (`wimage.h`) wraps a supplied image, copies five image-header slots, and requires its depth field equal **8 bits** before further processing. The earlier `FUN_00423310` output allocates a three-channel 8-bit target image, validating format compatibility.
