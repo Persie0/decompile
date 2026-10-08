@@ -2221,3 +2221,10 @@ The successful [public sampler/camera sweep 37778110601](https://github.com/Pers
 `FUN_00431118` in `imaging/linear_camera.cc` stores width/height at `+0x24/+0x28`, principal point `((width-1)/2,(height-1)/2)` at `+0x1c`, and scaled FOV at `+8`, then calls `FUN_00431954`. This identifies the wide-angle factory values `512,682|384` as dimensions and `120.0|160.0` as the **field-of-view** input. The FOV scale constant `DAT_00161ae0` must still be verified from binary bytes, and camera output projection does not identify the runtime Photo Sphere lens FOV.
 
 [Checkpoint 55](google-camera-photosphere-checkpoint-55-rgb-sampling-and-camera-fov.md) contains the full reference algorithm and remaining gaps.
+
+
+## 40. 2026-10-08: FOV degrees-to-radians and exact linear-camera focal scale
+
+The successful [public focal sweep 37778822211](https://github.com/Persie0/Playground/actions/runs/37778822211) reads native constant `DAT_00161ae0` as double `0x3f91df46a2529d39` = `π/180`. `FUN_00431118` converts the passed FOV degrees to float radians at `camera+8`. `FUN_00431954` stores `fx=fy=(width/2)/tanf(FOV_rad/2)` and `inv_fx=inv_fy=1/f` at camera offsets `+0x0c/+0x10/+0x14/+0x18`. With `cx=(width-1)/2`, `cy=(height-1)/2` at `+0x1c/+0x20`, widths and heights at `+0x24/+0x28`, the linear perspective *output projection* camera is now mathematically specified.
+
+Mode-3 wide-angle variants: `512×682 @120°` or `512×384 @160°` depending on low flag bit. Neither equals the runtime lens calibration or standard Photo Sphere ring target geometry. [Checkpoint 56](google-camera-photosphere-checkpoint-56-exact-fov-focal-calibration.md).
