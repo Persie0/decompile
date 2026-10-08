@@ -41,9 +41,9 @@ The parsed values supply EXIF/GPano XMP fields (`eyb.java:366-420`). Java contai
 
 ## Retry boundary
 
-`exi.doInBackground` and `exl.mo2767a` implement up to three camera autofocus attempts when the feature flag is enabled and the pitch change exceeds 8° (or a forced retry state is set). The callback advances the trial count and records capture-time pose/location on success or the final attempt. This is autofocus coordination, not a stitch retry or timed backoff.
+The `exf.java` worker owns a bounded queue (capacity 50), drains currently queued paths into a batch, and calls the void JNI `AlignNextImage()` once per batch item. There is no sleep, timer, per-call success result, or retry/backoff around that call. The worker blocks for another queue item when the queue is empty; shutdown uses a poison-pill path.
 
-`exf.java` drains the current queue into a batch and calls `LightCycleNative.AlignNextImage()` inside the per-path loop. The JNI declaration is `native void`, so Java receives no success boolean; the source shows no retry/backoff around the call. Native code leaves a missing-path item at the queue head, but the Java wrapper does not establish whether later scheduling revisits it. The JADX reconstruction reports 41 errors, so exact local loop scheduling is qualified. Final processing still fails when a source image or alignment fails, as described in checkpoint 39.
+Native code retains a missing-path item at its queue head. If Java has further batch entries, subsequent `AlignNextImage()` calls can revisit that same native head; that is repeated invocation driven by queued work, not an explicit retry. If the batch ends and no new item arrives, Java does not autonomously poll. For an existing file, downstream failure occurs after the item is consumed, so later calls advance. The JADX output places some batch-index assignments after the loop, so exact bytecode ordering should not be inferred from the reconstructed local control flow.
 
 ## Static APK recheck (2026-10-08)
 
