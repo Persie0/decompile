@@ -128,3 +128,17 @@ The synthetic regression `native_gamma_shared_ray_collector_matches_pairwise_ref
 The first pinned [full all-target suite #37860037653](https://github.com/Persie0/Playground/actions/runs/37860037653) ran all tests and reported **Rust formatting failures after passing tests**, including unrelated source files throughout the repository. This is separate **existing whole-repo rustfmt debt**, not evidence the algorithmic tests failed. A public [functional regression #37860218302](https://github.com/Persie0/Playground/actions/runs/37860218302) pins that exact optimized Rust commit and verifies the complete all-target suite in default, portable and Android-JNI configurations without gating functionality on unrelated broad formatting changes. Its result should be checked on GitHub before marking it final green.
 
 **Open numerical work:** full Java/device integration; derive exact native angular threshold and original thumbnail image dimensions/decoding; validate camera-ray/projected pixel mappings with a captured Photo Sphere from the stock app; measure actual CPU, peak RAM and panorama quality changes on phones.
+
+### Checkpoint 110 completion and full functional CI result
+
+The final independent pinned [public Playground functional validation #37860218302](https://github.com/Persie0/Playground/actions/runs/37860218302) **completed successfully in all 3/3 jobs**, testing exact revision `60c8b50e41ec8d00b57a9f16b7c0f73f8754f3b5`:
+
+| Configuration | Core Rust library | Additional all-target tests | Result |
+|---|---:|---|---|
+| Default | **151 passed** | 1 + 10 + 2 passed | **SUCCESS** |
+| Portable (`--no-default-features`) | **151 passed** | 1 + 7 + 2 passed | **SUCCESS** |
+| Android-JNI feature on host | **151 passed** | 1 + 10 + 2 passed | **SUCCESS** |
+
+The test `native_gamma_shared_ray_collector_matches_pairwise_reference` passed in all three library suites. The initial full [format-enforcing test #37860037653](https://github.com/Persie0/Playground/actions/runs/37860037653) showed **all functional tests passing**, but its jobs failed afterward solely from unrelated pre-existing whole-repository `cargo fmt --all -- --check` differences, including other source and integration-test files; it should not be cited as a functional regression. The final green workflow separates functional CI from the broad formatting-debt task and does **not** assert repository-wide rustfmt cleanliness.
+
+**Final checkpoint status:** native Gamma sample source selection, integer RGB lookup, exact RGB coefficients, mean normalization and threshold now reflect recovered native code, and the Rust shared-ray aggregation is validated for synthetic reference fixtures. The precise original thumbnail lens/camera mapping, angular acceptance threshold, per-device intrinsics, final panorama pixel parity and measured on-phone performance remain unverified.
