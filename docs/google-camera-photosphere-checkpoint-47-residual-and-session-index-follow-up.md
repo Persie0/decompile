@@ -53,7 +53,7 @@ The loop uses angular step `2π/N` and connects each target to its previous and 
 
 The separate wide-angle path Ghidra 0x215fd0 (raw ELF 0x115fd0) adds a 20° margin to the requested field of view, clamps per-image overlap to 0.4 when needed, then calls Ghidra 0x2161fc (raw ELF 0x1161fc). That routine creates nine 0x48-byte target records for a 3×3 grid and assigns wrapped neighbor IDs through Ghidra 0x216948 (raw ELF 0x116948). The wide-angle helper has no direct caller in the saved xref list, so its use for an executed capture is unproven.
 
-These bodies clarify target indexing, but they do not identify which strategy a real capture selects or how generated target records correspond to the session's saved-image order. The Photo Sphere constructor's overlap values still are not mapped to a concrete generator-config instance.
+The Photo Sphere reset JNI at raw 0x0edb8c passes capture selector 0 to shared helper FUN_001ed84c, which stores it in PTR_DAT_00512018 and creates the session-builder object through a session-manager vcall. Later InitTargets passes six Java-array values through the target manager's indirect +0x10 method and retrieves targets through +0x58. This shows the reset-to-target-manager path, but the indirect calls do not expose the generator config's +0x14 value. Capture selector 0 is not generator mode 0/1, and the constructor overlap values remain unmapped. The saved code still does not identify the strategy selected in a real runtime capture or how generated targets correspond to saved-image order.
 
 ## Session/rosette sequence and cardinality guards
 
