@@ -743,3 +743,12 @@ YUV output `FUN_00420998` writes neutral `0x80` U/V chroma when all four source 
 ### Checkpoint 60 row-setter verification
 
 The successful [public row-setter disassembly 37783652564](https://github.com/Persie0/Playground/actions/runs/37783652564) resolves the finalizer's virtual `+0x38 -> FUN_0049c8e8`: it computes the destination row container as `rows+index*24`, checks self-assignment, and tail-calls `FUN_001374e4` with the temporary source run-vector `[begin,end)`. [Checkpoint 60](../google-camera-photosphere-checkpoint-60-rle-finalizer-crop.md) now includes the exact ARM64 trace. The remaining helper controls vector capacity/ownership; its allocation mechanics do not change the proven crop-and-assign semantics.
+
+
+## 2026-10-08 — checkpoint 60: graph-cut labels written back into final two seam masks
+
+The successful [raw seam-selection disassembly #37783771481](https://github.com/Persie0/Playground/actions/runs/37783771481) and [complete-range public artifact readback #37784083006](https://github.com/Persie0/Playground/actions/runs/37784083006) recover the executable **post-allocator** portion of `FUN_0043ad54` (`seam_selection.cc`), previously lost by Ghidra's false allocator `noReturn`. The native path indexes active RLE pixels with sequential **32-bit node IDs**, sets graph terminal costs with `FUN_0043bd4c`, neighbor costs with `FUN_0043bd68`, calls `FUN_0043bd94` before label reads, and tests each result against **zero** to clear the corresponding pixel in **one of two 100-valued dense seam masks**. Finally each mask is encoded into RLE by receiver vtable `0x0050ed00+0x50 → FUN_0049ca90`.
+
+Two directly confirmed graph values: strong terminal penalty **10,000,000.0** (AArch64 double `0x416312d000000000`) and a positive neighbor-cost additive float **~0.01f** (`0x3c23d70a`). The exact edge/node helper semantics are under targeted Ghidra investigation, and the final multiband blend mask normalization is **not** yet proved.
+
+See [checkpoint 60](../google-camera-photosphere-checkpoint-60-graphcut-labels-to-seam-masks.md); concurrent public [helper matrix #37784150244](https://github.com/Persie0/Playground/actions/runs/37784150244) traces graph helper implementations, IBFS readback and blend accumulation.
