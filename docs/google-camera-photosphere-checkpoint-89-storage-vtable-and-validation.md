@@ -15,9 +15,9 @@ Ghidra `ReferenceManager.getReferencesTo(function_entry)` independently finds re
 | `0x40cc78` | `0x50cc78` | `FUN_0041a6bc` | read/restore camera rosette storage |
 | `0x40cca0` | `0x50cca0` | `FUN_0041aa40` | compose the literal `session.meta` path |
 
-The independent ELF `readelf -Wr` output confirms `R_AARCH64_RELATIVE` entries with addends `0x319b74, 0x319d40, 0x31a6bc, 0x31aa40` at exactly those raw addresses. This is **far stronger** than merely finding similarly named functions: they are installed as function pointers in one tightly packed storage-method region. The precise object's vptr base and relationship to slot **`+0x50`** still require inspection of preceding and following relocation entries. Avoid assigning individual relative slot offsets until that base is confirmed.
+The independent ELF `readelf -Wr` output confirms `R_AARCH64_RELATIVE` entries with addends `0x319b74, 0x319d40, 0x31a6bc, 0x31aa40` at exactly those raw addresses. This is **far stronger** than merely finding similarly named functions: they are installed as function pointers in one tightly packed storage-method region. **Update — independently verified in the neighboring relocation audit #37829653792:** the Itanium-style vtable carries a typeinfo pointer at raw **0x40cc48 → 0x40ccb8**, and its first function pointer is at raw **0x40cc50**, so the concrete storage instance's **vptr=raw 0x40cc50 (Ghidra 0x50cc50)**. The exact virtual slot mapping is now resolved below.
 
-The writer and reader both call their provider's virtual **`+0x50`** to obtain the path; `FUN_0041aa40` is in the same storage-method region and assembles `session.meta`. This greatly narrows the previous uncertainty that they might target completely unrelated file types. However **which method occupies `provider_vptr+0x50`** and any extra wrappers need confirmation before claiming the complete virtual dispatch chain.
+The writer and reader both call their provider's virtual **`+0x50`** to obtain the path. The concrete table at raw 0x40cc50 gives **`vptr+0x50 = raw 0x40cca0 → FUN_0041aa40`**, so **the path getter is exactly the native `session.meta` path method for this storage class**. This resolves the direct writer/reader/path relationship for an object carrying this vptr. A subsequent storage constructor trace can verify all runtime instantiation modes.
 
 ## 2. Exact path join behavior in `FUN_004478b8`
 
@@ -72,9 +72,34 @@ The independent public [metadata reference fixture suite #37828848009](https://g
 
 ## 6. Remaining goals
 
-1. Determine exact storage object's **vptr base**, `+0x50` method target and whether both writer/reader receive this concrete class in Photo Sphere mode.
+1. Exact storage object's **vptr base raw 0x40cc50** and **`+0x50→FUN_0041aa40`** are now established; check constructor and runtime instantiation to confirm that every Photo Sphere session uses this concrete class.
 2. Identify the genuine `source_photos_count` writer or establish the field is only consumed in the native reader and emitted elsewhere.
 3. Resolve on-disk `session.meta` **reset/truncate** orchestration despite nine-line writer append semantics.
 4. Test actual camera stills, saved intrinsics, orientation matrices and Photo Sphere output against the Rust renderer, including color/seam and memory/CPU parity.
 
-**Confidence:** high for the four contiguous ELF function-pointer relocations, path-join branches, optional metadata key readback, and CI results. **Unverified:** exact provider dispatch/base, count emission, native-device image fidelity.
+**Confidence:** high for the exact storage vtable base and its getter/writer/reader slots, path-join branches, optional metadata key readback, and CI results. **Still unverified:** actual runtime instance selection, count emission, native-device image fidelity.
+
+## 7. Verified complete native vtable layout and `+0x50` filename getter
+
+The public [expanded neighboring ELF relocation audit #37829653792](https://github.com/Persie0/Playground/actions/runs/37829653792) passed and includes all relocations raw `0x40cb80..0x40cd10`. It proves the table's **Itanium C++ ABI** header and exact class function-pointer base:
+
+- raw `0x40cc48` has `R_AARCH64_RELATIVE` addend `0x40ccb8`, the **typeinfo pointer**;
+- raw **`0x40cc50`** is the **first virtual function pointer**, hence the instance's vptr points to **`0x40cc50`** (Ghidra `0x50cc50`).
+
+| Relative method offset from vptr | Raw entry | Destination raw target | Ghidra function |
+| ---: | ---: | ---: | --- |
+| `+0x00` | `0x40cc50` | `0x319694` | `FUN_00419694` |
+| `+0x08` | `0x40cc58` | `0x3196d4` | `FUN_004196d4` |
+| `+0x10` | `0x40cc60` | `0x319714` | `FUN_00419714` |
+| **`+0x18`** | **`0x40cc68`** | `0x319b74` | **`FUN_00419b74`: metadata writer** |
+| **`+0x20`** | **`0x40cc70`** | `0x319d40` | **`FUN_00419d40`: metadata reader** |
+| `+0x28` | `0x40cc78` | `0x31a6bc` | camera/rosette storage helper |
+| `+0x30` | `0x40cc80` | `0x31a84c` | ground-truth file helper |
+| `+0x38` | `0x40cc88` | `0x31a8c4` | other storage helper |
+| `+0x40` | `0x40cc90` | `0x31a9a8` | numbered/dynamic filename |
+| `+0x48` | `0x40cc98` | `0x31aa34` | other storage method |
+| **`+0x50`** | **`0x40cca0`** | **`0x31aa40`** | **`FUN_0041aa40`: session.meta filename** |
+
+This exactly matches the writer and reader invoking `(*(provider_vptr + 0x50))` to produce their path, so the concrete table proves **writer +0x18 → getter +0x50 → root joined with `session.meta`**. The Ghidra function writes into a supplied return-string object; the actual storage root is located at object `+8`.
+
+The table's first three methods and any constructor that installs the vptr still warrant further lifecycle work. The earlier absence of direct AArch64 `BL` calls to the writer is unsurprising because the writer is an actual virtual method at `+0x18`.
