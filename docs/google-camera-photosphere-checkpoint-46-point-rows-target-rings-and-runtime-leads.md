@@ -20,11 +20,19 @@ Camera/FOV helper raw 0x2158fc reads width, height, and focal length through cam
 
 This independently confirms the complete-ring and cosine-scaled count behavior documented for the Photo Sphere target generator. The saved decompile has no recovered caller of raw 0x2158fc, however, and does not map the Photo Sphere constructor's 0.4/0.325/0.4 arguments to this exact config object's +0x10/+0x14 fields. Mode 1 uses N = int(2π / ((1 − overlap) × FOV)); its connection to the Photo Sphere constructor is likewise not established. The separate raw 0x215fd0 → 0x2161fc path implements a wide-angle overlap strategy and is not the mode-0 full-ring path. A concrete target count still needs the camera model/FOV and verified config instance.
 
+## Line-match inputs and residual boundary
+
+Pair-conversion helper raw 0x227bac (Ghidra 0x227bac) walks 0x14-byte matcher records, reads the two float coordinates at offsets +0 and +8, calls each camera's vtable +0x88, and writes separate 0x0c-byte three-float outputs. This confirms camera-model conversion of 2D match coordinates to 3-float values; interpreting the outputs specifically as unit rays is plausible but not proven by this method body.
+
+GlobalFocalLength setup raw 0x2287c0 walks 0x80-byte match records and selects point rows at +0x50/+0x58 or line rows at +0x68/+0x70. LineAligner method Ghidra 0x403900 checks paired line-feature vectors have equal counts using 16-byte elements, calls helper Ghidra 0x406fcc, then conditionally prunes both vectors through Ghidra 0x4039e8 when the returned count is between 3 and the original count. The robust-filter interpretation is inferred from call context; the element size and bilateral pruning are direct from the decompile.
+
+RTTI identifies Ceres AutoDiffCostFunction<LineMatchResidual,4,4,4,2,1>, establishing four residual components with parameter blocks sized 4, 4, 2, and 1. HuberLoss and SoftLOneLoss are also present in the binary, but the available xrefs do not show which loss is attached to line matches or its scale. The residual body and line-row numeric units remain unresolved.
+
 ## Seam-mask preparation and final blend boundary
 
 String and invariant evidence includes blend_mask_bound.left % 2 == 0 at string offset 0x4ad5b, run_length_mask != nullptr at 0x4ad8e, a BlendDistance-aligned blend-mask bound at 0x5118c, active mask padding at 0x511a5, mask_generator_optimal_seam.cc at 0x5122a, and blender.cc at 0x51c21. Xrefs for the optimal-seam source map chiefly to raw 0x433478 and also 0x435eb0, 0x435f6c, and 0x434f20.
 
-Raw FUN_00433478 prepares per-image blending_masks_ and low-resolution mask pyramids before handing them into blender machinery. The inspected code does not expose a feather ramp, distance transform, sum-of-masks normalization, or normalized per-image weight formula. FUN_00435eb0/FUN_00435f6c check mask bounds against image dimensions; raw 0x429064 converts blender output color planes and does not reveal mask weighting. The final seam transition may be implicit in an incompletely recovered blender implementation, so no specific feathering or normalization rule is established.
+Raw FUN_00433478 prepares per-image blending_masks_ and low-resolution mask pyramids before handing them into blender machinery. RTTI identifies MonolithicMultibandBlender and YUVMonolithicMultibandBlender implementations; several blender vtable methods are not included as focused decompilations. YUV mask consumer raw 0x420998 sets chroma to neutral 0x80 when all four corresponding mask bytes are zero, but does not calculate seam weights. The inspected code exposes no feather ramp, distance transform, sum-of-masks normalization, or normalized per-image weight formula. FUN_00435eb0/FUN_00435f6c check mask bounds against image dimensions; raw 0x429064 converts blender output color planes and does not reveal mask weighting. The final seam transition may be implicit in an incompletely recovered blender implementation, so no specific feathering or normalization rule is established.
 
 ## Flow-default caller boundary
 
@@ -32,9 +40,9 @@ The focused xref artifact reports one executable caller of solve loop 0x1ffc30: 
 
 ## Android/JNI and runtime-only limits
 
-JNI AlignNextImage raw 0x0ef830 (Ghidra 0x1ef830) dispatches through manager vtable +0x20. The thunk contains no repeat loop, delay, or backoff; Java scheduling and retry behavior remain unresolved. The preview converter consumes Y plus interleaved VU and emits RGB, so its input is NV21-compatible, but JNI does not pass Android's preview-format enum. The actual target-device callback format therefore remains unknown.
+The available artifact corpus has no app Java, DEX, APK, or smali: the native path inventory lists liblightcycle.so, and the supplied zip contains focused native outputs. JNI AlignNextImage raw 0x0ef830 (Ghidra 0x1ef830) dispatches through manager vtable +0x20; the callgraph marks its virtual target unresolved. The thunk has no repeat loop, delay, or backoff. AddExistingSession raw 0x1ee5d4 ends in an opaque vtable +0x18 callback; FinishCapture raw 0x1ee234 clears and releases the session object. These wrappers do not reveal Java scheduling or retry cadence.
 
-The only native session.meta writer traced in the saved path writes selected camera metadata. JNI GetNextSessionStorage exposes metadataFilePath as a storage field but does not itself write it. No runtime metadata capture or additional writer was found in the focused paths.
+The corpus contains no PreviewCallback, setPreviewFormat, NV21, or YV12 references. The converter consumes Y plus interleaved VU and emits RGB, establishing NV21-compatible input layout, but the actual Android callback format remains unknown. GetNextSessionStorage raw 0x1ee9dc maps metadataFilePath and other paths into LocalSessionStorage; this is a path handoff, not a file write. session.meta appears as a string-table entry at offset 0x504df with no xref in the saved scans. Generic fopen/fwrite hits belong to Ceres problem serialization. No additional session.meta writer or runtime capture was found.
 
 ## Evidence artifacts and remaining work
 
@@ -46,5 +54,9 @@ Relevant local exports include:
 - /tmp/psreverse/photosphere-linealigner-caller/xrefs-decompiled.txt
 - /tmp/psreverse/pixel-camera-line-record-trace/xrefs-decompiled.txt
 - /tmp/psreverse/github-actions-artifact-11515618113/focused/FUN_00433478_00433478.c
+- /tmp/psreverse/github-actions-artifact-11474498247/classes/rtti-vtables-constructors.txt
+- /tmp/psreverse/github-actions-artifact-11474380866/focused/FUN_00227bac_00227bac.c
+- /tmp/psreverse/github-actions-artifact-11474380866/focused/FUN_002287c0_002287c0.c
+- /tmp/psreverse/pixel-camera-line-record-trace/xrefs-decompiled.txt
 
 Remaining work is runtime-dependent: confirm the Java repeat/scheduling policy, target-device preview callback format, and metadata writer set; obtain camera intrinsics and the actual generator config instance to calculate target totals; and resolve line-row units, point/line residual equations, and final blend weights from their hidden or runtime implementations.
