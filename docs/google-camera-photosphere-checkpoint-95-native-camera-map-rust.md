@@ -86,3 +86,12 @@ All three public [Ghidra source camera lanes #37844041675](https://github.com/Pe
 - The restored-session helper `FUN_0021a34c` continues using `session_storage+0x10` to recover native 3×3 orientation matrices and then builds a linear camera in its allocator-truncated success path, corroborated by independent prior checkpoint 91 ARM64.
 
 The priority is now **real captured data** and a trace of the live constructor or optional distortion assignment. The current API is explicitly suitable for measured/calibrated intrinsics and mathematically correct rotation, but cannot infer source calibration from `session.meta`/indexed JPEGs alone.
+
+
+## 7. Verified actual Android/iOS compilation; Java runtime provenance in progress
+
+Public [mobile release compile #37845164236](https://github.com/Persie0/Playground/actions/runs/37845164236) **passed both independent ARM64 targets**: `aarch64-linux-android --features android-jni` and `aarch64-apple-ios`, pinned to source commit `cdd10c6e2d35dbbbbef951de84342c79da2e8a1b`. The new mapping APIs and imported source-image methods therefore compile for native mobile Rust. No actual device timing, lens data, pixel output or JNI/Swift host-method smoke test is implied.
+
+To address the outstanding runtime source-intrinsics wiring, started a public **three-lane Java/JADX investigation** of the exact pinned Google Camera 8.8.225 APK, focused on (a) JNI FOV-calibration and session callers, (b) Camera2 lens metadata, and (c) file-based capture/session persistence: [workflow](https://github.com/Persie0/Playground/actions/workflows/photosphere-java-camera-96.yml). JADX 1.5.6 completed nearly the full APK decompilation but reported errors in 41 classes, initially preventing the search step. The workflow now requires thousands of real emitted Java files and permits the documented partial-error exit status for targeted searches; missing/errored Java classes will **not** be treated as proof of missing behavior. Only fully retrieved and corroborated Java or bytecode evidence will be added to a subsequent checkpoint.
+
+This is still a parameterized **no-distortion** mapper, not a complete automatic per-device calibration implementation.
