@@ -77,3 +77,5 @@ The `mapper-callback` job exported the image mapper factory/caller again, but it
 - Device/session capture required for runtime preview format/FOV, actual `session.meta`, and JPEG-source to target ID identity.
 
 Previous stage: [checkpoint 54](google-camera-photosphere-checkpoint-54-fast-pixel-mapper.md). This checkpoint establishes exact scalar 3-channel bilinear sampling but **does not mean complete Google Camera parity**.
+
+**Checkpoint 56 update (2026-10-08):** The exact previously unresolved FOV scale constant is `DAT_00161ae0 = 0x3f91df46a2529d39 = π/180` (double). `FUN_00431954` computes `fx=fy=(width/2)/tanf(fov_radians/2)`, with inverse scales `1/f`. See [checkpoint 56](google-camera-photosphere-checkpoint-56-exact-fov-focal-calibration.md). This resolves the projection-camera FOV conversion but not the actual runtime handset lens FOV.
