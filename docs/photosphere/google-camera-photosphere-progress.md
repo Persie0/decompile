@@ -666,3 +666,9 @@ The previously truncated session-type switch `FUN_002189d8` is conclusively the 
 Remaining: internal warp interpolation `FUN_0043eda4`, virtual source-camera mapper, parallel mapping branch, seam labels and normalized blending, runtime source-to-target/metadata.
 
 Full detail: [checkpoint 53](../google-camera-photosphere-checkpoint-53-concrete-blend-mapper.md).
+
+## 2026-10-08 — checkpoint 55: fast pixel mapper bilinear warp and parallelism
+
+[Checkpoint 55](../google-camera-photosphere-checkpoint-55-fast-pixel-mapper.md) follows the successful [public Playground interpolation run 37777415222](https://github.com/Persie0/Playground/actions/runs/37777415222). The grid-band worker **`FUN_0043eda4`** references `cityblock/portable/imaging/fast_pixel_mapper.cc`, checks four warp-grid corners, and applies an explicit **bilinear interpolation of two source-coordinate float planes** for cells with valid corners; mixed-validity cells fall back to **per-pixel virtual reprojection** and cells without valid corners zero their outputs. Each resulting coordinate pair is clamped and passed to **`FUN_00216f7c`** (`WImageUtil::BilinearInterpolate(image,x_f,y_f,dest)`), advancing a three-byte output pixel pointer. This establishes a fast sparse-grid **image warp**, not seam alpha normalization.
+
+The alternative `FUN_0043ea50` branch for worker argument **>=2** constructs a threadpool using `FUN_004482f0` and starts workers with `FUN_004488d8`; its actual task partitioning is obscured by another allocator-induced C truncation. Its caller sources this value from blender object `+0x200`. Next: low-level sample rounding/channel order in `FUN_00216f7c`, source projection accessor implementation, and threaded job construction after raw ARM64 `0x0043ecdc`. Runtime thread count and full seam/multiband normalization remain unresolved.
