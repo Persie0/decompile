@@ -2464,3 +2464,16 @@ This is substantially more than a static session.meta schema: the actual **nativ
 
 
 **Checkpoint 91 completion:** All three public [JNI Ghidra jobs #37831980692](https://github.com/Persie0/Playground/actions/runs/37831980692) **passed**. JNI `AddExistingSession` gets three Java strings as native paths/arguments, invokes `FUN_0021a34c` for storage virtual +0x10 rosette/image accessor restore, and continues to `FUN_002189d8(...,1)` output camera and renderer virtual +0x18. Ghidra preserves the native assertion `session_storage->GetSessionData(&rosette_T_cams, &image_accessor)` on failure. The related `FUN_0021a0e8` utility is a distinct render/output routine calling `thunk_FUN_0041c618`. Independent raw #37832012101 remains the source for truncated success branches and exact 36-byte pose strides.
+
+
+## 64. Checkpoint 92: Google Camera on-disk orientation and numbered JPG import
+
+Six passed public workflows [Ghidra #37833372182](https://github.com/Persie0/Playground/actions/runs/37833372182), [ARM64 restore #37833429979](https://github.com/Persie0/Playground/actions/runs/37833429979), [vtable relocations #37833534510](https://github.com/Persie0/Playground/actions/runs/37833534510), [image suffix #37833620269](https://github.com/Persie0/Playground/actions/runs/37833620269), [indexed accessor #37833776227](https://github.com/Persie0/Playground/actions/runs/37833776227), [string constant #37834013241](https://github.com/Persie0/Playground/actions/runs/37834013241) prove:
+
+- Session storage object `FUN_004195c8` hardcodes root-relative **`orientations.txt`** at object+0x20, byte string loaded from ELF `0x4bedf`.
+- `FUN_0041b58c` parses **9 float32 elements for each 3×3 pose orientation matrix plus a 10th checksum float**; it requires **absolute error <=0.001** against the native sum of the first nine values. Matrices occupy consecutive 36-byte entries.
+- `FUN_00447708` enumerates non-directory entries under the root, then `FUN_0041a9a8` constructs **numeric-index-derived `.jpg` filenames** (literal suffix ELF 0x5a1ba), which are matched exactly and appended in indexed pose order. The precise integer formatting and newline policy of any writer are not yet validated.
+- Concrete **32-byte image accessor** has raw vptr **0x40dcf8**. `+0x40` returns an indexed 24-byte filename string and `+0x28` uses `FUN_0044753c` to read image dimensions as needed. Import should **not** decode all JPEGs up front.
+- The session owner `FUN_0021a204` is **160 bytes** and stores its native storage object at owner+0x90, distinct from 56-byte camera instances.
+
+This narrows a future Rust **Google-format session importer** to a text orientation reader with checksum verification and ordered indexed-JPEG lookup, without guessing orientation-to-quaternion alignment. See [checkpoint 92](google-camera-photosphere-checkpoint-92-native-orientations-jpeg-import.md).
