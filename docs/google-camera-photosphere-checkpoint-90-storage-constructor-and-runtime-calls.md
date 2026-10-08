@@ -75,3 +75,16 @@ The writer emits **nine named fields only**; it never emits `source_photos_count
 5. Validate saved calibration and source images against PhotosphereRust output on a real phone, rather than inferring end-to-end pixel accuracy from successful synthetic tests.
 
 **Confidence:** high for vptr constructor, destructor layout, three direct caller instructions, and virtual writer→filename linkage; incomplete for full runtime lifecycle and count field writer.
+
+
+## 5. Runtime caller classes recovered after checkpoint creation
+
+The subsequent successful public [Ghidra caller trace #37831421857](https://github.com/Persie0/Playground/actions/runs/37831421857) resolves the containing function identities of several raw BL callsites:
+
+- Raw **0x0f0858** (Ghidra 0x001f0858) is inside actual JNI export **`Java_com_google_android_apps_lightcycle_panorama_LightCycleNative_CalibrateFieldOfViewDeg`**, Ghidra function entry **0x001f0784**. A native FOV calibration operation thus constructs this exact storage class from a path string, and passes it into subsequent calibration objects.
+- Raw **0x11a394** (Ghidra 0x0021a394) is inside `FUN_0021a34c`, itself called by JNI **`Java_com_google_android_apps_lightcycle_panorama_LightCycleNative_AddExistingSession`**. The ARM64 caller **immediately dispatches vtable `+0x10`** of the newly constructed storage instance at raw `0x11a3b0..0x11a3b8`, with output records allocated on its stack; after success it invokes virtual `+0x28` on a returned object and constructs a 56-byte linear-camera object `FUN_00431344`. This links `FUN_00419714` to **session restoration of rosette/images**, not to session.meta overwrite.
+- Raw **0x11a2b0** (Ghidra 0x0021a2b0) is in the neighboring native session creation flow (indexed Ghidra enclosing function `FUN_0021a0e8`); the ARM64 caller stores the new storage pointer at **its owning object+0x90** and accesses a preexisting provider virtual `+0x38`. The exact JNI call path and object semantics require fuller per-function decompilation.
+
+The constructor itself is still **partially truncated in Ghidra** after the allocator; these interpretations are backed by direct native ARM64 callsites, Ghidra enclosing function names, and the confirmed storage vtable.
+
+A further targeted caller-decompile and full `FUN_00419714` raw-body audit are the next tasks. A confirmed AddExistingSession **read/restore** path is not evidence for a truncate/reset **write** path.
