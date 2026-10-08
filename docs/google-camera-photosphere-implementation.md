@@ -2237,3 +2237,14 @@ Mode-3 wide-angle variants: `512×682 @120°` or `512×384 @160°` depending on 
 The two concrete blender vtables `0x0050d010` and `0x0050d0c8` dispatch three-channel output to `FUN_0042114c` and `FUN_00421fb0` respectively, both using `FUN_00423f2c`. `FUN_0042a474` reads fixed-point pyramid level image size, not normalization. `FUN_004380dc` constructs an RLE receiver and resubmits masks shifted by the mosaic width when left bound is negative (panorama horizontal wrap). Its receiver's `+0x68/+0x80/+0x70` methods and final graph-cut labels need direct tracing.
 
 The geometric warp's source callback is `[original_source_mapper_vtable+0x10]`, with source mapper stored at wrapper object `+0x08`; the concrete mapper class passed to `FUN_00423310` remains unproven. See [checkpoint 58](google-camera-photosphere-checkpoint-58-four-way-gap-results.md).
+
+
+## 42. 2026-10-08: actual IBFS backend, joined native warp workers and RLE mask dispatch
+
+[Five native jobs #37782634803](https://github.com/Persie0/Playground/actions/runs/37782634803) passed, as did [mask factory ARM64 #37782641221](https://github.com/Persie0/Playground/actions/runs/37782641221) and [RLE vtable #37782949059](https://github.com/Persie0/Playground/actions/runs/37782949059). The graph-cut backend is **IBFS max-flow**: `FUN_0043d52c` modifies capacities, `FUN_0043d6f8` appends edge arcs, and `FUN_0043df98` runs IBFS alternating tree active sets. Their actual source provenance is `research/bigml/mrf/maxflow/ibfs.cc`; previous candidate vtables `0x0050d988` and `0x0050d9b8` are solver-related, **not proven camera mappers**. `FUN_00439b0c→FUN_0043ad54` is the next image-to-mincut connection.
+
+`FUN_0044b6b0` executes native **`pthread_join`**, so the `FUN_0044834c` threadpool teardown waits for workers. `FUN_0044b2ec` starts pthread threads with OS attributes. `FUN_00448048` defaults requested zero threads to 1, and the pool queues 48-byte row-band work records.
+
+The `FUN_0049c5d8` 40-byte RLE mask object has vtable **`0x0050ed00`**, with actual slots `+0x68=FUN_0049d07c`, `+0x70=FUN_0049d170`, `+0x80=FUN_0049d824`. Their responsibilities are dimension configuration, output extraction, and merging shifted inclusive row-runs with sorted coalescing. `FUN_0049ce64` expands RLE runs to 8-bit pixels. This fills in seam mask composition, not the last graph-cut labeling or multiband normalization.
+
+See [checkpoint 59](google-camera-photosphere-checkpoint-59-ibfs-graphcut-and-joined-workers.md).
