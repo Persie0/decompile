@@ -498,7 +498,7 @@ The strongest same-layout false positives are 3×3 rosette/camera matrices; othe
 
 ## 2026-10-07 — checkpoint 39: native backlog audit
 
-The parallel native audit resolved the Photo Sphere full-ring target formula and bounded evidence across features, optical flow, graph filtering, bundle adjustment, rendering, preview input, and session failure handling. It left native descriptor generation, graph adjacency insertion, line-RANSAC tuning, and selected rendering coefficients unresolved. The Java archive was subsequently recovered in checkpoint 40, which closes the Java preview-buffer, session-format, and retry-policy gaps. See [checkpoint 39](../google-camera-photosphere-checkpoint-39-native-backlog-audit.md) and [checkpoint 40](../google-camera-photosphere-checkpoint-40-java-preview-session-artifacts.md).
+The parallel native audit resolved the Photo Sphere full-ring target formula and bounded evidence across features, optical flow, graph filtering, bundle adjustment, rendering, preview input, and session failure handling. It left native descriptor generation, graph adjacency insertion, line-RANSAC tuning, and selected rendering coefficients unresolved. Checkpoint 40 later recovered Java source, found no explicit AlignNextImage retry/backoff, and left exact worker cadence/repeat-after-false behavior unresolved.
 
 ## 2026-10-07 — checkpoint 40: Java preview and session artifacts
 
@@ -555,18 +555,29 @@ The outer path crops and updates run-length maps, dilates/clips bounds, and gene
 
 ## 2026-10-08 — checkpoint 46: point rows, target rings, and runtime leads
 
-The matcher input field *param_3 is the point-row cap, and param_3[3] is a separate minimum raw-match threshold. Raw instructions establish the stored scalar as sqrt(num_inliers / point_cap). Point-row coordinates are matcher-emitted float base-image-grid values; camera conversion at vtable +0x88 applies only to temporary robust-fit records. Exact pixel-center semantics and the scalar's later residual role remain unknown. Line endpoints undergo feature-scale and mapper/camera preprocessing, but their final units, calibration, and residual formula remain unresolved.
+The matcher input field *param_3 is the point-row cap, and param_3[3] is a separate minimum raw-match threshold. Raw instructions establish the stored scalar as sqrt(num_inliers / point_cap). Point-row coordinates are matcher-emitted float base-image-grid values; camera conversion at vtable +0x88 applies only to temporary robust-fit records. Checkpoint 23 shows the scalar multiplies both point residuals; its source-level meaning remains unknown. Exact pixel-center semantics are unproven. Checkpoint 23 also gives the four line-incidence equations and HuberLoss(35); final line-row units/calibration remain unresolved. The alternate AddImage writer still stores 0.25 or 0.125 after a 0.9 metric test; its source-level weight meaning remains unknown.
 
 Target branch Ghidra FUN_002159fc (raw ELF 0x1159fc) uses config +0x14 as a mode selector and +0x10 as overlap. Mode 0 calls FUN_002147c4, which produces complete azimuth rings with cosine-scaled counts and one target near each pole. This confirms the documented mode-0 ring math. The saved exports do not link the Photo Sphere constructor's 0.4/0.325/0.4 arguments to this exact config instance; concrete target counts still need camera intrinsics/FOV and that mapping.
 
-The seam xref follow-up reaches mask_generator_optimal_seam.cc mask preparation and low-resolution mask pyramids. RTTI confirms multiband blender classes, and a YUV mask consumer zeros chroma where all four mask bytes are zero; neither exposes the final feathering or normalized-weight equation. The line trace finds 16-byte paired features and bilateral pruning before BA, while its four-residual cost type is confirmed but its equations and loss attachment remain unknown. The native corpus has no Java/DEX, preview-format setup, or session.meta xref; retry scheduling and actual device formats remain unresolved. Full trace: [checkpoint 46](../google-camera-photosphere-checkpoint-46-point-rows-target-rings-and-runtime-leads.md).
+The seam xref follow-up reaches mask_generator_optimal_seam.cc mask preparation and low-resolution mask pyramids. RTTI confirms multiband blender classes, and a YUV mask consumer zeros chroma where all four mask bytes are zero; neither exposes final feathering or normalized-weight equations. The line trace finds 16-byte paired features and bilateral pruning before BA; checkpoint 23 recovers its four bidirectional line-incidence equations and HuberLoss(35). Final line-row units/calibration and point-scalar source meaning remain open. The native corpus has no Java/DEX, preview-format setup, or session.meta xref. Checkpoint 40 found no explicit Java retry/backoff, while exact worker cadence remains unresolved.
 
 ### Remaining targets
 
-- Determine whether the JNI caller repeats AlignNextImage when a missing path remains queued, and characterize per-image scheduling/timing.
+- Determine the exact `exf` call cadence and what happens after `AlignNextImage()` returns false. Checkpoint 40 found no explicit Java retry/backoff; checkpoints 5/43 show a missing-path item remains at the queue head.
 - Locate any final seam feathering or normalized-weight stage after the SimpleRunLengthImage operations mapped in checkpoint 45.
 - Determine whether any caller overwrites the recovered native AlignmentTracker/GlobalFlowSolver constructor defaults.
-- Point rows are matcher-emitted float base-image-grid coordinates; exact pixel-center semantics and scalar residual weighting remain open. Resolve line-row units/calibration and point/line residual equations (checkpoint 46).
+- Point rows are matcher-emitted float base-image-grid coordinates; exact pixel-center semantics and the scalar's source-level meaning remain open. Resolve line-row units/calibration; checkpoint 23 already documents the point/line equations and match losses.
 - Verify the target device's preview byte format; the native JNI call omits Android's format enum.
 - Check for additional session.meta writers and capture a runtime metadata file.
 - Compute target totals from concrete camera intrinsics/FOV and verify which runtime config instance receives the Photo Sphere constructor overlaps (checkpoint 46).
+
+
+## 2026-10-08 — checkpoint 47: residual equations and session/index invariants
+
+The older row notes are reconciled against checkpoints 20 and 23: the observed GlobalFocalLength path uses HuberLoss(35) for point/line blocks and TrivialLoss for sensor blocks. Point-row scalars multiply both point residuals; their source-level meaning remains unknown. The four line residuals evaluate normalized, scale-weighted line triples in both view directions; final line-row units/calibration remain unknown.
+
+The Java audit found no explicit retry/backoff around AlignNextImage. The worker drains completed source-image paths into incremental calls, but exact call timing and repeat-after-false behavior are not established. Native queue code handles one image per call; missing-path entries remain at the queue head, while later read failures consume the entry.
+
+New rosette checks require queued session image count to equal preview-rosette camera count, and LineAligner requires the align and preview rosettes to have equal camera counts and matching side-vector lengths. These checks enforce cardinality/shared-index assumptions; they do not establish which images occupy each index or prove producer ordering. The target-generator audit traced wraparound neighbor IDs for a mode-1 ring and a fixed nine-target 3×3 wide-angle grid. The real capture strategy/config mapping remains open.
+
+Full trace: [checkpoint 47](../google-camera-photosphere-checkpoint-47-residual-and-session-index-follow-up.md).
