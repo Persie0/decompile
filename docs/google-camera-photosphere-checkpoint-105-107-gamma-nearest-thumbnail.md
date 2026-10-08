@@ -74,3 +74,45 @@ Outstanding:
 5. Test on actual Android/iOS target hardware, measuring memory, CPU, output image quality and color seam behavior.
 
 **Claim limit:** Proven native instruction patterns and three successful Rust test variants do **not** prove full native algorithm parity or identical Photo Sphere quality.
+
+## Checkpoint 108 — confirmed mean normalization and low-brightness rejection (2026-10-09)
+
+**Independent native evidence:** [public 3-track ARM64 #37859375830](https://github.com/Persie0/Playground/actions/runs/37859375830) **3/3 passed**; gamma pipeline raw `0x3412a4..0x341348`.
+
+An earlier reconstructed GammaAdjuster normalization constant **248.02734375** (checkpoints 99–100) was incorrect **for these input overlap means**. The exact native code loads `x11=0x406fe00000000000`, i.e. **binary64 255.0**, then for each directed pair with observation count `n>=1` stores:
+
+```text
+mean_ij = sum_ij / (double(n_ij) * 255.0)
+```
+
+The adjacent binary64 at ELF `0x61870` is **`0.00980392156862745` = `1/102`**; if either directed normalized mean for the same unordered pair is **strictly less** than that value, the native routine clears both pair counters to zero at `0x3412e4..0x3412e8`. There is no individual black-pixel rejection in the original one-pixel RGB collection loop, so blacks contribute zero to pair means and may still be part of the count. Later normal-equation accumulation `0x3416dc..0x34177c` compares the pair count against the constructor's `minimum=5` and skips when **`count <= 5`**, otherwise calculates the recovered gamma matrix objective using already logged means.
+
+The exact normalized brightness minimum is **2.5/255 raw grayscale average**, since `255*(1/102)=2.5`. This clarifies the distinct conditions:
+1. each RGB pixel must pass geometry/visibility/projection/bounds;
+2. both per-pair mean luminances must pass the 1/102 threshold;
+3. the final pair count must exceed 5 to enter the normal equations.
+
+**Implemented directly in** [`PhotosphereRust/src/photometric.rs`](https://github.com/Persie0/PhotosphereRust/blob/main/src/photometric.rs), commit [`f54ad7127e1f2663c3a9489173cb38d34f64df12`](https://github.com/Persie0/PhotosphereRust/commit/f54ad7127e1f2663c3a9489173cb38d34f64df12). The Gamma-only pair statistics now normalize by **255.0**, accept individual black samples into the mean, and reject pairs if either normalized average is below **1/102**. The original robust/balanced gain solver remains unchanged.
+
+[Three-way public Rust validation #37859583281](https://github.com/Persie0/Playground/actions/runs/37859583281) **passed 3/3**: default, portable and Android JNI. Each variant passed **8/8 photometric tests**, and `cargo check --all-targets` succeeded. The default lane additionally passed `cargo fmt --all -- --check`. Newly added regressions verify all-white normalized log exactly zero, reject solid luminance 2 and accept luminance 3, and ensure checkerboard black pixels remain counted before mean thresholding. These are synthetic tests, not a Google Camera device fixture.
+
+## Checkpoint 109 — Gamma projection virtual slots match StandardRosette (2026-10-09)
+
+[Public two-track RTTI/method audit #37859645486](https://github.com/Persie0/Playground/actions/runs/37859645486) **2/2 passed** and independently confirmed the original raw C++ **`StandardRosette` address point `0x40dc10`**, RTTI `cityblock::portable::{anonymous}::StandardRosette`, whose methods match **every** previously observed Gamma constructor virtual offset:
+
+| Used in Gamma constructor | `StandardRosette` vtable method raw | Earlier verified behavior |
+|---|---|---|
+| `+0x18` camera count | `0x344818` | Rosette-camera list count |
+| `+0x48` image retrieval | `0x344d54` | Source-image accessor for indexed camera |
+| `+0x98` ray → thumbnail pixel | **`0x345798`** | **`R_k * world_ray`**, then selected photo camera model virtual **`+0x80`** projection to float pixel XY |
+| `+0xa0` thumbnail pixel → ray | **`0x34587c`** | Selected photo camera model virtual **`+0x88`** unprojection, then **`R_k^T * camera_ray`** |
+
+The last two methods were already independently decompiled and numerically traced in [checkpoint 71](google-camera-photosphere-checkpoint-71-rosette-3d-projection-and-rle-format.md). The gamma constructor `0x340da8..0x340f48` calls these same virtual offsets with appropriate (image index, image-camera/ray, pixel) operands. This strongly grounds **the applicable virtual ABI and spatial transform**; it does not *alone* dynamically prove every thumbnail runtime object points to this exact C++ vtable. That requires tracing the concrete thumbnail owner/constructor (which can also use an interface-compatible subclass).
+
+**False-positive avoided:** a broad RTTI scan also proposed the `InMemoryImageAccessor` address point `0x40dd58`, but subsequent method disassembly shows its supposed `+0x98=0x346d4c` and `+0xa0=0x346e28` are **destructor and deleting destructor**, not the spatial projection calls. Those offsets cross into the next C++ vtable and must **not** be substituted for Gamma's real virtual `+0x98/+0xa0`. `JpegFileImageAccessor` at `0x40dcf8` likewise has a pure-virtual `+0xa0` slot. The matching spatial interface with existing verified source methods is `StandardRosette`.
+
+**Remaining gap:** actual capture/device-specific `camera_models[k]` projection and lens distortion at virtual `+0x80/+0x88`; thumbnail downscale and crop metadata; angular acceptance from `0x340e90..0x340f2c`; and real-capture differential tests.
+
+## Checkpoint 107 Ghidra no-return repair outcome
+
+[Public two-way Ghidra run #37859039010](https://github.com/Persie0/Playground/actions/runs/37859039010) **passed 2/2** as reproducible Ghidra jobs, and `FUN_004f19f4` was successfully patched to pointer-returning, with candidate constructor/function bodies extended in the temporary analysis project. **However the resulting high-level decompiler output remained truncated at the allocator call**, rather than exposing the full Gamma sampling function. Therefore the authoritative new numeric and pixel conclusions above derive from **independent complete raw ARM64 instruction inspection**, not from a misleading claim of recovered full Ghidra pseudocode. Avoid describing the Ghidra run as proof of full constructor parity.
