@@ -57,10 +57,10 @@ Containing-object constructor callers are raw 0x0ed94c and 0x0edb58; the process
 
 ## Bounded remaining questions
 
-- Whether the JNI caller repeats AlignNextImage when a missing path remains at queue head; no explicit Java retry/backoff was found.
+- Whether the Java caller repeats AlignNextImage when a missing path remains at queue head; the JNI thunk only dispatches, and no explicit Java retry/backoff was found.
 - Whether any caller overwrites the native constructor defaults for AlignmentTracker +0x50/+0x54 = 20.0/300 or solver +0x08/+0x0c/+0x10 = 0/50/3; no later native writer was found in the scanned class paths.
 - Any final mask feathering/weight normalization after the SimpleRunLengthImage conversions and projection-mask generation.
-- Point/line row coordinate calibration/units and the point scalar's residual meaning; producer paths and traced initial values are in checkpoint 44.
+- Point-row coordinates are now traced as matcher-emitted float base-image-grid/pixel-coordinate values; exact pixel-center semantics and the scalar's later residual-weighting meaning remain open. Line-row units/calibration and residual equations remain unresolved (checkpoint 46).
 - The complete session.meta writer set and whether another path adds keys consumed by Java; current focused exports do not settle this, and runtime capture would.
 - The Android preview format on a target device; native conversion is NV21-compatible, but JNI does not receive the format enum.
-- Exact target totals for a specified camera model/FOV.
+- Exact target totals still require a concrete camera/FOV and a verified mapping from the Photo Sphere constructor arguments to the generator config (checkpoint 46).
