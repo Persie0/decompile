@@ -683,3 +683,9 @@ Per tile: if all four mapped x corners are **strictly positive**, bilinearly int
 `FUN_00431344` in the separate projection track initializes a camera model and tail-calls `FUN_00431118`; the wide-angle `512,682/384,120/160` factory arguments remain instruction-confirmed but not fully semantically named.
 
 Next: exact sampler `FUN_00216f7c`, camera-mapper virtual callback, threaded branch, then final seam/weight normalization. Full proof: [checkpoint 54](../google-camera-photosphere-checkpoint-54-fast-pixel-mapper.md).
+
+## 2026-10-08 — checkpoint 56: exact three-channel bilinear sampling
+
+[Checkpoint 56](../google-camera-photosphere-checkpoint-56-bilinear-sample-kernel.md) documents successful [public Playground sampler run 37778098025](https://github.com/Persie0/Playground/actions/runs/37778098025). **`FUN_00216f7c`** checks `0<=x<=width-1` and `0<=y<=height-1`, uses the input image's row byte stride, samples three adjacent 8-bit channels independently with four-pixel bilinear interpolation, uses replicated last-column/last-row neighbors at boundaries, and writes each channel as **`trunc(interpolated+0.5)`**. Out-of-bounds calls return false without writing destination pixels. Channel ordering (RGB/BGR) is not established.
+
+Threadpool constructor **`FUN_00448048`** receives requested worker count and queue capacity `0x7fffffff`; zero requested threads warns and falls back to one. Worker start **`FUN_0044b2ec`** configures POSIX pthread attributes and stack size (constructor default `0x1e8000`). Exact task distribution inside the fast mapper's parallel branch remains unrecovered. The traced fast warp sample is now implementable accurately; the whole panorama pipeline, camera projection source, seam selection, and final multiband weight normalization are **not** completely reconstructed.
