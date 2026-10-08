@@ -2539,7 +2539,7 @@ Public [Ghidra run #37849744695](https://github.com/Persie0/Playground/actions/r
 
 The same sweep further nails grayscale optical-flow sample geometry (`FUN_001ff7dc` strict 1-pixel inner border, bilinear source intensity, per-sample 0/1 mask) and N×3/N×1 solve wiring; the exact dense Jacobian row construction remains pending.
 
-## 57. Checkpoint 101: three independent pinned native disassembly checks
+## 60. Checkpoint 101: three independent pinned native disassembly checks
 
 A public [three-lane ARM64 audit #37853396032](https://github.com/Persie0/Playground/actions/runs/37853396032) and [expanded readback #37853506889](https://github.com/Persie0/Playground/actions/runs/37853506889) both **passed 3/3**. The 39-band native GammaAdjuster expression produces **1,982 nominal float32-angle rays** (full ring counts in [checkpoint 101](google-camera-photosphere-checkpoint-101-three-track-native-audit.md)); raw `0x341dc0` initializes `1.0/1.75` then tail-branches to the native constructor. This is a count/dispatch corroboration, not native gamma pixel parity.
 
