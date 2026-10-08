@@ -40,6 +40,6 @@ The *exact dense-flow Jacobian coefficient builder* is **still unresolved**; the
 
 ## 4. Validation and remaining priorities
 
-The focused [three-way public Rust photometric suite #37850377106](https://github.com/Persie0/Playground/actions/runs/37850377106) was initiated on the new code for default, no-default-features portable, and Android-JNI configurations. Update this checkpoint with confirmed job conclusions rather than assuming success before completion.
+The focused [three-way public Rust photometric suite #37850377106](https://github.com/Persie0/Playground/actions/runs/37850377106) **completed 3/3 successfully**: default, no-default-features portable, and Android-JNI. Each configuration passed **4/4 photometric tests** (including the recovered sphere-lattice properties and identical-view gamma solver) and `cargo check`. These are deterministic Rust unit checks, not differential native-device or original Google Camera pixel tests.
 
 Highest-value unresolved tasks remain native GammaAdjuster camera accessor frame/image sample parity, dense-flow Jacobian/camera correction details, production contrast-matching cap, strong-parallax/depth behavior, original on-device FOV intrinsics and **real Google Camera capture/output differential tests**. A clean-room algorithm being implemented and unit-tested is not equivalent to pixel-identical output from proprietary native code.
