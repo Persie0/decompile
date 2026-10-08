@@ -25,9 +25,9 @@ Thus the native call creates a thumbnail from a **source path to a destination p
 
 ## 3. Capture-session size selection and target-layout constructors
 
-`FUN_0021874c` in `photosphere_parameters.cc` selects one of three budget constants from `DAT_00162e30` for requested size codes `1,2,3`. Other values emit `"No size specified, using small"` and use `8,000,000` pixels. The selected budget passes through `FUN_0041c5e0`; the returned value is stored at session parameters `param_1[2]`. For session type `4`, `param_1[0]` is truncated `sqrt(value)`; other types receive `-1` at that field. **Exact three preset values, and downstream sizing semantics, still need the data table and `FUN_0041c5e0` analysis.**
+`FUN_0021874c` in `photosphere_parameters.cc` selects one of three budget constants from `DAT_00162e30` for requested size codes `1,2,3`. Other values emit `"No size specified, using small"` and use `8,000,000` pixels. The selected budget passes through `FUN_0041c5e0`; the returned value is stored at session parameters `param_1[2]`. The primary implementation notes already give the additional device-dependent cap `min(preset_budget, ((x-30)/6.5)*1,000,000)`, with `x`'s physical meaning unproven. For session type `4`, `param_1[0]` is truncated `sqrt(value)`; other types receive `-1` at that field. **Cross-check against the established implementation notes:** the three preset budgets are already recovered as **small 8,000,000; medium 26,000,000; large 70,000,000 pixels**, and Java Photo Sphere requests **large** before rendering. The subsequent device-dependent budget cap and `FUN_0041c5e0` transformation are documented in the primary implementation notes; the new sweep does not supersede them.
 
-`FUN_002189d8` in the same source file switches over session types `0,1,2,3,4,5` to construct target-generator variants, but its C output is blocked by the allocator `FUN_004f19f4` misclassified as `noReturn`. Its `0x2aa`, `0x42f00000`, `0x43200000` constants for type `3` are not reliably complete constructor arguments without raw AArch64 verification.
+`FUN_002189d8` in the same source file switches over session types `0,1,2,3,4,5` to construct target-generator variants. The established native session-type mapping identifies these as Photo Sphere, Horizontal, Vertical, Wide angle, Fisheye, and Calibration, respectively. Its **post-allocator** C output is blocked by `FUN_004f19f4` misclassified as `noReturn`. Its `0x2aa`, `0x42f00000`, `0x43200000` constants for type `3` are not reliably complete constructor arguments without raw AArch64 verification.
 
 `FUN_001ed84c`, the JNI common reset, uses virtual session-manager `+0x10` to create a session with session type passed as `param_2`, a size/parameter object from `FUN_002188b8`, path/config settings, parameter `0x640`, and the explicit low bit of reset flag `param_4`. The `ResetForPhotoSphereCapture` JNI wrapper uses common reset with numeric `param_2=0` and `param_4=1`. **Those values belong to different parameters from the generic target-generator `config+0x14` mode selector**; no equivalence is yet proven.
 
@@ -41,7 +41,7 @@ Thus the native call creates a thumbnail from a **source path to a destination p
 | zero | `0x2aa` = **682** | `0x42f00000` = **120.0** |
 | non-zero | `0x180` = **384** | `0x43200000` = **160.0** |
 
-Native instructions: `0x00218a3c..0x00218a64`. These values could be constructor geometry/size parameters but their **field names and physical meaning are not yet proven**. Since Ghidra omitted the post-`malloc` branch, do **not** assume both values are consumed exactly as shown without completing the constructor trace. This evidence resolves the literal flag-conditioned constants, **not** the runtime Photo Sphere mode or count.
+Native instructions: `0x00218a3c..0x00218a64`. Since session type 3 corresponds to **Wide angle**, these are **wide-angle constructor** flag variants, not proof of standard Photo Sphere's ring target dimensions. Their **field names and physical meaning remain unproven**. Since Ghidra omitted the post-`malloc` branch, do **not** assume both values are consumed exactly as shown without completing the constructor trace. This evidence resolves the literal flag-conditioned wide-angle constructor constants, **not** the standard Photo Sphere's runtime lens/FOV or ring target count.
 
 ## 4. Blending data shape and unresolved output pixel method
 
@@ -55,7 +55,7 @@ Native instructions: `0x00218a3c..0x00218a64`. These values could be constructor
 
 ## 5. Stable observations and limitations
 
-- **Verified:** thumbnail source-to-destination conversion, JPEG writer quality 90, path-to-byte-vector read procedure, output 8-bit image requirement, three named size presets and an 8M fallback.
+- **Verified:** thumbnail source-to-destination conversion, JPEG writer quality 90, path-to-byte-vector read procedure, output 8-bit image requirement, known 8M/26M/70M named size presets and an 8M fallback.
 - **Observed but not yet fully reconstructed:** session-type target-generator switch, panorama pixel budget transformations, masked boundary-point extraction.
 - **Still unresolved:** final pixel normalization/graph-cut labels; exact source-to-target/rosette image-index mapping; runtime preview format, lens intrinsics and session.meta values; indirect solver overrides.
 
