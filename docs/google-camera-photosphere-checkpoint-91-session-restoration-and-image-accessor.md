@@ -70,3 +70,10 @@ This is **independent evidence of end-to-end native importing of an existing Pho
 - The native `FUN_00419b74` still **appends** nine metadata fields; no restoration method inspected here proves a session.meta truncate or rewrite policy.
 
 **Confidence:** high for constructor and copy allocations (56 bytes), class vptr, JNI restoration call, orientation 36-byte stride and file-restoration control-flow. Input serialization details and full pixel equivalence require native fixtures.
+
+
+## 5. Independent high-level JNI calibration confirmation
+
+One lane of the public [three-job Ghidra JNI run #37831980692](https://github.com/Persie0/Playground/actions/runs/37831980692), `session-jni-calibration-91`, has already **passed**. Its `Java_com_google_android_apps_lightcycle_panorama_LightCycleNative_CalibrateFieldOfViewDeg` decompile verifies the third JNI argument is retrieved as a UTF string, its length is computed with `strlen`, and the string is copied into a native tagged buffer and passed to `FUN_004195c8(path, length)`. The call is followed by allocation of a 448-byte (`0x1c0`) native calibration object. Ghidra still truncates this latter success path at a returning allocator, so the actual FOV optimization run is outside this checkpoint. This adds independent proof that **the constructor's root string comes from the JNI caller**, not from a hard-coded path.
+
+The other two JNI lanes were still running at this readback; their results should be consulted before treating the full Ghidra matrix as complete.
