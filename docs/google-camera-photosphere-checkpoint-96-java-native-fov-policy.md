@@ -23,7 +23,7 @@ float a() {
 
 **Important:** the 75-degree fallback applies **only** when `b()` returns nonpositive, **not** unconditionally whenever the reported FOV exceeds 75. The same `a()` FOV is passed to `LightCycleNative.ResetForPhotoSphereCapture(session_path,FOV)` through synchronized `exh.b` or the Horizontal/Vertical/Wide/Fisheye capture reset JNI methods.
 
-The runtime origin of `this.K` and of the positive millidegree configuration `din.a` still need tracing; this establishes the policy and call order but not each phone's numerical initial FOV.
+**Checkpoint 97 update:** A targeted [verified Java controller readback #37846525173](https://github.com/Persie0/Playground/actions/runs/37846525173) now establishes the origin of `this.K` in `exm.g()` as **`this.K = this.c.b.b().getHorizontalViewAngle();`**. Thus this controller uses the camera API's horizontal-view-angle report before the selection and JNI reset. The positive-millidegree configuration `din.a` still needs tracing; this establishes the policy and call order but not each phone's numerical initial FOV.
 
 ## 2. DeviceManager overrides
 
@@ -58,3 +58,19 @@ This connects checkpoints 80–83 native calibration (55/65/45-degree **starting
 General Google Camera image-processing classes read `CaptureResult.LENS_INTRINSIC_CALIBRATION` and `LENS_DISTORTION` and/or the corresponding `CameraCharacteristics` keys; one writes coefficients to `GcamModuleJNI.GeometricCalibration`. This is **not yet evidence** that legacy Photo Sphere LightCycle installs those coefficients in its native optional lens-correction pointer `camera+0x30`. Keep the two pipelines separate until proven.
 
 **Next:** implement a safe opt-in Rust legacy selection function, track controller `K` and preference reads, and obtain real captured-device FOV calibration for source-camera mapping. These findings are reverse-engineered input policy, **not** native output-image pixel parity.
+
+## 7. Focused camera report and preference readback (checkpoint 97)
+
+[Public Java exact-literal reader #37846525173](https://github.com/Persie0/Playground/actions/runs/37846525173) **passed** after correcting an initial regex-escaping error. Retrieved `defpackage/exm.java` at line 291–293:
+
+```java
+public final void g() {
+    this.K = this.c.b.b().getHorizontalViewAngle();
+}
+```
+
+The method's successful, decompiled caller still needs investigation to determine when `g()` is invoked and whether the physical sensor/crop metadata influences the returned camera-controller property. `foc.java` independently passes `exd.a(bnqVar.e().u)` into native Init, likely another camera-controller FOV reported value; no proof that these two report paths are always bitwise identical.
+
+The targeted literal search over **11,855 generated Java source files** found **one direct `photoSphereCalibratedFieldOfView` string reference**, a writer in `eym.java`. This is *not* a proof that no runtime reader exists: some Java classes failed JADX and preference names can be indirect, computed, or loaded by an abstraction.
+
+Native LightCycle session camera intrinsics remain **FOV derived and explicitly parameterized**, not yet corroborated against live Android Camera2 lens distortion metadata.
