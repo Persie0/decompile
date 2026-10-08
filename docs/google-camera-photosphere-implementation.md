@@ -2167,6 +2167,8 @@ Additionally, native line-feature preprocessing converts intermediate signed fix
 
 ## 34. 2026-10-08: graph-cut seam costs and per-mode target generator
 
-New output from public Playground reader run `37771812144` identifies `FUN_004390a8` (three-channel seam image difference: `abs(d0) + sqrt(d1² + d2²)`) and `FUN_00439600` (unary luminance penalty `scale * max(abs(0.2989*c0 + 0.5871*c1 + 0.114*c2 - 128) - 78, 0)`). `FUN_00421718` is an output-channel interleaver, not the normalization operator. The derived costs do not yet give final graph-cut labels or multiband blender normalized pixel weights.
+New output from public Playground reader run `37771812144` identifies `FUN_004390a8` (three-channel seam image difference: `abs(d0) + sqrt(d1² + d2²)`) and `FUN_00439600` (unary luminance penalty `scale * max(abs(min(L, 255-L) - 128) - 78, 0), where L = 0.2989*c0 + 0.5871*c1 + 0.114*c2`). `FUN_00421718` is an output-channel interleaver, not the normalization operator. The derived costs do not yet give final graph-cut labels or multiband blender normalized pixel weights.
 
 `FUN_002159fc` uses target mode at `config+0x14` (mode 1 generating from `trunc(C / ((1-config.x10)*spacing))`; mode 0 delegating to `FUN_002147c4`). JNI `InitTargets` forwards a 36-byte config through session-builder virtual method `+0x10`, but concrete runtime selection is not yet shown. `FUN_001ffc30` loops according to mutable field `solver+0x0c`, so an initializer value alone is insufficient to establish active iteration count. Details: [checkpoint 50](google-camera-photosphere-checkpoint-50-seam-cost-and-flow-targets.md).
+
+**2026-10-08 scalar unary correction:** The seam-cost function first transforms luminance `L` to `B = min(L,255-L)` before applying `scale * max(abs(B-128)-78,0)`; for `L` within `[0,255]`, this is `scale * max(50-B,0)`. The earlier shortcut using `abs(L-128)` directly was not exact. See the amended checkpoint 50.
