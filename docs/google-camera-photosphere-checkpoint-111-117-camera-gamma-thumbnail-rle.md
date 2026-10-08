@@ -175,3 +175,26 @@ The `FUN_0011a204` session factory receives its 12-byte source-image options as 
 Hence **the target thumbnail width is the upper 32-bit word of the packed `x1` argument into `FUN_0010f310`**, not the 32-bit third option, the scalar FOV, or a fixed value stored in `SimpleThumbnailCreator`. Another `FUN_0011a204` call at `0x11a40c` is an `AddExistingSession` path with externally supplied options; session re-import may therefore carry different dimensions.
 
 **Remaining uncertainty:** This proves register/field origin but *not yet the numeric width of stock capture*. The packed value itself comes from the upstream reset/capture parameter chain. It is inappropriate to change `PhotosphereRust`'s 640px pragmatic default based solely on this intermediate field layout. Follow-up public [checkpoint 122 workflow](https://github.com/Persie0/Playground/blob/main/.github/workflows/photosphere-checkpoint-122.yml) traces the upstream packed dimension creation; label its conclusions only after checking logs.
+
+## Checkpoint 122 — packed target-width provenance reaches the session reset object interface
+
+[Checkpoint 122 public original-ELF trace #37862035959](https://github.com/Persie0/Playground/actions/runs/37862035959) **passed**. It independently verifies the width handoff from **`FUN_0010f0fc`'s third parameter `x2`**, via `FUN_0010f310` and `FUN_0011a204`, to the concrete thumbnail constructor:
+
+```asm
+0010f134  mov x23,x2        ; packed uint32 dimensions supplied to FUN_0010f0fc
+...
+0010f210  mov x1,x23        ; forwarded unmodified into FUN_0010f310
+0010f224  bl 0x10f310
+...
+0010f350  mov x26,x1
+0010f36c  str x26,[sp,#0x30]  ; options image-size pair
+0010f3b8  add x2,sp,#0x30
+0010f3cc  bl  0x11a204
+...
+0011a2d0  ldr w0,[x19,#4]     ; upper 32-bit half of original x2
+0011a2d4  bl  0x319308        ; SimpleThumbnailCreator(width)
+```
+
+The `FUN_0010f0fc` method's third parameter `x2` therefore supplies **the packed source-image dimensions**, and the **high word becomes target thumbnail width**. It is not the returned `x0` from its earlier provider virtual call at `0x10f140` (that return is instead stored into `x26` and used elsewhere), nor is the width selected by the later target-mode float overlap branches.
+
+**Remaining concrete task:** identify the caller that passes the packed `x2` into virtual `FUN_0010f0fc` from the selected Photo Sphere JNI/config/Camera dimensions. This indirect interface dispatch prevents claiming a literal default width from the statically inspected method alone. A capture-session log of `x2`, or tracing the exact factory caller, would settle it. **No Rust default-width change** was made because a numeric width is not established.
