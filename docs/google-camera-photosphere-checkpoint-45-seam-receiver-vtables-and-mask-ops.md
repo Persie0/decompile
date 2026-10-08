@@ -29,7 +29,7 @@ After graph labels are applied, the graphcut routine extracts binary labels. The
 
 ## Follow-up from checkpoint 46
 
-Optimal-seam source xrefs reach the mask-preparation routine at raw 0x433478 and related bounds checks. It builds full and low-resolution masks for blender machinery, but the exports do not expose the final feather transition or normalized-weight formula. See [checkpoint 46](google-camera-photosphere-checkpoint-46-point-rows-target-rings-and-runtime-leads.md).
+Optimal-seam source xrefs reach the mask-preparation routine at Ghidra 0x433478 (raw ELF 0x333478) and related bounds checks. It builds full and low-resolution masks for blender machinery, but the exports do not expose the final feather transition or normalized-weight formula. See [checkpoint 46](google-camera-photosphere-checkpoint-46-point-rows-target-rings-and-runtime-leads.md).
 
 ## Related traces
 
