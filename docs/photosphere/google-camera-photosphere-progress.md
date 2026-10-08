@@ -632,3 +632,12 @@ A second four-track parallel native investigation completed successfully in **pu
 `FUN_001f327c` writes little-endian `0x0000000f00000003` at solver offset `+0x0c`: default `+0x0c=3` (used as the global-flow iteration limit) and `+0x10=15`. The defaults are proven, but overrides remain unexcluded. Target geometry upstream `FUN_002158fc` calculates angular FOV from image dimensions and focal parameters; JNI `FUN_001ef8f8` emits `NewTarget(int,float[9])` from native 0x28-byte rows. Runtime target mode, counts and source-file identity remain unknown.
 
 Full analysis: [checkpoint 51](../google-camera-photosphere-checkpoint-51-native-gaps-and-dispatch.md).
+
+
+## 2026-10-08 — checkpoint 52: downstream JPEG paths and session size
+
+The [third parallel public Playground sweep #37774803025](https://github.com/Persie0/Playground/actions/runs/37774803025) completed all three jobs successfully, and [readback #37775166760](https://github.com/Persie0/Playground/actions/runs/37775166760) printed the source/target/blend evidence. Native `CreateThumbnailImage` (`0x001f002c`) consumes source and output paths, prepares a thumbnail and passes JPEG quality `0x5a = 90` to `FUN_00447c9c`. That is thumbnail encoding quality, **not a verified capture photo or final panorama quality**. `FUN_00447a54` reads binary files fully into memory and verifies fread/fclose; `FUN_00447884` separately checks `stat`.
+
+Session parameter function `FUN_0021874c` recognizes three size codes, applies preset pixel budgets, and defaults to 8,000,000 for unrecognized codes. The target-generator-type switch `FUN_002189d8` remains decompiler-truncated by the allocator issue. `FUN_00425770` wraps an **8-bit** source image; `FUN_004252b0` traverses mask boundaries but its missing normal allocator branches prevent a verified complete algorithm. The final virtual blend pixel kernel/weight normalization and index-to-source photo identity remain open.
+
+Full analysis: [checkpoint 52](../google-camera-photosphere-checkpoint-52-thumbnail-io-and-session-size.md).
