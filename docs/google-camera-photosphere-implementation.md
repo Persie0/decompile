@@ -2477,3 +2477,6 @@ Six passed public workflows [Ghidra #37833372182](https://github.com/Persie0/Pla
 - The session owner `FUN_0021a204` is **160 bytes** and stores its native storage object at owner+0x90, distinct from 56-byte camera instances.
 
 This narrows a future Rust **Google-format session importer** to a text orientation reader with checksum verification and ordered indexed-JPEG lookup, without guessing orientation-to-quaternion alignment. See [checkpoint 92](google-camera-photosphere-checkpoint-92-native-orientations-jpeg-import.md).
+
+
+**Checkpoint 92 Rust importer landed:** Direct-main [`google_lightcycle.rs`](https://github.com/Persie0/PhotosphereRust/blob/main/src/google_lightcycle.rs) exposes `parse_lightcycle_orientations` and `load_lightcycle_session_files` through `lib.rs`. It checks text orientation records of 9 float32 + checksum against 0.001, matches required indexed `.jpg` files, preserves `[f32;9]` per-image rotation without inventing pose conversion and avoids eager image decode. [Public three-way validation #37834525886](https://github.com/Persie0/Playground/actions/runs/37834525886) is **all green**: 8 native-format importer tests passed in default, portable and Android-JNI feature configurations, with compilation checks passed. This is **synthetic import validation**, not real captured-session equivalence.
