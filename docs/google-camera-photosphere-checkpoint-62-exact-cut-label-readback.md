@@ -63,3 +63,10 @@ The observed solver/backend family is IBFS (`research/bigml/mrf/maxflow/ibfs.cc`
 ## 4. Next efforts
 
 The parallel [graph interface + blend coefficient jobs #37784983724](https://github.com/Persie0/Playground/actions/runs/37784983724) target concrete graph-interface classes/solver slot definitions and the still missing normalized blend weights. This checkpoint includes only the **completed, verified** ARM64 label readback.
+
+
+## 5. Further parallel validation of graph and blender helper roles
+
+[Public Playground graph/blend run #37784983724](https://github.com/Persie0/Playground/actions/runs/37784983724) finished with **both matrix jobs successful**. The graph-interface job reconfirms `FUN_0043bd94`'s signed node unary and solver vcall, and `FUN_0043bef0` is a **456-byte IBFS object allocation/constructor path** whose C remains truncated at `FUN_004f19f4`. `FUN_0043d52c` handles IBFS terminal capacities while `FUN_0043d6f8` records the graph's two directed residual arc capacities and symmetric adjacency records.
+
+The `blend-coefficient` track confirms `FUN_0042ad24` is a strict **mask-zero propagation** operation: for two aligned images with matching width and height, if a source mask byte is zero, it sets the corresponding destination byte to zero, using SIMD/strided rows. The path is from `fixed_point_pyramid_section.h` and does **not** calculate a normalized multiband alpha. `FUN_00425770` is an 8-bit image wrapper, likewise not the normalization formula. The unresolved final per-pixel blend is therefore narrowed to the actual multiband image accumulator/compositor rather than these generic image-mask helpers.
