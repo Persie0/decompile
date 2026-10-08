@@ -49,3 +49,23 @@ Ghidra's handling of vector/global defaults and an `extraout_var` makes parts of
 The four-gap sweep separately identifies additional plausible seam/multiband and source-mapper vtables, but these are **candidates** until each is linked to a specific allocated receiver and executed callsite. Earlier checkpoints 50 and 55/56 already identify the graph-cut **cost terms** and the independent sparse-warp **pixel sampler**, respectively; do not conflate either with seam-label optimization or normalized blend weights.
 
 **Confidence:** high for collection count/rectangle sizes, width/height checks, negative-X translation by panorama width and call slots, medium for bounds-clipping semantics, unknown for concrete generator implementation and final seam-label assignments.
+
+## 4. Raw factory follow-up — 40-byte receiver with concrete vptr
+
+A subsequent successful [public Playground raw factory extraction #37782641221](https://github.com/Persie0/Playground/actions/runs/37782641221) directly disassembles raw ELF `FUN_0039c5d8` (Ghidra `FUN_0049c5d8`):
+
+```asm
+39c5dc mov w0,#0x28
+39c5e0 bl 3f19f4
+39c5e4 movi v0.2d,#0x0
+39c5e8 adrp x8,0x40e000
+39c5ec add x8,x8,#0xd00
+39c5f0 str x8,[x0]
+39c5f4 stur q0,[x0,#8]
+39c5f8 stur q0,[x0,#24]
+39c600 ret
+```
+
+This allocates **0x28 = 40 bytes**, installs **raw ELF vptr `0x40ed00`** (Ghidra vptr `0x50ed00`) at object offset `+0x00`, and initializes the remaining 32 bytes `+0x08..+0x27` to zero. The caller's generated ARM64 in the same run directly verifies the vtable dispatch offsets `+0x68`, `+0x80`, `+0x70`, and `+0x08`. A [focused vtable decompilation in public Playground](https://github.com/Persie0/Playground/actions/workflows/photosphere-mask-generator-vtable.yml) now targets those exact slots.
+
+**Evidence update:** the factory allocation, object size, vptr and initialization are now high-confidence raw-instruction facts; concrete virtual method bodies still require inspection.
