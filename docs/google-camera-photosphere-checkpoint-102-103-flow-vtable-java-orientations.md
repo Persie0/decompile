@@ -114,3 +114,13 @@ This resolves a major omission from checkpoint 92/94: the native `FUN_0041b58c` 
 ## Ghidra validation update — concrete vptr readback
 
 [Successful #37855643212](https://github.com/Persie0/Playground/actions/runs/37855643212) reports exactly `FLOW_VTABLE 004fd398 -> 0x001fdef0`, `004fd3a8 -> 0x001fd76c`, `004fd3b0 -> 0x001fdcc0` and the full table above. The same run decompiled `FUN_001fdcc0` with explicit source strings `constraints.gradients.size()` and `temporal_derivatives.size()`, plus a compact three-column float matrix equation. Its flow coordinator `FUN_001ffc30` asserts the motion-model pointer is nonnull and tags `cityblock/portable/panorama/optical_flow/global_flow_solver.cc`. This independently corroborates method identity and arguments, not a final proof of end-to-end original Camera parity. [Constructor-focused follow-up #37855936025](https://github.com/Persie0/Playground/actions/runs/37855936025) examines the two newly identified initializer bodies.
+
+## Constructor-path Ghidra result (successful second run, 2026-10-09)
+
+The [additional focused Ghidra run #37855936025](https://github.com/Persie0/Playground/actions/runs/37855936025) **passed** and decompiled both instructions previously found referencing the model vtable:
+
+- `FUN_001f327c` constructs an alignment-tracker object and, at Ghidra `0x001f32d0`, installs `param_1[0xb] = PTR_DAT_005120f0 + 0x10` at the embedded model location **object `+0x58`**. Ghidra's data-reference analysis associates the address-taken result with **`CameraRotationModel` vptr `0x004fd398`**. The routine also initializes the related flow iteration/configuration fields and calls `FUN_001f3594` before return. This is an **actual model initialization reference**, not just a surviving vtable in the ELF.
+- `FUN_001f3378` is a cleanup/destruction routine for the same type of large object. It writes `&PTR_FUN_004fd398` to the field at **`param_1+0x58`**, while freeing owned vectors and model storage. This confirms the vptr is associated with the embedded subobject throughout lifecycle teardown.
+- The optimizer `FUN_001f4010` constructs/prepares an image pyramid, calls `FUN_001f3c80` and then `FUN_001f40f0`. Separately the latter's direct callsite invokes the global-flow solver `FUN_001ffc30`. Model virtual dispatch is therefore part of the recovered alignment infrastructure.
+
+**Careful boundary:** the constructor and destructor now substantiate a real C++ embedded `CameraRotationModel`; they do not prove every FOV calibration mode selects the same source-object pointer, because alternative constructors/motion models and complete caller ownership still need mapping.
