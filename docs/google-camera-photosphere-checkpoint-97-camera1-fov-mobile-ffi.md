@@ -61,7 +61,7 @@ The default existing stitcher is untouched. JSON serialization incurs a short ho
 
 Public [ABI test workflow #37846923448](https://github.com/Persie0/Playground/actions/runs/37846923448) passed **3/3 configurations** (default, portable and Android-JNI). Each ran **23/23 projection**, **2/2 FFI JSON camera-map**, and **20/20 Google session importer** tests and applicable cargo checks; targeted tests include legacy camera FOV branch behavior, indexed source rays, FOV-derived linear intrinsics, JSON forward/reverse camera mapping and invalid-input rejection.
 
-A separate public cross-target [Android/iOS release compilation workflow](https://github.com/Persie0/Playground/actions/workflows/photosphererust-mobile-camera-ffi-98.yml) verifies native ARM64 linkage for both platforms independently; its outcome must be confirmed before asserting this new ABI compiles on both mobile targets.
+A separate public cross-target [Android/iOS ARM64 release compilation #37847041486](https://github.com/Persie0/Playground/actions/runs/37847041486) **passed 2/2**, compiling the current C/Swift and Kotlin/JNI camera mapping bridge for both target triples. Device runtime verification remains outstanding.
 
 ## 4. Still unresolved
 
