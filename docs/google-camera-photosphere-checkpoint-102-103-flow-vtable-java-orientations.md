@@ -8,7 +8,7 @@
 - [Checkpoint 102 ELF/Capstone 3-lane run #37855344832](https://github.com/Persie0/Playground/actions/runs/37855344832): **3/3 passed** (flow relocation/vtable, Gamma source-dispatch, session metadata).
 - [Checkpoint 103 Capstone/typeinfo cross-check #37855508996](https://github.com/Persie0/Playground/actions/runs/37855508996): **passed**.
 - [Checkpoint 103 focused Java JADX extraction #37855549772](https://github.com/Persie0/Playground/actions/runs/37855549772): **passed**; JADX 1.5.6 emitted 11,855 Java files and reported return status 3 (expected class reconstruction errors). All specifically cited `exk` and `exm` methods were decompiled successfully.
-- Ghidra caller/vtable verification launched at [#37855643212](https://github.com/Persie0/Playground/actions/runs/37855643212). See the run for its eventual result; this report does not infer success before verified.
+- [Focused Ghidra vtable and Jacobian verification #37855643212](https://github.com/Persie0/Playground/actions/runs/37855643212): **passed**. It independently resolved the seven relocated virtual slots and identified in-binary references to the vptr from two model-construction functions.
 
 All heavy work was performed only in public `Persie0/Playground`. GitHub Actions download used `secrets.PRIVATE_REPO_TOKEN || secrets.GH_TOKEN || secrets.GH_RELEASE_TOKEN || github.token`. Analysis and documentation files are committed directly to the default `main` branches.
 
@@ -35,7 +35,7 @@ The two words immediately preceding the vptr are offset-to-top zero and the RTTI
 
 The native `FUN_001ffc30` alignment-flow iteration accesses `flow_model = this->field_at_0` and invokes virtual **`+0x10`** at raw `0xffde4`, then calls `FUN_001ffab0` at raw `0xffe04` to sample grayscale, mask valid points and compact 12-byte coefficient rows. It next invokes virtual **`+0x18`** at raw `0xffe24` with the populated feature/intensity arrays, then calls the 3×1 solver `FUN_001fff14` at raw `0xffe3c`. The later path invokes virtual `+0x20`, `+0x28`, `+0x30` around pose-rotation update and convergence checks.
 
-**New resolution:** This precisely identifies a **concrete numerical flow model** with `+0x18` mapped to the earlier recovered `FUN_001fdcc0` Jacobian. The previously missing opaque `+0x10`/ `+0x18` class is no longer just a guessed generic interface. To assert that **every production FOV session** uses this concrete class, its constructor/vptr installation and all alternative model selection branches still need tracing. The first Capstone method-reference sweep found no straightforward standalone ADRP+ADD materialization of this vptr; an absence of that specific pattern is not proof of non-instantiation. The known Java and native flows can select settings at runtime.
+**New resolution:** This precisely identifies a **concrete numerical flow model** with `+0x18` mapped to the earlier recovered `FUN_001fdcc0` Jacobian. The previously missing opaque `+0x10`/ `+0x18` class is no longer just a guessed generic interface. To assert that **every production FOV session** uses this concrete class, its constructor/vptr installation and all alternative model selection branches still need tracing. The initial Capstone pattern scan found no simple standalone ADRP+ADD materialization of this vptr, but **Ghidra found four actual references** at re-based `0x001f32d0` in `FUN_001f327c`, `0x001f3458` in `FUN_001f3378`, and the two destructors `FUN_001fdef0` / `FUN_001fdf18`. Thus constructor-side materialization exists; the remaining question is exact runtime construction/selection and whether another motion model can substitute.
 
 **Original Jacobian algebra retained from checkpoint 39:** for normalized feature `(x,y)`, horizontal/vertical gradients `(gx,gy)`, and temporal intensity change `It`, recovered `FUN_001fdcc0` rows are:
 
@@ -109,3 +109,8 @@ This resolves a major omission from checkpoint 92/94: the native `FUN_0041b58c` 
 5. Resolve native `session.meta` truncation separately; do not conflate it with Java orientation-file initialization.
 
 **Limit:** static native ELF / synthetic clean-room tests and JADX source reconstruction cannot prove pixel-identical output to Google Camera on a real phone.
+
+
+## Ghidra validation update — concrete vptr readback
+
+[Successful #37855643212](https://github.com/Persie0/Playground/actions/runs/37855643212) reports exactly `FLOW_VTABLE 004fd398 -> 0x001fdef0`, `004fd3a8 -> 0x001fd76c`, `004fd3b0 -> 0x001fdcc0` and the full table above. The same run decompiled `FUN_001fdcc0` with explicit source strings `constraints.gradients.size()` and `temporal_derivatives.size()`, plus a compact three-column float matrix equation. Its flow coordinator `FUN_001ffc30` asserts the motion-model pointer is nonnull and tags `cityblock/portable/panorama/optical_flow/global_flow_solver.cc`. This independently corroborates method identity and arguments, not a final proof of end-to-end original Camera parity. [Constructor-focused follow-up #37855936025](https://github.com/Persie0/Playground/actions/runs/37855936025) examines the two newly identified initializer bodies.
