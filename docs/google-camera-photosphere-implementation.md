@@ -2203,3 +2203,12 @@ All native runs took place in public Playground: [allocator repair 37776472158](
 `FUN_002189d8` is the **output projection camera-model factory**, not target orientation generation: Photo Sphere, horizontal and calibration → equirectangular constructor `FUN_004305bc(512)`; vertical → rotated equirectangular `FUN_0041b154(512)`; wide-angle → `FUN_00431344(512,682 or 384,120.0f or 160.0f)`; fisheye → `FUN_00430978(512,512,180.0f)`. These are constructor arguments read directly from AArch64, not user-configured output panorama sizes.
 
 [Checkpoint 53](google-camera-photosphere-checkpoint-53-concrete-blend-mapper.md) documents the full dispatch, artifacts and remaining analysis.
+
+
+## 38. 2026-10-08: fast pixel mapper interpolation and mask-edge fallbacks
+
+Successful [public two-track Ghidra sweep 37777470805](https://github.com/Persie0/Playground/actions/runs/37777470805) and independent [AArch64 trace 37777618476](https://github.com/Persie0/Playground/actions/runs/37777618476) establish `FUN_0043eda4` (source path `imaging/fast_pixel_mapper.cc`) as the warp grid-row kernel reached from concrete blend-stage virtual `FUN_0043ea50`.
+
+With grid step `S=10`, source coordinate maps have `ceil(W/S)+1` × `ceil(H/S)+1` float32 vertices. For fully valid grid cells, the warp approximates interior source locations using **bilinear interpolation of four mapped corner coordinates** `(X,Y) = (1-u)(1-v)*P00 + u(1-v)*P10 + (1-u)v*P01 + uv*P11`; then clamps `X,Y` to source image bounds and invokes `FUN_00216f7c` (`WImageUtil::BilinearInterpolate`) into three-byte output pixels. For cells with **mixed valid and invalid** corner mappings, it invokes the source camera mapping callback for each pixel instead of interpolating. Cells with no positive corner x coordinate are zeroed. Border cells and the final row/column are handled with their reduced extents. This is performance-sensitive geometric reprojection, **not the separate final weighted blending formula**.
+
+The wide-angle camera constructor `FUN_00431344` initializes a camera vtable and delegates to `FUN_00431118`. [Checkpoint 54](google-camera-photosphere-checkpoint-54-fast-pixel-mapper.md) provides branch detail, formula and limits.
