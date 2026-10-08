@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-08  
 **Binary:** Google Camera 8.8.225 `liblightcycle.so` SHA-256 `878feb4ab3912bc0a4c399d9eb14b6c615926e132b324ad8ea02d4988fd428d1`.  
-**Evidence:** [3-way equirectangular Ghidra #37807744614](https://github.com/Persie0/Playground/actions/runs/37807744614) (**3/3 passed**); [3-way render constructor / mask projection #37807552369](https://github.com/Persie0/Playground/actions/runs/37807552369) (**3/3 passed**); [direct ELF constant extraction #37808273452](https://github.com/Persie0/Playground/actions/runs/37808273452) (**passed**); [clean-room stage tests #37808507523](https://github.com/Persie0/Playground/actions/runs/37808507523) (**14/14 passed** after correcting pole-longitude assumptions). The separate [AArch64 equirectangular disassembly #37807817824](https://github.com/Persie0/Playground/actions/runs/37807817824) was initiated for independent instruction-level checking; its result should be reviewed separately before claiming ARM64 cross-validation. All workflows run solely in public `Persie0/Playground`.
+**Evidence:** [3-way equirectangular Ghidra #37807744614](https://github.com/Persie0/Playground/actions/runs/37807744614) (**3/3 passed**); [3-way render constructor / mask projection #37807552369](https://github.com/Persie0/Playground/actions/runs/37807552369) (**3/3 passed**); [direct ELF constant extraction #37808273452](https://github.com/Persie0/Playground/actions/runs/37808273452) (**passed**); [clean-room stage tests #37808507523](https://github.com/Persie0/Playground/actions/runs/37808507523) (**14/14 passed** after correcting pole-longitude assumptions). Independent [pinned Capstone ARM64 disassembly #37809146580](https://github.com/Persie0/Playground/actions/runs/37809146580) **passed**, confirming exact projection instructions and the native float32/double operation order. A parallel binutils-based disassembly [#37807817824](https://github.com/Persie0/Playground/actions/runs/37807817824) was also launched but is not necessary for the verified result. All workflows run solely in public `Persie0/Playground`.
 
 ## 1. Source identity, virtual table and panorama dimensions
 
@@ -63,11 +63,11 @@ z = cos_theta*cos_phi
 return true
 ```
 
-The decompiled expression for `phi` uses `v+0.5 + v+0.5` explicitly. The pseudocode above emphasizes its mathematical meaning; for bit-for-bit float32 parity, retain the native operation order shown by Ghidra or the independent ARM64 trace. The output ray has unit length up to float rounding and the inverse does not explicitly normalize it.
+The decompiled expression for `phi` uses `v+0.5 + v+0.5` explicitly, verified in [Capstone ARM64 #37809146580](https://github.com/Persie0/Playground/actions/runs/37809146580) at raw addresses `0x3308ec..0x330930`. The pseudocode above emphasizes its mathematical meaning; for bit-for-bit float32 parity, retain the native operation order shown by Ghidra or the independent ARM64 trace. The output ray has unit length up to float rounding and the inverse does not explicitly normalize it.
 
 At an unambiguous center ray `(0,0,-1)`, **`(u,v)=(H-0.5, H/2-0.5)`**; for W=512,H=256 this is **(255.5,127.5)**. The functions are angle-based and essentially independent of positive ray magnitude, with no input bounds rejection in either recovered method. The downstream adapter performs its own horizontal wrap/coverage checks (checkpoint 70).
 
-**Pole singularity:** For `(0,+1,0)` and `(0,-1,0)`, longitude is geometrically undefined and signed zeros matter to `atan2f(x,-z)`. A correct equivalence test must compare projected latitude or unprojected 3D direction, **not assert one arbitrary horizontal pixel**. This exposed and corrected an initial fixture-test failure in workflow `37808371730`; fixed job `37808507523` passes.
+**Pole singularity:** For `(0,+1,0)` and `(0,-1,0)`, longitude is geometrically undefined and signed zeros matter to `atan2f(x,-z)`. A correct equivalence test must compare projected latitude or unprojected 3D direction, **not assert one arbitrary horizontal pixel**. This exposed and corrected an initial fixture-test failure in workflow `37808371730`; fixed job `37808507523` passes. Independent ARM64 confirms the `fadd s1,s1,s1` step and `fsub` from 1.0 before multiplication by π/2, preserving native float32 rounding.
 
 ## 4. Verified stage fixtures
 
