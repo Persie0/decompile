@@ -1188,15 +1188,15 @@ The first boolean passed to `FinishCapture(`` is normally **false when at least 
 
 ## Reverse-engineering progress log
 
-### 2026-10-07 — Native ARM64 deep dive in progress
+### 2026-10-07 — Native ARM64 deep dive checkpoint
 
-Current status:
+Status recorded at this checkpoint (historical snapshot):
 
 - Java/JNI control flow: mapped end-to-end.
 - Native `liblightcycle.so` hash verified and extracted.
 - Native symbols/RTTI/string evidence mapped for alignment, bundle adjustment, seam finding, blending and rendering.
 - Headless Ghidra pass completed successfully for the main JNI entry points.
-- Focused target-generator / session-builder decompilation is in progress.
+- The next planned pass was focused target-generator / session-builder decompilation; later findings appear in the checkpoints referenced below.
 - A separate string-xref Ghidra pass failed at script output generation; this did not affect the recovered binary or the successful earlier Ghidra decompilation.
 
 New confirmed/recovered findings since the first implementation map:
