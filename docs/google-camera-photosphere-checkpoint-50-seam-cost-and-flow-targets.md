@@ -22,11 +22,12 @@ The second function is in the same `seam_finder_graphcut.cc` family. It produces
 
 ```text
 L = 0.2989 * c0 + 0.5871 * c1 + 0.114 * c2
-brightness_distance = abs(L - 128.0)
-unary_cost = scale * max(brightness_distance - 78.0, 0.0)
+B = min(L, 255.0 - L)
+unary_cost = scale * max(abs(B - 128.0) - 78.0, 0.0)
+# For L in [0,255], equivalent to scale * max(50 - B, 0)
 ```
 
-The scalar fallback shows the exact constants `0.2989`, `0.5871`, `0.114`, `128.0`, and `78.0`. The scale comes from `*(float *)(param_1 + 8)`; caller provenance and whether it is fixed or configurable are not yet established. NEON also implements vector processing over groups of four pixels. The first stage computes `min(L, 255-L)` before the second stage, equivalent to the expression above for (0\le L\le255) aside from the 127.5 vs 128 quantization detail; the explicit output threshold stage uses `abs(L-128)`. The exact handling of quantization near the midpoint should be validated from raw SIMD instructions if bit parity is required.
+The scalar fallback shows the exact constants `0.2989`, `0.5871`, `0.114`, `255.0`, `128.0`, and `78.0`. **Both stages matter:** the function first stores `B = min(L, 255-L)`, *then* applies `abs(B-128)` and the `78` threshold. For byte-range luminance the exact scalar expression simplifies to `scale * max(50 - min(L,255-L),0)`. The previous `scale * max(abs(L-128)-78,0)` shortcut was incorrect, especially at the bright end (e.g. `L=255`: actual cost is `scale*50`, shortcut gives `scale*49`). The scale comes from `*(float *)(param_1 + 8)`; its caller and configurability remain unidentified. SIMD processing uses four-pixel groups; bit-exact equality across scalar/SIMD around numeric boundaries needs direct instruction tests.
 
 No inference that these functions directly output the final optimal seam labels, which are chosen in subsequent graph-cut stages; nor that the multiband blender normalizes these same floats directly.
 
