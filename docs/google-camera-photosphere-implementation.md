@@ -2192,3 +2192,14 @@ Parallel [Playground sweep #37774803025](https://github.com/Persie0/Playground/a
 Session `FUN_0021874c` selects three pixel-budget size presets, with an **8-million-pixel fallback** for invalid size codes, and delegates size transformation to `FUN_0041c5e0`. Target-generator choice `FUN_002189d8` remains truncated. The output image wrapper `FUN_00425770` checks **8-bit depth**. Boundary helper `FUN_004252b0` is malformed by allocator decompilation; resolving the `FUN_00423310` virtual output blend remains the main final-weight lead.
 
 See [checkpoint 52](google-camera-photosphere-checkpoint-52-thumbnail-io-and-session-size.md).
+
+
+## 37. 2026-10-08: concrete output blender virtual sampler
+
+All native runs took place in public Playground: [allocator repair 37776472158](https://github.com/Persie0/Playground/actions/runs/37776472158), [vtable trace 37776718323](https://github.com/Persie0/Playground/actions/runs/37776718323) and [raw objdump 37776902153](https://github.com/Persie0/Playground/actions/runs/37776902153), all **successful**.
+
+`FUN_00423310`'s previously anonymous vcall is resolved by the `FUN_0043e930` 72-byte factory and its vtable `0x0050da08`: `+0x10 → FUN_0043ea50`. With grid step 10, this callee constructs two float32 mapping surfaces (`ceil(W/10)+1` by `ceil(H/10)+1`), evaluates the wrapped source's mapping callback at each vertex, writes `-1.0` for mapping failures, and dispatches per-row work to `FUN_0043eda4`. **This is geometric mapping/resampling and not the unresolved final seam/blend normalization formula**.
+
+`FUN_002189d8` is the **output projection camera-model factory**, not target orientation generation: Photo Sphere, horizontal and calibration → equirectangular constructor `FUN_004305bc(512)`; vertical → rotated equirectangular `FUN_0041b154(512)`; wide-angle → `FUN_00431344(512,682 or 384,120.0f or 160.0f)`; fisheye → `FUN_00430978(512,512,180.0f)`. These are constructor arguments read directly from AArch64, not user-configured output panorama sizes.
+
+[Checkpoint 53](google-camera-photosphere-checkpoint-53-concrete-blend-mapper.md) documents the full dispatch, artifacts and remaining analysis.
