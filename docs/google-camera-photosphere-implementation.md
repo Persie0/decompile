@@ -2212,3 +2212,12 @@ Successful [public two-track Ghidra sweep 37777470805](https://github.com/Persie
 With grid step `S=10`, source coordinate maps have `ceil(W/S)+1` × `ceil(H/S)+1` float32 vertices. For fully valid grid cells, the warp approximates interior source locations using **bilinear interpolation of four mapped corner coordinates** `(X,Y) = (1-u)(1-v)*P00 + u(1-v)*P10 + (1-u)v*P01 + uv*P11`; then clamps `X,Y` to source image bounds and invokes `FUN_00216f7c` (`WImageUtil::BilinearInterpolate`) into three-byte output pixels. For cells with **mixed valid and invalid** corner mappings, it invokes the source camera mapping callback for each pixel instead of interpolating. Cells with no positive corner x coordinate are zeroed. Border cells and the final row/column are handled with their reduced extents. This is performance-sensitive geometric reprojection, **not the separate final weighted blending formula**.
 
 The wide-angle camera constructor `FUN_00431344` initializes a camera vtable and delegates to `FUN_00431118`. [Checkpoint 54](google-camera-photosphere-checkpoint-54-fast-pixel-mapper.md) provides branch detail, formula and limits.
+
+
+## 39. 2026-10-08: byte-exact scalar RGB sampler and linear camera center
+
+The successful [public sampler/camera sweep 37778110601](https://github.com/Persie0/Playground/actions/runs/37778110601) confirms `FUN_00216f7c` (`WImageUtil::BilinearInterpolate`) consumes interleaved 3-channel 8-bit pixels with explicit row stride, samples four neighbors with fractional `fx,fy`, computes horizontal top/bottom lerps and a vertical lerp, then stores `uint8(int(value + 0.5f))`. Source `x,y` must lie in inclusive bounds; right/bottom edge neighbors are the same edge pixels. Note this is bilinear **image sampling**, following the separate bilinear **coordinate warp** in checkpoint 54. Small floating point differences from FMA/compiler flags are not excluded.
+
+`FUN_00431118` in `imaging/linear_camera.cc` stores width/height at `+0x24/+0x28`, principal point `((width-1)/2,(height-1)/2)` at `+0x1c`, and scaled FOV at `+8`, then calls `FUN_00431954`. This identifies the wide-angle factory values `512,682|384` as dimensions and `120.0|160.0` as the **field-of-view** input. The FOV scale constant `DAT_00161ae0` must still be verified from binary bytes, and camera output projection does not identify the runtime Photo Sphere lens FOV.
+
+[Checkpoint 55](google-camera-photosphere-checkpoint-55-rgb-sampling-and-camera-fov.md) contains the full reference algorithm and remaining gaps.
