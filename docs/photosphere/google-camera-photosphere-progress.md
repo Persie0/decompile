@@ -752,3 +752,12 @@ The successful [raw seam-selection disassembly #37783771481](https://github.com/
 Two directly confirmed graph values: strong terminal penalty **10,000,000.0** (AArch64 double `0x416312d000000000`) and a positive neighbor-cost additive float **~0.01f** (`0x3c23d70a`). The exact edge/node helper semantics are under targeted Ghidra investigation, and the final multiband blend mask normalization is **not** yet proved.
 
 See [checkpoint 60](../google-camera-photosphere-checkpoint-60-graphcut-labels-to-seam-masks.md); concurrent public [helper matrix #37784150244](https://github.com/Persie0/Playground/actions/runs/37784150244) traces graph helper implementations, IBFS readback and blend accumulation.
+
+
+## 2026-10-08 — checkpoint 61: signed graph unary, exact capacity scale, fixed-point pyramid state
+
+All three public [helper jobs #37784150244](https://github.com/Persie0/Playground/actions/runs/37784150244) passed. `FUN_0043bcd8` creates the node/unary array (8 bytes per node); `FUN_0043bd4c` performs **`unary[node] += cost_a - cost_b`** in double precision; `FUN_0043bd68` dispatches neighbor edges via graph vtable `+0x18`; `FUN_0043bd94` converts positive/negative accumulated unary to **signed-choice int64 capacity magnitudes by multiplying 1,000,000.0 and truncating**, feeds opposite source/sink terminals using vtable `+0x20/+0x28`, invokes graph solve vcall `+0x30`, then allocates the label array. The final result's 0-vs-nonzero comparison and per-pixel choice between two 100-valued seam masks is already confirmed by checkpoint 60.
+
+`FUN_00422ffc` seeds the first image section's bytes to `0x80`, subsequent levels' 16-bit elements to `0x8000`. `FUN_0042a6a4` applies masks to the multi-level sections, zeroing coefficients where masks are zero; `FUN_00423f2c` contains contrast matching but not yet a proven universal final normalized blend-weight formula. The Ghidra allocator branch and portions of the large image accumulator remain decompiler-truncated.
+
+Full verified interpretation: [checkpoint 61](../google-camera-photosphere-checkpoint-61-signed-unary-and-pyramid-initialization.md).
