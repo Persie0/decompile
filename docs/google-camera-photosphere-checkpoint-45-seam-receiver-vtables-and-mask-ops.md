@@ -27,6 +27,10 @@ After graph labels are applied, the graphcut routine extracts binary labels. The
 
 **Bounded negative:** the inspected path identifies binary labels, RLE-to-dense filling, dense-to-RLE ingestion, bounds dilation/clipping, and projection-mask generation. It does not identify a feather/ramp consumer or a normalized seam-weight stage after label extraction.
 
+## Follow-up from checkpoint 46
+
+Optimal-seam source xrefs reach the mask-preparation routine at raw 0x433478 and related bounds checks. It builds full and low-resolution masks for blender machinery, but the exports do not expose the final feather transition or normalized-weight formula. See [checkpoint 46](google-camera-photosphere-checkpoint-46-point-rows-target-rings-and-runtime-leads.md).
+
 ## Related traces
 
 - [Implementation map](google-camera-photosphere-implementation.md)
