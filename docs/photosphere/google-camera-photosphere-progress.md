@@ -597,3 +597,13 @@ The main point scalar is `sqrt(num_inliers / point_cap)` and multiplies both poi
 Target-generation notes separate JNI capture selector `0`, PhotoSphereTargetGenerator constructor selector `0` (fisheye selector `1`), and generic config mode `+0x14`. The constructor switch and overlap triplet `0.40/0.325/0.40` support the Photo Sphere ring layout. The Java `InitTargets(float[])` path and native keyed 9-float target records are traced, but the generic config linkage remains unresolved. Mode 0 uses nested truncation before cosine; mode 1 uses `int(2π / ((1-overlap) * FOV))`; 3×3 neighbor mapping is recovered.
 
 Focused Ghidra run [37715269158](https://github.com/Persie0/Playground/actions/runs/37715269158) completed successfully. The latest source/native readback is [reader run 37715715351](https://github.com/Persie0/Playground/actions/runs/37715715351). The accumulator exposes a contrast-matching coefficient update but no final per-pixel seam weights/normalization. FIFO and same-record thumbnail/alignment inputs are supported; the preview helper's pointer collection and wrapper copying preserve order, but pointer-to-image identity remains unproven. The focused flow scan confirms constructor defaults only and does not exclude later native, indirect, or external writes.
+
+## 2026-10-08 — checkpoint 48: rosette decompiler allocator error
+
+A new instruction-level verification resolves the misleading `FUN_004440ec` decompile. Ghidra marked allocator `FUN_004f19f4` as non-returning even though its exported body returns after successful `malloc`. At raw ELF `0x344138`, the rosette helper calls that allocator; at `0x34413c` it immediately reads the returned `x0` to compute an end pointer, then initializes the pointer range with `memset`. Hence the earlier apparent early termination in the helper was a **decompiler prototype/control-flow error**, not evidence that construction is absent. This advances the preview-rosette problem but does not yet prove all image pointer identities.
+
+The companion constructor `FUN_00443e74` verifies image/camera/orientation cardinality and copies the ordered pointer and orientation ranges. The exact index-to-source correspondence and helper return contract still require the corrected complete decompile.
+
+A four-track Ghidra matrix was started in the **public Playground** repository (run [37771126182](https://github.com/Persie0/Playground/actions/runs/37771126182)): rosette retyping, seam/blender, flow/line matching, and targets/metadata. Results must be reviewed before promoting further algorithmic claims.
+
+Full detail: [checkpoint 48](../google-camera-photosphere-checkpoint-48-rosette-allocator-boundary.md).
