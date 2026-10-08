@@ -45,6 +45,17 @@ The parsed values supply EXIF/GPano XMP fields (`eyb.java:366-420`). Java contai
 
 `exf.java` drains the current queue into a batch and calls `LightCycleNative.AlignNextImage()` inside the per-path loop. The JNI declaration is `native void`, so Java receives no success boolean; the source shows no retry/backoff around the call. Native code leaves a missing-path item at the queue head, but the Java wrapper does not establish whether later scheduling revisits it. The JADX reconstruction reports 41 errors, so exact local loop scheduling is qualified. Final processing still fails when a source image or alignment fails, as described in checkpoint 39.
 
+## Static APK recheck (2026-10-08)
+
+The exact APK has three DEX files. A JADX 1.5.6 source-only pass (41 recoverable reconstruction errors) confirms the Camera1 path and sharpens the runtime boundary:
+
+- `bnf.java:30-33` posts the original `PreviewCallback` byte array; `bey.java:222-243` queues it into the preview state; `exp.java:969-991` passes that same byte array to `LightCycleNative.ProcessFrame(byte[], width, height, boolean)`.
+- `bnj.java:22-44` reads the active `Camera.Parameters.getPreviewFormat()` into camera settings. `bnc.java:175-189` reapplies that value, and `ewt.java:127-144` uses it when sizing callback buffers. No fixed format such as NV21 is set by this LightCycle path, and JNI does not receive a separate format argument.
+- `foc.java:647-655` supplies the selected preview dimensions. Format ID, dimensions, and actual frame layout still depend on the active device parameters.
+- `foc.java:563-605` creates the session directory and stores the `orientations.txt` and `session.meta` paths. The visible Java writer updates `orientations.txt`; `eyb.java:133-154` reads comma-separated `session.meta` rows after native rendering and later consumes crop-width fields. Java does not write those metadata rows in the inspected flow.
+
+This confirms the static handoff, not a particular phone’s preview format or metadata contents. Those values require a device/session capture. The source pass ran as the `android-source` job in [Ghidra/JADX run 37713609633](https://github.com/Persie0/Playground/actions/runs/37713609633); the callback/session context was printed in [reader run 37713953557](https://github.com/Persie0/Playground/actions/runs/37713953557).
+
 ## Remaining native work
 
-The focused Ghidra workflow run [37693894574](https://github.com/Persie0/Playground/actions/runs/37693894574) was started with direct focus on line RANSAC (`0x406fcc`), the graph component path (`0x21ef24`, `0x2252d4`, `0x225514`), and seam costs (`0x4390a8`, `0x439600`), plus added source-file string matches for the pyramid and feature code. Its output will determine whether those native gaps can be closed.
+The broader native recheck is recorded in [focused Ghidra run 37713609633](https://github.com/Persie0/Playground/actions/runs/37713609633). It recovered additional queue, line-transform, target-ring, and blender vtable context; exact line calibration, preview-rosette ordering, and final blend weights remain under review in checkpoints 44, 46, and 47.
