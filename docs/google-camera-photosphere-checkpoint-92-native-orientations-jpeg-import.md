@@ -84,3 +84,24 @@ The allocator's Ghidra `noReturn` misclassification still truncates some methods
 5. Continue tracing `source_photos_count` emission and `session.meta` truncation/reset behavior; the writer examined in checkpoint 90 still uses append mode.
 
 **Confidence:** high for literal `orientations.txt`, nine float32 plus additive checksum and 0.001 tolerance, 24-byte indexed JPEG filename accessor, native file-existence ordering checks, and vtable identity. Native writer formatting, real capture integration and bitwise output parity remain unverified.
+
+
+## 7. Clean-room Rust importer implemented and checked
+
+The new module [`src/google_lightcycle.rs`](https://github.com/Persie0/PhotosphereRust/blob/main/src/google_lightcycle.rs) is committed directly to **`Persie0/PhotosphereRust/main`** and publicly exported from `src/lib.rs`. Its API:
+
+```rust
+pub fn parse_lightcycle_orientations(text: &str) -> photosphere::Result<Vec<[f32; 9]>>;
+pub fn load_lightcycle_session_files(root: impl AsRef<Path>) -> photosphere::Result<LightCycleSessionFiles>;
+```
+
+It reads the verified `orientations.txt` file, parses **ten float32 numeric fields per orientation**, checks signed-float additive checksum with tolerance **0.001**, rejects incomplete/nonfinite records, finds matching indexed **`N.jpg`** paths in camera order, and preserves 3×3 native matrices as-is. It does **not** decode JPEGs in the import pass or silently convert `R_k` to quaternion poses. Its ordinary, unpadded decimal `N` representation follows the identified integer formatter and `.jpg` suffix, but still needs validation with a real session directory to prove the filename spelling exactly.
+
+The public [three-way Rust importer validation #37834525886](https://github.com/Persie0/Playground/actions/runs/37834525886) ran **all jobs successfully**:
+- default Rust features: **8/8 importer tests** and `cargo check --all-targets` passed;
+- `--no-default-features`: **8/8 importer tests** and all-targets portable check passed;
+- `--features android-jni`: **8/8 importer tests** and JNI feature check passed.
+
+Tests cover good/reordered source paths, corrupt checksum, threshold tolerance, truncated/nonnumeric record, nonfinite input, missing image and missing orientations file. These are **synthetic regression fixtures**, not native/real-camera data validation. The module was documented in the Rust repository README.
+
+Further work: original camera-specific intrinsics and `session.meta` values need merging into a complete `PhotoSphereSessionManifest` before this reader could recreate a fully registered Photo Sphere output.
