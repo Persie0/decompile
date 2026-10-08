@@ -698,3 +698,10 @@ The [public Playground three-track sweep 37778110601](https://github.com/Persie0
 The `linear_camera.cc` initializer `FUN_00431118` writes width/height, principal point `((width-1)/2,(height-1)/2)` and field-of-view times the native conversion factor `DAT_00161ae0`, then calls `FUN_00431954`. Therefore the wide-angle mode's `120/160` constants are field-of-view inputs and `512,682/384` are camera dimensions. Exact conversion-factor bits and downstream focal normalization remain to be established. The third callback trace reiterates an allocator-truncated factory; input source context/vtable remains unresolved.
 
 Complete reference and pseudocode: [checkpoint 55](../google-camera-photosphere-checkpoint-55-rgb-sampling-and-camera-fov.md).
+
+
+## 2026-10-08 — checkpoint 56: exact FOV radians constant and calibrated pinhole focal length
+
+The [public Playground focal trace 37778822211](https://github.com/Persie0/Playground/actions/runs/37778822211) **passed**. Ghidra memory read confirms `DAT_00161ae0` at `0x00161ae0` contains IEEE-754 double **`0x3f91df46a2529d39` = `0.017453292519943295`**, exactly `π/180`. Linear camera `FUN_00431118` multiplies FOV **degrees** by that factor and stores radians as float at camera offset `+8`. `FUN_00431954` then computes `f = (image_width*0.5f) / tanf(fov_radians*0.5f)`, storing `fx=fy=f` at `+0x0c/+0x10` and `1/f` at `+0x14/+0x18`. The optical center is `((W-1)/2,(H-1)/2)` at `+0x1c/+0x20`, image dimensions at `+0x24/+0x28`.
+
+This fully resolves the linear output-camera model for wide-angle mode 3. Variant 0 uses `512×682, 120°`; variant 1 uses `512×384,160°`. This is **not** a physical device lens calibration or standard Photo Sphere target FOV. Full detail: [checkpoint 56](../google-camera-photosphere-checkpoint-56-exact-fov-focal-calibration.md).
