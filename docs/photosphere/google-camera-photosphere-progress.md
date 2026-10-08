@@ -541,24 +541,32 @@ The initial checkpoint43 scan did not locate constructor writers for tracker +0x
 
 ## 2026-10-07 — checkpoint 44: match-row producers and native flow defaults
 
-The AddImage feature path is connected end to end: raw 0x11d570 calls wrapper 0x126188, which calls extractor 0x3a2560; the extractor multiplies each feature position pair at +8 by 1 << level before AddImage passes the same feature slots to matcher raw 0x120600. This establishes level-zero-scale coordinates, not pixel or camera-normalized units. The matcher appends 0x1c-byte point rows through raw 0x122384. Their +0x18 scalar is sqrt(num_inliers / *param_3), with num_inliers returned through raw 0x30f860; the apparent zero numerator in the decompiler is incorrect. A second AddImage branch writes the same stride with a scalar selected as 0.25 or 0.125 after a 0.9 metric test.
+The AddImage feature path is connected end to end: raw 0x11d570 calls wrapper 0x126188, which calls extractor 0x3a2560; the extractor restores each feature position to the base-image grid before matching at raw 0x120600. Checkpoint 46 traces the stored point rows to float pixel-coordinate units (medium confidence; exact pixel-center semantics remain unproven). The +0x18 scalar is sqrt(num_inliers / point_cap): *param_3 is the maximum point-row count, while param_3[3] is a separate minimum raw-match threshold. The count comes from the out-parameter passed to raw 0x30f860; Ghidra's apparent zero numerator is a recovery artifact. Camera +0x88 conversion is used on temporary robust-fit records, not on stored rows. A second AddImage branch writes the same stride with 0.25 or 0.125 after a 0.9 metric test.
 
 LineAlignerImpl's raw writer 0x316154 copies prepared endpoint floats and its +0x2c field into each 0x24-byte row. Constructor raw 0x303b08 initializes 25.0 at that field for the traced path. Endpoint preparation includes a positive feature-scale branch followed by camera-model dispatch; the helper/virtual target bodies are absent, so final coordinate units and calibration remain unresolved.
 
 The native constructor path recovers AlignmentTracker +0x50=20.0f and +0x54=300, with embedded GlobalFlowSolver at tracker +0x78 set to +0x08=0, +0x0c=50, and +0x10=3. No later native overwrite was found in the scanned class paths; external mutation remains unobserved. Full trace: [checkpoint 44](../google-camera-photosphere-checkpoint-44-match-row-producers-and-flow-defaults.md).
 
+## 2026-10-08 — checkpoint 46: point rows, target rings, and runtime leads
+
+The matcher input field *param_3 is the point-row cap, and param_3[3] is a separate minimum raw-match threshold. Raw instructions establish the stored scalar as sqrt(num_inliers / point_cap). Point-row coordinates are matcher-emitted float base-image-grid values; camera conversion at vtable +0x88 applies only to temporary robust-fit records. Exact pixel-center semantics and the scalar's later residual role remain unknown. Line endpoints undergo feature-scale and mapper/camera preprocessing, but their final units, calibration, and residual formula remain unresolved.
+
+Raw target branch FUN_002159fc uses config +0x14 as a mode selector and +0x10 as overlap. Mode 0 calls FUN_002147c4, which produces complete azimuth rings with cosine-scaled counts and one target near each pole. This confirms the documented mode-0 ring math. The saved exports do not link the Photo Sphere constructor's 0.4/0.325/0.4 arguments to this exact config instance; concrete target counts still need camera intrinsics/FOV and that mapping.
+
+The seam xref follow-up reaches mask_generator_optimal_seam.cc mask preparation, which creates full and low-resolution blending masks for the blender. Bounds and padding invariants are present, but the available exports do not reveal the final feathering or normalized-weight equation. A focused flow-default caller scan shows the tracker invokes an embedded per-instance solver; no extra setter surfaced in that xref set. JNI retry scheduling, preview format, extra session.meta writers, line-row units, residual formula, and final blend behavior remain runtime or hidden-implementation questions. Full trace: [checkpoint 46](../google-camera-photosphere-checkpoint-46-point-rows-target-rings-and-runtime-leads.md).
+
 ## 2026-10-07 — checkpoint 45: seam receiver vtables and mask operations
 
 The four SeamFinderGraphcut receivers are SimpleRunLengthImage objects. Incoming x2/x3 call vtable +0x58 with value 100; that entry maps to raw 0x39ce64 and fills active runs into a dense byte image. Incoming x6/x7 call +0x50 with dense-mask pointers; that entry maps to raw 0x39ca90 and ingests the dense image into run-length form. Their vptr raw 0x40ed00 (Ghidra 0x50ed00) is set by constructor raw 0x39c5d8. The former ExposureUnaryCostComputer candidate at 0x50d8c8 was the wrong vtable for these calls; its unary compute method is at +0x10 (raw 0x339600).
 
-The outer path crops and updates run-length maps, dilates/clips bounds, and generates per-image projection masks. No feather/ramp consumer or post-label normalized-weight stage was identified in the inspected call paths. Full trace: [checkpoint 45](../google-camera-photosphere-checkpoint-45-seam-receiver-vtables-and-mask-ops.md).
+The outer path crops and updates run-length maps, dilates/clips bounds, and generates per-image projection masks. Checkpoint 46 traces optimal-seam mask preparation into full and low-resolution mask pyramids handed to blender machinery, but the exports still show no explicit feather ramp or normalized-weight equation. Full trace: [checkpoint 45](../google-camera-photosphere-checkpoint-45-seam-receiver-vtables-and-mask-ops.md); follow-up: [checkpoint 46](../google-camera-photosphere-checkpoint-46-point-rows-target-rings-and-runtime-leads.md).
 
 ### Remaining targets
 
 - Determine whether the JNI caller repeats AlignNextImage when a missing path remains queued, and characterize per-image scheduling/timing.
 - Locate any final seam feathering or normalized-weight stage after the SimpleRunLengthImage operations mapped in checkpoint 45.
 - Determine whether any caller overwrites the recovered native AlignmentTracker/GlobalFlowSolver constructor defaults.
-- Establish point/line row coordinate units and calibration, and interpret the point residual scalar; producer paths are traced in checkpoint 44.
+- Point rows are matcher-emitted float base-image-grid coordinates; exact pixel-center semantics and scalar residual weighting remain open. Resolve line-row units/calibration and point/line residual equations (checkpoint 46).
 - Verify the target device's preview byte format; the native JNI call omits Android's format enum.
 - Check for additional session.meta writers and capture a runtime metadata file.
-- Evaluate target totals for a specified camera model and FOV.
+- Compute target totals from concrete camera intrinsics/FOV and verify which runtime config instance receives the Photo Sphere constructor overlaps (checkpoint 46).
