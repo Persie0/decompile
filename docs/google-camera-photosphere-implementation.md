@@ -2172,3 +2172,14 @@ New output from public Playground reader run `37771812144` identifies `FUN_00439
 `FUN_002159fc` uses target mode at `config+0x14` (mode 1 generating from `trunc(C / ((1-config.x10)*spacing))`; mode 0 delegating to `FUN_002147c4`). JNI `InitTargets` forwards a 36-byte config through session-builder virtual method `+0x10`, but concrete runtime selection is not yet shown. `FUN_001ffc30` loops according to mutable field `solver+0x0c`, so an initializer value alone is insufficient to establish active iteration count. Details: [checkpoint 50](google-camera-photosphere-checkpoint-50-seam-cost-and-flow-targets.md).
 
 **2026-10-08 scalar unary correction:** The seam-cost function first transforms luminance `L` to `B = min(L,255-L)` before applying `scale * max(abs(B-128)-78,0)`; for `L` within `[0,255]`, this is `scale * max(50-B,0)`. The earlier shortcut using `abs(L-128)` directly was not exact. See the amended checkpoint 50.
+
+
+## 35. 2026-10-08: Ghidra repaired caller graph, flow iteration default, and seam dispatch
+
+The public Playground four-track [follow-up sweep](https://github.com/Persie0/Playground/actions/runs/37774014407) and [readback](https://github.com/Persie0/Playground/actions/runs/37774402113) confirm that the rosette constructor's full function body can be restored and the allocator prototype corrected so the call graph includes `FUN_00443e74`, `memset` and `free`. The Ghidra C **still** truncates and cannot replace the raw ARM64 proof. Session-storage helper `FUN_0041a6bc` independently uses the same rosette constructor.
+
+`FUN_00421fb0` carries three blending channel passes. `FUN_0042a24c` is a destructor (not pixel-weight normalization); `FUN_00423bc4` merges sparse boundary-map entries, while `FUN_00423310` clips a region and dispatches a virtual three-channel output blend. The graph-cut cost functions use separable 3/5-window local maximum filtering via `FUN_0049c2bc`. The output weight/normalization kernel is not yet identified.
+
+The flow constructor `FUN_001f327c` assigns `*(uint64_t *)(solver+0x0c)=0x0000000f00000003`, implying **default three iterations** at `+0x0c` (the loop bound) and `15` at `+0x10`. Later overrides remain possible. `FUN_002158fc` calculates FOV angles from dimensions/focal values before target generation; `FUN_001ef8f8` creates `NewTarget(int,float[9])` from 40-byte native entries.
+
+Full evidence and next targets: [checkpoint 51](google-camera-photosphere-checkpoint-51-native-gaps-and-dispatch.md).
