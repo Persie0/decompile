@@ -124,3 +124,18 @@ The [additional focused Ghidra run #37855936025](https://github.com/Persie0/Play
 - The optimizer `FUN_001f4010` constructs/prepares an image pyramid, calls `FUN_001f3c80` and then `FUN_001f40f0`. Separately the latter's direct callsite invokes the global-flow solver `FUN_001ffc30`. Model virtual dispatch is therefore part of the recovered alignment infrastructure.
 
 **Careful boundary:** the constructor and destructor now substantiate a real C++ embedded `CameraRotationModel`; they do not prove every FOV calibration mode selects the same source-object pointer, because alternative constructors/motion models and complete caller ownership still need mapping.
+
+### Constructor numeric initializers (additional verified disassembly)
+
+The same Ghidra run shows explicit 64-bit stores after `FUN_001f3594(param_1,3)` in `FUN_001f327c`:
+
+```text
+store u64 0x0000000f00000003 at object +0x0c
+   => lower f32/u32 bits 0x00000003 (integer 3)
+   => upper f32/u32 bits 0x0000000f (integer 15)
+store u64 0x0000012c41a00000 at object +0x50
+   => lower f32 bits 0x41a00000 (float32 20.0)
+   => upper u32 bits 0x0000012c (integer 300)
+```
+
+The **bit patterns and offsets** are directly recovered. Their complete semantic field names and potential later mode-dependent overrides are not: do **not** label 20.0 or 300 as proven production thresholds/limits without tracing readers. In the optimizer `FUN_001f40f0`, the +0x0c word participates in the finest/coarsest pyramid-level bounds check, while the separate `FUN_001ffc30` flow solver iteration fields belong to a different object. Keep them distinct.
