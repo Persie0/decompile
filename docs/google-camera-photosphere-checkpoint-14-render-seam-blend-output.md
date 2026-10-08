@@ -123,14 +123,15 @@ Recovered luminance conversion:
 Y = 0.2989 R + 0.5871 G + 0.114 B
 ```
 
-Recovered unary/exposure cost detail:
+Recovered unary/exposure cost:
 
 ```text
-mid_luma = 128
-threshold/dead region = 78
+Y = 0.2989 R + 0.5871 G + 0.114 B
+unary = scale * max(0, 50 - min(Y, 255 - Y))
+Photo Sphere scale = 1.0
 ```
 
-The seam cost uses image-difference terms and an exposure/unary penalty so seams avoid visually bad areas, not just large RGB differences.
+The pairwise color cost is `|Y1 - Y2| + sqrt((Cb1-Cb2)^2 + (Cr1-Cr2)^2)`. The graph evaluator adds `0.01` to positive pairwise sums and scales integer capacities by 1,000,000; this is capacity quantization, not a relative energy weight.
 
 The graph-cut implementation is backed by Google's IBFS max-flow code:
 
@@ -169,19 +170,21 @@ This confirms a memory-aware YUV-to-JPEG path before fallback to a larger RGB mo
 
 ## Session metadata and GPano
 
-Native writes `session.meta` with at least:
+The inspected native writer at raw `0x319b74` opens `session.meta` in append mode and emits nine newline-terminated rows, in this order:
 
+- `version`
+- `filepath`
 - `full_pano_width`
 - `full_pano_height`
 - `cropped_area_width`
 - `cropped_area_height`
-- `cropped_area_top`
 - `cropped_area_left`
-- `first_photo_time`
-- `last_photo_time`
-- `source_photos_count`
-- `pose_heading`
+- `cropped_area_top`
 - `yaw_correction_deg`
+
+The adjacent native parser also recognizes `source_photos_count`. The Java reader recognizes additional keys including `first_photo_time`, `last_photo_time`, `source_photos_count`, and `pose_heading`; Java assigns the metadata path but does not pre-seed or write these rows. The analyzed writer vtable group has one writer slot, but indirect dispatch does not rule out an extra append elsewhere. If only the nine native rows exist, null-guarded XMP output omits missing timestamp, source-count, and heading tags.
+
+Java then writes EXIF + GPano XMP.
 
 Java then writes EXIF + GPano XMP.
 
@@ -253,18 +256,19 @@ Minimum practical implementation:
 | 2400 px reference projection width | confirmed |
 | graph-cut seam family | confirmed |
 | luminance weights | confirmed |
-| unary threshold 78 | confirmed |
+| unary cost `scale * max(0, 50 - min(Y,255-Y))`, Photo Sphere scale 1.0 | confirmed |
 | multiband blending family | confirmed |
 | exact blend pyramid levels | unresolved |
 | exact exposure model coefficients beyond recovered luma/unary terms | unresolved |
-| exact seam weights | unresolved |
+| graph-cut unary/pairwise cost formulas | confirmed |
+| final per-pixel blend weights/normalization | unresolved |
 | exact YUV/RGB fallback thresholds | unresolved |
 
 ## Remaining exact targets
 
 - number of pyramid levels for each output size;
 - blend-distance formula;
-- seam graph unary/pairwise weights;
+- final per-pixel seam blend-weight/normalization formula;
 - exposure/gamma adjustment coefficients;
 - YUV path memory thresholds;
 - exact valid-crop and largest-interior-rectangle implementation.
