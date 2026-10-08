@@ -2313,7 +2313,7 @@ Graph cut's **temporary 100-valued dense mask** is re-encoded by `FUN_0049ca90` 
 
 ## 52. Checkpoint 72: linear-camera intrinsics and projected mask RLE; reference fixtures
 
-Successful [3-way public Ghidra #37794642499](https://github.com/Persie0/Playground/actions/runs/37794642499) resolves `FUN_00430978` **fisheye-camera** initialization (reclassified from linear in checkpoint 73): `angle_rad=float(field_of_view)*DAT_00161ae0`, `focal=width/angle_rad`, `cx=(width-1)/2`, `cy=(height-1)/2`, `fx=fy=focal`, and inverse focal in two other floats. `FUN_00431118` likewise initializes center and dimensions. Do **not** replace native division by angle with arbitrary pinhole tangent formula; runtime FOV scale and concrete camera model vtable still require checks. `FUN_004380dc` creates overall RLE mosaic mask from per-image projected coverage, handling panorama horizontal wrap; `FUN_00437e68` generates one per-image RLE mask with `FUN_004364fc`; `FUN_00437ab8` derives even-aligned clipped/dilated bounds. Actual 0/1 decoder fill byte at blending still unknown.
+Successful [3-way public Ghidra #37794642499](https://github.com/Persie0/Playground/actions/runs/37794642499) resolves `FUN_00430978` **fisheye-camera** initialization (reclassified from linear in checkpoint 73): `angle_rad=float(field_of_view)*DAT_00161ae0`, `focal=width/angle_rad`, `cx=(width-1)/2`, `cy=(height-1)/2`, `fx=fy=focal`, and inverse focal in two other floats. `FUN_00431118` likewise initializes center and dimensions. Do **not** replace native division by angle with arbitrary pinhole tangent formula; the native FOV scale is proven π/180 (checkpoint 74), but the actual per-captured-image camera model still requires checking. `FUN_004380dc` creates overall RLE mosaic mask from per-image projected coverage, handling panorama horizontal wrap; `FUN_00437e68` generates one per-image RLE mask with `FUN_004364fc`; `FUN_00437ab8` derives even-aligned clipped/dilated bounds. Actual 0/1 decoder fill byte at blending still unknown.
 
 New [seven deterministic clean-room tests](https://github.com/Persie0/Playground/blob/main/scripts/photosphere_stage_fixtures.py) were run in public [CI #37794870468](https://github.com/Persie0/Playground/actions/runs/37794870468): **7/7 passed** verifying known 3×3 rotations/transpose, 100-to-run-to-caller-fill RLE occupancy, signed /9 feather, and two-pass X-wrap. They do **not** execute native Google Camera or prove pixel equivalence. [Checkpoint 72](google-camera-photosphere-checkpoint-72-camera-construction-mask-projection-fixtures.md).
 
@@ -2325,3 +2325,23 @@ Independent successful [Ghidra camera models #37795747004](https://github.com/Pe
 **Correction of checkpoint 72:** the independent `FUN_00430978` installs raw fisheye vptr `0x40d470`; its `+0x80 FUN_00430c24` is height-scaling and asserts from `fisheye_camera.cc`, and its `+0x88 FUN_00430ddc` updates FOV/focal fields. Neither should be called a source-image ray projection. Real Photo Sphere source-camera class remains unconfirmed.
 
 Expanded [public deterministic fixtures](https://github.com/Persie0/Playground/blob/main/scripts/photosphere_stage_fixtures.py) to linear negative-Z projection and inverse; **10/10 tests passed** in [run #37796120534](https://github.com/Persie0/Playground/actions/runs/37796120534). Those are reference equations, **not** original native pixel comparison. [Checkpoint 73](google-camera-photosphere-checkpoint-73-linear-projection-fisheye-distinction.md).
+
+
+## 54. Checkpoint 74: complete equirectangular pixel-to-world-ray mapping for Photo Sphere output
+
+The successful public [3-track Ghidra #37807744614](https://github.com/Persie0/Playground/actions/runs/37807744614) identified exact virtual methods on Photo Sphere equirectangular camera `FUN_004305bc`: **vptr raw `0x40d3c8`, `+0x80 → FUN_00430800` (world ray→pixel), `+0x88 → FUN_004308c0` (pixel→world ray)**. For panorama width `W`, cached height `H=W>>1`:
+
+```text
+theta_lon = atan2f(ray.x,-ray.z)
+phi_lat   = atan2f(ray.y,hypotf(ray.x,-ray.z))
+u         = (theta_lon/π+1)*H - 0.5
+v         = ((π/2-phi_lat)/π)*H - 0.5
+
+theta = (u+0.5)/H*π
+phi   = (1-2*(v+0.5)/H)*π/2
+ray   = (-sin(theta)*cos(phi), sin(phi), cos(theta)*cos(phi))
+```
+
+The native calls use float32 `atan2f/hypotf/sincosf` with double intermediate angular factors (see [checkpoint 74](google-camera-photosphere-checkpoint-74-equirectangular-pixel-ray-equations.md)). Public [ELF constant check #37808273452](https://github.com/Persie0/Playground/actions/runs/37808273452) confirmed exact doubles π, π/2, π/180 and 2π, including `DAT_001617a8=π`. The complete mapper dispatch is now `panorama_xy → equirect+0x88 → R_k·ray → photo_model+0x80` and the reverse applies `photo_model+0x88 → R_k^T·ray → equirect+0x80` (rosette checkpoint 71). The photo model's runtime identity, correction vtable and distortion terms still require probing.
+
+Added equirectangular reference fixtures for center, cardinals/poles, nonunit rays and horizontal seam to [public fixtures](https://github.com/Persie0/Playground/blob/main/scripts/photosphere_stage_fixtures.py). [GHA run #37808507523](https://github.com/Persie0/Playground/actions/runs/37808507523) passed **14/14** after adjusting the physically undefined pole longitude assertion. The math is recovered; native pixel-by-pixel differential comparison is not yet done.
