@@ -168,6 +168,8 @@ Failed WriteYUV420ToJPEG, will try create and write full RGB mosaic.
 
 This confirms a memory-aware YUV-to-JPEG path before fallback to a larger RGB mosaic.
 
+The focused Ghidra caller `FUN_0042114c` invokes `FUN_00423f2c` for channels 0, 1, and 2. The full 972-line decompile (public Playground Ghidra run [37712254892](https://github.com/Persie0/Playground/actions/runs/37712254892); full-output reader [37712635044](https://github.com/Persie0/Playground/actions/runs/37712635044)) clips overlapping rectangles at each pyramid level. On contrast-matched levels it derives `r` from two selected signed-short values when the selection guards pass, clamps `r` to [1, 2.5], then adds `int(x * (r + k*x^2) / (1 + k*x^2))` for each gated nonzero incoming coefficient `x`. Here `k = 0.04` in the signed-byte level-0 path and `k = 2.4414062e-6` in higher signed-short levels. Sentinel minima (-128 and -32768) are cleared to zero, and the updated coefficients saturate to [-127, 127] or [-32767, 32767]. A separate visible branch performs plain signed-byte/short accumulation. This recovers internal contrast matching and pyramid-coefficient updates, not final seam alpha/weight normalization; the semantic orientation of the ratio is unresolved. Ghidra reports removed unreachable blocks in this complex function.
+
 ## Session metadata and GPano
 
 The inspected native writer at raw `0x319b74` opens `session.meta` in append mode and emits nine newline-terminated rows, in this order:
@@ -258,9 +260,10 @@ Minimum practical implementation:
 | luminance weights | confirmed |
 | unary cost `scale * max(0, 50 - min(Y,255-Y))`, Photo Sphere scale 1.0 | confirmed |
 | multiband blending family | confirmed |
-| exact blend pyramid levels | unresolved |
+| exact blend pyramid levels | 10 in the traced Photo Sphere workflow; broader output-size mapping unresolved |
 | exact exposure model coefficients beyond recovered luma/unary terms | unresolved |
 | graph-cut unary/pairwise cost formulas | confirmed |
+| contrast-matching pyramid coefficient gain | confirmed |
 | final per-pixel blend weights/normalization | unresolved |
 | exact YUV/RGB fallback thresholds | unresolved |
 
