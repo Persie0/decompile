@@ -28,7 +28,7 @@ These vtable assignments are verified by the exact recorded relocations at raw `
 
 Hence the final stitcher **really does pass 0/1 dense mask bytes to the multiband blender for at least these two concrete production mask-generator classes**. This resolves the previously unverified decoder-to-blender bridge in checkpoints 70–77 for these variants, not merely an intermediary coverage path. The graph-cut mask's transient 100 is discarded during RLE re-encoding, as previously proved.
 
-**Mode coverage caveat:** The same ELF also contains a third concrete graph-cut/mask-generator vptr candidate, raw `0x40d750` (virtual `+0x28→FUN_00433478`), with a different signature/role. Its eventual published per-image mask access method and the factory's mapping between source mode IDs and mask-generator instances still require verification before claiming **every** rendering variant uses one of the two directly mapped paths.
+**Mode coverage caveat:** The same ELF also contains a **third mask-generator vtable candidate at raw `0x40d760`** (virtual `+0x28` at relocation `0x40d788` → **`FUN_00434f20`**). The earlier provisional assignment to `0x40d750/+0x28` was an incorrect choice of the C++ vtable address; `FUN_00433478` instead appears at the third table's `+0x18`. This third provider's mode and exact mask expansion require direct function analysis before making a universal claim. Its eventual published per-image mask access method and the factory's mapping between source mode IDs and mask-generator instances still require verification before claiming **every** rendering variant uses one of the two directly mapped paths.
 
 ## 2. The true native `contrast_matching_levels_` threshold is **computed from render options**
 
