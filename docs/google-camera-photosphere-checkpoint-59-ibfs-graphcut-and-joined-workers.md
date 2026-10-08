@@ -48,3 +48,20 @@ The `blend-accumulator` track confirms `FUN_00420998` tries direct **YUV420-to-J
 5. Validate a real Google Camera capture against clean-room Rust outputs, including pixel accuracy, seam locations, memory and speed.
 
 This checkpoint is progress in **algorithm identification and native reconstruction**, not verification of a complete pixel-exact Photo Sphere clone.
+
+
+## 5. Concrete RLE vtable and seam-mask merging recovered after checkpoint creation
+
+Successful independent [RLE dispatch #37782949059](https://github.com/Persie0/Playground/actions/runs/37782949059) and [mask-generator vtable #37782849675](https://github.com/Persie0/Playground/actions/runs/37782849675) identify **all relevant vtable slots of the `FUN_0049c5d8` receiver** at `0x0050ed00`:
+
+| Receiver slot | Function | Observed meaning |
+| ---: | --- | --- |
+| `+0x50` | `FUN_0049ca90` | Encode a dense 8-bit mask into inclusive horizontal RLE runs |
+| `+0x58` | `FUN_0049ce64` | Expand the inclusive RLE runs into a byte image, setting the selected mask value |
+| `+0x68` | `FUN_0049d07c` | Set receiver mosaic width/height, resize/reset per-row run vectors |
+| `+0x70` | `FUN_0049d170` | Validate rectangle and produce extracted cropped RLE output; successful-path C still truncated at allocation |
+| `+0x80` | `FUN_0049d824` | Ingest shifted input mask runs and merge overlapping/touching horizontal intervals into each mosaic row |
+
+The `+0x80` helper `FUN_0049d824` fetches each source RLE row via source virtual `+0x28`, shifts x endpoints by the bound's left coordinate, clips negative x to zero, collects candidate runs, sorts with `FUN_002432a0` and merges runs using comparator `FUN_0049e5b4`. The raw output is consistent with *union-style run coalescing*, not per-pixel weighted blending. The `+0x50` dense-to-RLE helper stores integer inclusive `[start,end]` pairs whenever a byte mask switches between zero/nonzero. Thus the horizontal periodic-wrap duplicate in `FUN_004380dc` is now traceable through the concrete receiver methods.
+
+These results close the **RLE mask packing/combination dispatch gap**, but they do **not** identify optimal graph-cut labels, graph energy coefficients, or final multiband weight-normalization arithmetic. `FUN_0043ad54` (`seam_selection.cc`) invokes the same receiver and has a long allocator-truncated path; raw AArch64 follow-up is needed.
