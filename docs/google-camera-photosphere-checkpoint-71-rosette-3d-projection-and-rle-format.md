@@ -1,4 +1,4 @@
-# Photo Sphere checkpoint 71 — corrected rosette ABI, 3×3 camera rays and lossless RLE support
+# Photo Sphere checkpoint 71 — corrected rosette ABI, 3×3 camera rays and coverage-only RLE masks
 
 **Date:** 2026-10-08  
 **Target binary:** Google Camera 8.8.225 `liblightcycle.so`, SHA-256 `878feb4ab3912bc0a4c399d9eb14b6c615926e132b324ad8ea02d4988fd428d1`.  
