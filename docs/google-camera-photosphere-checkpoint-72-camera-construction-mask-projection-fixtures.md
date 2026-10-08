@@ -9,9 +9,9 @@
 
 All workflows executed in the **public** `Persie0/Playground` repository. All documentation was committed directly to private `Persie0/decompile/main` without PRs.
 
-## 1. Concrete field-of-view linear camera initialization
+## 1. Two distinct FOV model families: fisheye versus linear camera
 
-`FUN_00430978(field_of_view,width,height)`, in the `cityblock/portable/imaging/linear_camera.cc` family, initializes a camera-like object's raw fields. Ghidra successfully reconstructed the arithmetic:
+**Correction verified in checkpoint 73:** `FUN_00430978(field_of_view,width,height)` is a **fisheye camera** initializer, as demonstrated by another method in its concrete vtable (`FUN_00430c24`), which asserts from `cityblock/portable/imaging/fisheye_camera.cc`. Do **not** attribute `FUN_00430978` to `linear_camera.cc`. It initializes these raw fields: Ghidra successfully reconstructed the arithmetic:
 
 ```text
 angle_rad = double(field_of_view) * DAT_00161ae0
@@ -28,18 +28,18 @@ this+0x14  = 1/focal
 this+0x18  = 1/focal
 ```
 
-The constructor installs a concrete vtable through `PTR_DAT_00514450+0x10`. The name *linear camera* comes from the adjacent native source path recovered for `FUN_00431118`; it does not establish that this constructor is used for every individual Photo Sphere source-image lens.
+The constructor installs concrete **fisheye-model vtable at raw 0x40d470**, verified by pointer relocation `0x414450→0x40d470` and ARM64 `+0x10` adjustment. The name *linear camera* applies separately to `FUN_00431118` (whose implementation references `linear_camera.cc`), **not** to this fisheye initializer. Its camera model is still not proven to be the one used for every original Photo Sphere source-image lens.
 
-`FUN_00431118` (another `linear_camera.cc` initializer) computes the centered pixel coordinate `((width-1)/2,(height-1)/2)` and assigns an angle dependent on the external constant `DAT_00161ae0`. It invokes `FUN_00431954` after assigning dimensions and angle. The **exact value** of `DAT_00161ae0` and camera-specific runtime mode must still be checked before calling it degrees-to-radians or treating its focal scale as a universal perspective projection.
+`FUN_00431118` (the separate `linear_camera.cc` initializer) computes the centered pixel coordinate `((width-1)/2,(height-1)/2)` and assigns an angle dependent on the external constant `DAT_00161ae0`. It invokes `FUN_00431954` after assigning dimensions and angle. The **exact value** of `DAT_00161ae0` and camera-specific runtime mode must still be checked before calling it degrees-to-radians or treating its focal scale as a universal perspective projection.
 
-**Implementation caveat:** `focal=width/angle_rad` is not the same as the pinhole model `width/(2*tan(angle_rad/2))`; the binary code explicitly uses division by the angle. Do not replace one with the other based only on camera convention.
+**Implementation caveat:** the **fisheye** model's `focal=width/angle_scaled` is not the same as the linear pinhole model `width/(2*tan(angle_scaled/2))`. Preserve each concrete model's equations instead of applying one universal camera formula. The **linear-camera** virtual `+0x80/+0x88` numerical project/unproject functions have since been identified in checkpoint 73.
 
 Other factory branches confirmed:
 - `FUN_00431344` initializes a larger image/camera provider object with vptr `PTR_FUN_0050d540`, zeros multiple fields, then calls `FUN_00431118`.
 - `FUN_004305bc` installs another vptr `PTR_FUN_0050d3c8` then initializes additional state with `FUN_00430668`.
 - `FUN_00431d48` is allocator-truncated in Ghidra (allocating 72 bytes); cannot infer the rest from its C.
 
-A concrete per-photo camera-model virtual method at `+0x80/+0x88` has **not yet been identified** from these constructors. The last verified rosette chain remains `d_cam=R[index]·world_ray`, then source camera model virtual `+0x80` project; inverse is virtual `+0x88` unproject then `R[index]^T` (checkpoint 71).
+Subsequent checkpoint 73 identifies **linear camera** projection vtable `raw 0x40d540`, slots `+0x80→FUN_00431b54`, `+0x88→FUN_00431c38`. Which concrete camera model appears in each recorded session is still unverified. The last verified rosette chain remains `d_cam=R[index]·world_ray`, then source camera model virtual `+0x80` project; inverse is virtual `+0x88` unproject then `R[index]^T` (checkpoint 71).
 
 ## 2. Projected mask generation is coverage geometry, not per-pixel alpha
 
@@ -69,7 +69,7 @@ Added [scripts/photosphere_stage_fixtures.py](https://github.com/Persie0/Playgro
 
 ## 4. Remaining verification targets
 
-- Resolve actual panorama mosaic camera vptr `+0x88/+0x80` **ray↔pixel math**.
+- Resolve actual panorama mosaic camera vptr `+0x88/+0x80` **ray↔pixel math** and identify the per-session photo camera model, including fisheye distortion.
 - Resolve source camera model vptr `+0x80/+0x88` **projection/unprojection and lens-distortion**.
 - Resolve which RLE decoder or mask wrapper sets the **blender's nonzero mask fill byte**, and the actual `blender+0x10` feather-start level.
 - Test real indexed camera matrices, source JPEG/session identity and pixel-level differences against captured Google Camera reference output.
