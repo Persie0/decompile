@@ -10,7 +10,7 @@ This checkpoint cross-checks the remaining static leads against the saved raw di
 
 Matcher raw 0x120600 receives its matcher configuration as param_3. Field *param_3 is the maximum point-row count. Candidate matches are accumulated and, when the count reaches this cap, spatial subsampling through Ghidra 0x2215b4 (raw ELF 0x1215b4) writes the requested count. The separate field param_3[3] (+0x0c) is a minimum raw-match threshold used by an early fallback branch; it is not the scalar denominator.
 
-The +0x18 scalar in the seven-float point row is sqrt(num_inliers / point_cap). The numerator is the out-parameter returned through raw 0x30f860 (Ghidra 0x40f860), and the denominator is *param_3. Raw matcher instructions at 0x120e94–0x120eb0 convert both integers, divide, and apply fsqrt. The apparent zero numerator in the Ghidra pseudo-expression is a stack/register recovery artifact. This identifies the scalar's construction, but not its later residual-weighting meaning. The alternate AddImage writer remains separately gated by a 0.9 metric and stores 0.25 or 0.125.
+The scalar's construction is known, and checkpoint 23 establishes that it multiplies both point residuals; its source-level meaning remains unknown.
 
 The detector and extractor path supports describing the stored point coordinates as matcher-emitted float coordinates in the base-image grid, or pixel-coordinate units. Feature positions are read from 12-byte detector records and restored for pyramid level before matching; the row writer copies the original matcher records. Camera vtable +0x88 converts matched coordinates into temporary three-float records for robust fitting, while stored point rows remain the original matcher coordinates. Confidence is medium: the evidence does not establish exact pixel-center semantics or whether any earlier producer applies a subpixel convention.
 
@@ -26,7 +26,7 @@ Pair-conversion helper Ghidra 0x227bac (raw ELF 0x127bac) walks 0x14-byte matche
 
 GlobalFocalLength setup Ghidra 0x2287c0 (raw ELF 0x1287c0) walks 0x80-byte match records and selects point rows at +0x50/+0x58 or line rows at +0x68/+0x70. LineAligner method Ghidra 0x403900 checks paired line-feature vectors have equal counts using 16-byte elements, calls helper Ghidra 0x406fcc, then conditionally prunes both vectors through Ghidra 0x4039e8 when the returned count is between 3 and the original count. The robust-filter interpretation is inferred from call context; the element size and bilateral pruning are direct from the decompile.
 
-RTTI identifies Ceres AutoDiffCostFunction<LineMatchResidual,4,4,4,2,1>, establishing four residual components with parameter blocks sized 4, 4, 2, and 1. HuberLoss and SoftLOneLoss are also present in the binary, but the available xrefs do not show which loss is attached to line matches or its scale. The residual body and line-row numeric units remain unresolved.
+RTTI identifies Ceres AutoDiffCostFunction<LineMatchResidual,4,4,4,2,1>, establishing four residual components with parameter blocks sized 4, 4, 2, and 1. Checkpoint 23 recovers the four bidirectional line-incidence equations and HuberLoss(35) for the observed GlobalFocalLength path. Line-row coordinate units/calibration and the source-level meaning of the row scale remain unresolved.
 
 ## Seam-mask preparation and final blend boundary
 
@@ -44,6 +44,12 @@ The available artifact corpus has no app Java, DEX, APK, or smali: the native pa
 
 The corpus contains no PreviewCallback, setPreviewFormat, NV21, or YV12 references. The converter consumes Y plus interleaved VU and emits RGB, establishing NV21-compatible input layout, but the actual Android callback format remains unknown. GetNextSessionStorage Ghidra 0x1ee9dc (raw ELF 0x0ee9dc) maps metadataFilePath and other paths into LocalSessionStorage; this is a path handoff, not a file write. session.meta appears as a string-table entry at offset 0x504df with no xref in the saved scans. Generic fopen/fwrite hits belong to Ceres problem serialization. No additional session.meta writer or runtime capture was found.
 
+## Session/rosette and target-index follow-up
+
+Session-render queue processor Ghidra 0x21976c (raw ELF 0x11976c), with assertion xref at Ghidra 0x219cfc, checks `preview_rosette.GetNumCameras() == queue_entry.session.num_images()` and takes the fatal assertion path on mismatch. LineAlignerImpl Ghidra 0x403cf8 (raw ELF 0x303cf8) checks equal align-rosette and preview-rosette camera counts and a corresponding `image_needs_lines` count. Shared-index accesses indicate compatible positional indexing is expected, but these checks do not establish image identity or order.
+
+Target generator Ghidra 0x2158fc (raw ELF 0x1158fc) computes camera FOV and calls Ghidra 0x2159fc (raw ELF 0x1159fc). In mode 1, the latter computes `N = int(2π / ((1-overlap) * FOV))` using the double constant 2π at raw rodata 0x61b48, then adds wraparound neighbor IDs around the ring. Wide-angle helper Ghidra 0x215fd0 (raw ELF 0x115fd0) computes a requested FOV with a 20° margin, clamps per-image overlap at 0.4, and calls Ghidra 0x2161fc (raw ELF 0x1161fc), which allocates nine 0x48-byte targets for a 3×3 grid and assigns wrapped neighbor IDs through Ghidra 0x216948 (raw ELF 0x116948). These builders establish indexing behavior, not which strategy is invoked in a real capture or how target records align with session-image order.
+
 ## Evidence artifacts and remaining work
 
 Relevant local exports include:
@@ -59,4 +65,4 @@ Relevant local exports include:
 - /tmp/psreverse/github-actions-artifact-11474380866/focused/FUN_002287c0_002287c0.c
 - /tmp/psreverse/pixel-camera-line-record-trace/xrefs-decompiled.txt
 
-Remaining work is runtime-dependent: confirm the Java repeat/scheduling policy, target-device preview callback format, and metadata writer set; obtain camera intrinsics and the actual generator config instance to calculate target totals; and resolve line-row units, point/line residual equations, and final blend weights from their hidden or runtime implementations.
+Remaining work includes exact Java worker cadence and repeat-after-false behavior, target-device preview format, the complete metadata writer set, concrete target totals/config mapping, line-row units/calibration, point-scalar source meaning, final blend weights, and actual session/image ordering. Checkpoint 23 already resolves the point/line equations for its observed path.
