@@ -705,3 +705,14 @@ Complete reference and pseudocode: [checkpoint 55](../google-camera-photosphere-
 The [public Playground focal trace 37778822211](https://github.com/Persie0/Playground/actions/runs/37778822211) **passed**. Ghidra memory read confirms `DAT_00161ae0` at `0x00161ae0` contains IEEE-754 double **`0x3f91df46a2529d39` = `0.017453292519943295`**, exactly `π/180`. Linear camera `FUN_00431118` multiplies FOV **degrees** by that factor and stores radians as float at camera offset `+8`. `FUN_00431954` then computes `f = (image_width*0.5f) / tanf(fov_radians*0.5f)`, storing `fx=fy=f` at `+0x0c/+0x10` and `1/f` at `+0x14/+0x18`. The optical center is `((W-1)/2,(H-1)/2)` at `+0x1c/+0x20`, image dimensions at `+0x24/+0x28`.
 
 This fully resolves the linear output-camera model for wide-angle mode 3. Variant 0 uses `512×682, 120°`; variant 1 uses `512×384,160°`. This is **not** a physical device lens calibration or standard Photo Sphere target FOV. Full detail: [checkpoint 56](../google-camera-photosphere-checkpoint-56-exact-fov-focal-calibration.md).
+
+
+## 2026-10-08 — checkpoint 58: four-way seam/blend/source/thread result
+
+All four public [Playground Ghidra jobs #37781846431](https://github.com/Persie0/Playground/actions/runs/37781846431) passed, as did the [independent AArch64 run #37781880248](https://github.com/Persie0/Playground/actions/runs/37781880248). Threadpool `FUN_004482f0` constructs a requested-count pool, `FUN_004488d8` starts worker slots once (`thread/threadpool.cc`, `!started_` check), and `FUN_0044834c` shuts down and tears down queues/workers after row-band jobs, calling `FUN_0044b6b0` for every worker (join/wait behavior not yet platform-verified). Task descriptors are 48 bytes per interval as in checkpoint 57.
+
+Recovered two related blender dispatch vtables: `0x0050d010` with `+0x38→FUN_0042114c` and `0x0050d0c8` with `+0x38→FUN_00421fb0`; both process the three image channels through `FUN_00423f2c`. `FUN_0042a474` returns fixed-point pyramid level image dimensions; `FUN_0042a3f0` counts levels, neither normalizes blend weights.
+
+Seam mask `FUN_004380dc` constructs an RLE receiver `FUN_0049c5d8`, sets mosaic dimensions through vcall `+0x68`, adds per-image masks via `+0x80`, returns receiver `+0x70`; a negative left image-bound results in a **second mask submitted with horizontal shift +mosaic width**. The actual graph cut and final per-pixel weight normalization are **still unresolved**.
+
+Source image geometric mapping is virtual `[param_4→vtable+0x10]` where `FUN_00423310` passes `param_4` to factory `FUN_0043e930`, stored at mapper `+0x08`. No constructor provenance yet confirms the concrete image-coordinate callback. Full detailed evidence: [checkpoint 58](../google-camera-photosphere-checkpoint-58-four-way-gap-results.md).
