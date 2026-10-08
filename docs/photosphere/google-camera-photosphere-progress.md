@@ -583,3 +583,17 @@ The native queue is FIFO, and the same decoded per-file image/path/camera/pose r
 The blender follow-up found per-level container initialization and output conversion, but no final per-pixel weight formula.
 
 Full trace: [checkpoint 47](../google-camera-photosphere-checkpoint-47-residual-and-session-index-follow-up.md).
+
+## 2026-10-08 — source and runtime follow-up
+
+The reconstructed source-only JADX tree contains the Camera1 and worker sources; the native export archive itself does not. `p000.exf` drains queued paths into a batch and calls `AlignNextImage()` inside the per-path loop. The JNI declaration returns `void`, so Java receives no success boolean. No explicit retry/backoff is present; whether a later worker invocation revisits a missing-path item still queued natively is unknown. The decompile reports 41 reconstruction errors, so local scheduling details are qualified.
+
+Preview bytes reach `ProcessFrame` unchanged. Java reads active `Camera.Parameters.getPreviewFormat()` and uses it for callback-buffer sizing. The native conversion is NV21-compatible; the actual device format ID remains unknown.
+
+The known native writer at raw `0x319b74` appends nine rows in order: version, filepath, full panorama width/height, cropped width/height, cropped left/top, and yaw correction. The parser also recognizes `source_photos_count`; Java reads additional timestamp/count/heading fields but has no writer or preseed. No second writer vtable slot was found in the inspected group, while indirect/runtime appends remain possible.
+
+The main point scalar is `sqrt(num_inliers / point_cap)` and multiplies both point residuals; it is a residual scale with no recovered source field name. A second branch stores `0.25/0.125` after a `0.9` test. Camera ray triples are temporary outputs and separate from row `+24`. Line endpoint floats are scaled by camera-model dimension / feature dimension; physical calibration remains unresolved.
+
+Target-generation documentation now separates JNI capture selector `0`, PhotoSphereTargetGenerator constructor selector `0` (fisheye selector `1`), and generic config mode `+0x14`. The constructor switch and overlap triplet `0.40/0.325/0.40` support the Photo Sphere ring layout. The generic config linkage through `InitTargets` remains unresolved. Mode 0 uses nested truncation before cosine; mode 1 uses `int(2π / ((1-overlap) * FOV))`; 3×3 neighbor mapping is recovered.
+
+Run [37710458655](https://github.com/Persie0/Playground/actions/runs/37710458655) is still in progress with no artifact yet. Final per-pixel blend weights remain open. FIFO and same-record thumbnail/alignment inputs are supported, but end-to-end identity/order through the preview-rosette builder remains unproven. No setter-like default override appeared in the focused flow path; external/indirect writes are not excluded.
