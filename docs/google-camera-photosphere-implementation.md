@@ -2407,3 +2407,14 @@ Successful [three Ghidra jobs #37822740695](https://github.com/Persie0/Playgroun
 `FUN_001f1d48` session `panorama_aligner.cc` loads session image paths with accessor `+0x40`, decodes originals via `FUN_00447b0c`, constructs/resizes source camera models and registers each frame with controller virtual `+0x28`; after the last image it obtains the fitted rosette through `+0x40/+0x50`. `FUN_001f40f0` enforces coarsest≥finest≥0 with an existing image pyramid and uses iterative 3×3 transforms. The native image pair alignment objective and numeric optimizer stopping criteria are still unresolved; the cleanup methods `FUN_001f1344/153c/1638/1764/17b0` are not optimizer steps.
 
 [34/34 deterministic clean-room fixtures passed in CI #37823389214](https://github.com/Persie0/Playground/actions/runs/37823389214), including four new FOV seed policy cases and four unnormalized gradient interior-patch cases. This does **not** establish native device parity. Detailed findings: [checkpoint 82](google-camera-photosphere-checkpoint-82-fov-gradient-kernels-and-pair-alignment.md).
+
+
+## 61. Checkpoint 83: FOV selected image points → camera rays and minimum-angle pose initialization
+
+[Three successful public Ghidra jobs #37823769869](https://github.com/Persie0/Playground/actions/runs/37823769869) and [independent raw ARM64 #37823824000](https://github.com/Persie0/Playground/actions/runs/37823824000) trace two previously opaque native phases.
+
+`FUN_001fefdc` produces a 3×N float32 camera ray array from 2D selected gradient points. With a flag zero it emits **`Z=-1`** and direct normalized `(u,v)` based on source model virtual `+0x28/+0x30` and a caller-supplied vertical scalar; with flag nonzero it invokes full model virtual **`+0x88`** for each pixel, including any lens correction. Exact vertical parameter naming remains ambiguous in the decompiler, so do **not** blindly replace the virtual model path.
+
+`FUN_001f3e34` walks 64-byte stored candidate orientation records, builds relative 3×3 rotations, calls **`FUN_001f2e54`** and selects smallest squared SO(3) log magnitude. Native `FUN_001f2e54` computes `theta=acos((trace(R)-1)/2)` and, away from near-zero/near-π, `theta/(2sin(theta))*(R21−R12,R02−R20,R10−R01)`. It has explicit special handling for θ≈0 and θ≈π; numerical cutoff `DAT_00161a78` still needs direct ELF read. `FUN_001f40f0` uses this seed for 3×3 pose refinement; full numerical residual/convergence still unverified.
+
+Added 5 deterministic eligibility/rotation reference tests and [public CI #37824337262](https://github.com/Persie0/Playground/actions/runs/37824337262) passes **39/39**. These are mathematical stage tests, not native captured-frame parity. [Checkpoint 83](google-camera-photosphere-checkpoint-83-fov-flow-ray-and-so3-rotation-selection.md).
