@@ -2228,3 +2228,12 @@ The successful [public sampler/camera sweep 37778110601](https://github.com/Pers
 The successful [public focal sweep 37778822211](https://github.com/Persie0/Playground/actions/runs/37778822211) reads native constant `DAT_00161ae0` as double `0x3f91df46a2529d39` = `π/180`. `FUN_00431118` converts the passed FOV degrees to float radians at `camera+8`. `FUN_00431954` stores `fx=fy=(width/2)/tanf(FOV_rad/2)` and `inv_fx=inv_fy=1/f` at camera offsets `+0x0c/+0x10/+0x14/+0x18`. With `cx=(width-1)/2`, `cy=(height-1)/2` at `+0x1c/+0x20`, widths and heights at `+0x24/+0x28`, the linear perspective *output projection* camera is now mathematically specified.
 
 Mode-3 wide-angle variants: `512×682 @120°` or `512×384 @160°` depending on low flag bit. Neither equals the runtime lens calibration or standard Photo Sphere ring target geometry. [Checkpoint 56](google-camera-photosphere-checkpoint-56-exact-fov-focal-calibration.md).
+
+
+## 41. 2026-10-08: four-way native seam, blender, mapping and threadpool sweep
+
+[Public four-track sweep #37781846431](https://github.com/Persie0/Playground/actions/runs/37781846431) and [ARM64 corroboration #37781880248](https://github.com/Persie0/Playground/actions/runs/37781880248) succeeded. Native threaded warp uses `thread/threadpool.cc`: `FUN_004482f0` initializes, `FUN_004488d8` starts worker slots with the single-start assertion, and `FUN_0044834c` tears them down, including `FUN_0044b6b0` per worker. The per-row 48-byte tasks were already identified in checkpoint 57. Join/wait semantics require platform-call confirmation.
+
+The two concrete blender vtables `0x0050d010` and `0x0050d0c8` dispatch three-channel output to `FUN_0042114c` and `FUN_00421fb0` respectively, both using `FUN_00423f2c`. `FUN_0042a474` reads fixed-point pyramid level image size, not normalization. `FUN_004380dc` constructs an RLE receiver and resubmits masks shifted by the mosaic width when left bound is negative (panorama horizontal wrap). Its receiver's `+0x68/+0x80/+0x70` methods and final graph-cut labels need direct tracing.
+
+The geometric warp's source callback is `[original_source_mapper_vtable+0x10]`, with source mapper stored at wrapper object `+0x08`; the concrete mapper class passed to `FUN_00423310` remains unproven. See [checkpoint 58](google-camera-photosphere-checkpoint-58-four-way-gap-results.md).
