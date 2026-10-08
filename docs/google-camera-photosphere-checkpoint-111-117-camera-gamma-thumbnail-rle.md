@@ -96,3 +96,24 @@ In particular, another vtable `+0x58` call in the blender `0x321d38` takes a boo
 6. Native-vs-Rust device photometric and panorama pixel comparisons plus measured CPU/RAM performance; no capture data was available here.
 
 **Conclusion:** Angular sample visibility and the actual in-memory thumbnail subsystem are now much better understood. The remaining uncertainty is primarily *actual capture-session lens/thumbnail state and native-device differential output*, not the presence of a Gamma ray generator.
+
+## Checkpoint 117 completed: exact in-memory thumbnail output dimensions
+
+[Two-track pinned native run #37861410447](https://github.com/Persie0/Playground/actions/runs/37861410447) **2/2 passed**. Direct native `FUN_0030aee4` at raw `0x30aee4..0x30af6c` shows the actual captured-thumbnail conversion invoked by `SimpleThumbnailCreator::v+0x10 FUN_003193fc`:
+
+```text
+source_width  = ((Image*)source->image)->width   // native 32-bit at image +8
+source_height = ((Image*)source->image)->height  // native 32-bit at image +12
+output_width  = creator->target_width            // uint32 at SimpleThumbnailCreator +8
+output_height = trunc(double(output_width) *
+                      double(source_height) / double(source_width) + 0.5)
+image = allocate(output_width, output_height, channels=3, depth=8)
+resample(source, image)  // FUN_00117b10
+append_resized_image_to_in_memory_accessor(image) // FUN_003466c8
+```
+
+Raw ARM64 `0x30aef4..0x30af40` performs the float64 dimension ratio and `FCVTZS` rounding, then `FUN_000f0b28` sets up exactly `w0=target_width,w1=height,w2=3,w3=8`. This is **aspect-ratio-preserving resize of the full source image into RGB8**, not the ±8-pixel ROI/aspect crop used by the *separate* unreferenced JPEG-writing JNI helper. The in-memory image is delivered to the session's image accessor via `FUN_003466c8`.
+
+Consequently, GammaAdjuster source thumbnail dimensions are **not arbitrary**: their width is the `SimpleThumbnailCreator+8` configured integer, and their height is this exact rounded source-aspect value. The actual **numeric configuration of `creator+8`** in the selected stock runtime remains to be traced; do **not** set it to 640 just because Rust currently uses 640. The resample kernel `FUN_00117b10` is under separate checkpoint 118 verification, so avoid claiming bilinear vs nearest/downscale filtering yet.
+
+As a runtime cross-check, the original capture queue `FUN_0011b5f4` invokes `FUN_0011be38` per saved image, which invokes thumbnail creator `+0x10`; the supplied rosette is assembled only after cameras and thumbnails are available. This helps distinguish production thumbnail flow from the JNI routine with quality 90.
