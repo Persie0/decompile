@@ -105,3 +105,10 @@ The public [three-way Rust importer validation #37834525886](https://github.com/
 Tests cover good/reordered source paths, corrupt checksum, threshold tolerance, truncated/nonnumeric record, nonfinite input, missing image and missing orientations file. These are **synthetic regression fixtures**, not native/real-camera data validation. The module was documented in the Rust repository README.
 
 Further work: original camera-specific intrinsics and `session.meta` values need merging into a complete `PhotoSphereSessionManifest` before this reader could recreate a fully registered Photo Sphere output.
+
+
+## Checkpoint 93 follow-up (verified)
+
+The `FUN_0022148c` integer stream formatter was decompiled and independently inspected in ARM64: `FUN_004d140c` receives the integer without width/padding/hex manipulators, supporting the ordinary nonnegative decimal `N.jpg` name used by Rust. `FUN_0044753c` implements a **lazy JPEG-header dimension probe** and validates width >= 1, height > 0, with open/parse errors reported. The original orientation reader's stream-failure path can **discard an incomplete last 36-byte record while returning success**; the Rust importer intentionally rejects incomplete records rather than silently dropping potentially lost photos.
+
+A streaming Rust parser now consumes each 10-float orientation record without allocating a duplicate vector of string slices, preserving the same strict error checks. [Public three-way Rust CI #37835467535](https://github.com/Persie0/Playground/actions/runs/37835467535) passed **10 tests** in each default, portable and Android-JNI configuration. The independent [Ghidra #37835270518](https://github.com/Persie0/Playground/actions/runs/37835270518) **3/3** and [ARM64 #37835308914](https://github.com/Persie0/Playground/actions/runs/37835308914) passed. Full [checkpoint 93](google-camera-photosphere-checkpoint-93-native-jpeg-format-lazy-header-and-rust-stream.md).
