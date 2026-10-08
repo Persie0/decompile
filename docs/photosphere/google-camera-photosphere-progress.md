@@ -547,6 +547,12 @@ LineAlignerImpl's raw writer 0x316154 copies prepared endpoint floats and its +0
 
 The native constructor path recovers AlignmentTracker +0x50=20.0f and +0x54=300, with embedded GlobalFlowSolver at tracker +0x78 set to +0x08=0, +0x0c=50, and +0x10=3. No later native overwrite was found in the scanned class paths; external mutation remains unobserved. Full trace: [checkpoint 44](../google-camera-photosphere-checkpoint-44-match-row-producers-and-flow-defaults.md).
 
+## 2026-10-07 — checkpoint 45: seam receiver vtables and mask operations
+
+The four SeamFinderGraphcut receivers are SimpleRunLengthImage objects. Incoming x2/x3 call vtable +0x58 with value 100; that entry maps to raw 0x39ce64 and fills active runs into a dense byte image. Incoming x6/x7 call +0x50 with dense-mask pointers; that entry maps to raw 0x39ca90 and ingests the dense image into run-length form. Their vptr raw 0x40ed00 (Ghidra 0x50ed00) is set by constructor raw 0x39c5d8. The former ExposureUnaryCostComputer candidate at 0x50d8c8 was the wrong vtable for these calls; its unary compute method is at +0x10 (raw 0x339600).
+
+The outer path crops and updates run-length maps, dilates/clips bounds, and generates per-image projection masks. Checkpoint 46 traces optimal-seam mask preparation into full and low-resolution mask pyramids handed to blender machinery, but the exports still show no explicit feather ramp or normalized-weight equation. Full trace: [checkpoint 45](../google-camera-photosphere-checkpoint-45-seam-receiver-vtables-and-mask-ops.md); follow-up: [checkpoint 46](../google-camera-photosphere-checkpoint-46-point-rows-target-rings-and-runtime-leads.md).
+
 ## 2026-10-08 — checkpoint 46: point rows, target rings, and runtime leads
 
 The matcher input field *param_3 is the point-row cap, and param_3[3] is a separate minimum raw-match threshold. Raw instructions establish the stored scalar as sqrt(num_inliers / point_cap). Point-row coordinates are matcher-emitted float base-image-grid values; camera conversion at vtable +0x88 applies only to temporary robust-fit records. Exact pixel-center semantics and the scalar's later residual role remain unknown. Line endpoints undergo feature-scale and mapper/camera preprocessing, but their final units, calibration, and residual formula remain unresolved.
@@ -554,12 +560,6 @@ The matcher input field *param_3 is the point-row cap, and param_3[3] is a separ
 Raw target branch FUN_002159fc uses config +0x14 as a mode selector and +0x10 as overlap. Mode 0 calls FUN_002147c4, which produces complete azimuth rings with cosine-scaled counts and one target near each pole. This confirms the documented mode-0 ring math. The saved exports do not link the Photo Sphere constructor's 0.4/0.325/0.4 arguments to this exact config instance; concrete target counts still need camera intrinsics/FOV and that mapping.
 
 The seam xref follow-up reaches mask_generator_optimal_seam.cc mask preparation, which creates full and low-resolution blending masks for the blender. Bounds and padding invariants are present, but the available exports do not reveal the final feathering or normalized-weight equation. A focused flow-default caller scan shows the tracker invokes an embedded per-instance solver; no extra setter surfaced in that xref set. JNI retry scheduling, preview format, extra session.meta writers, line-row units, residual formula, and final blend behavior remain runtime or hidden-implementation questions. Full trace: [checkpoint 46](../google-camera-photosphere-checkpoint-46-point-rows-target-rings-and-runtime-leads.md).
-
-## 2026-10-07 — checkpoint 45: seam receiver vtables and mask operations
-
-The four SeamFinderGraphcut receivers are SimpleRunLengthImage objects. Incoming x2/x3 call vtable +0x58 with value 100; that entry maps to raw 0x39ce64 and fills active runs into a dense byte image. Incoming x6/x7 call +0x50 with dense-mask pointers; that entry maps to raw 0x39ca90 and ingests the dense image into run-length form. Their vptr raw 0x40ed00 (Ghidra 0x50ed00) is set by constructor raw 0x39c5d8. The former ExposureUnaryCostComputer candidate at 0x50d8c8 was the wrong vtable for these calls; its unary compute method is at +0x10 (raw 0x339600).
-
-The outer path crops and updates run-length maps, dilates/clips bounds, and generates per-image projection masks. Checkpoint 46 traces optimal-seam mask preparation into full and low-resolution mask pyramids handed to blender machinery, but the exports still show no explicit feather ramp or normalized-weight equation. Full trace: [checkpoint 45](../google-camera-photosphere-checkpoint-45-seam-receiver-vtables-and-mask-ops.md); follow-up: [checkpoint 46](../google-camera-photosphere-checkpoint-46-point-rows-target-rings-and-runtime-leads.md).
 
 ### Remaining targets
 
