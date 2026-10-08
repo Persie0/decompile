@@ -46,7 +46,7 @@ else:
         using matrix off-diagonal signs
 ```
 
-For a valid proper rotation away from singularities, the formula is the standard **SO(3) logarithmic map**. The native near-π branch avoids division by a tiny sine and chooses signs from matrix entries. A raw constant `DAT_00161a78` controls the handoff, but its exact numeric value remains to be read; do not replace the native cutoff by an arbitrary one without checking.
+For a valid proper rotation away from singularities, the formula is the standard **SO(3) logarithmic map**. The native near-π branch avoids division by a tiny sine and chooses signs from matrix entries. **Update:** independent [pinned ELF constant readback #37824606693](https://github.com/Persie0/Playground/actions/runs/37824606693) proves `DAT_00161a78` is the binary64 literal **1.00000000000000008e−5** (bits `0x3ee4f8b588e368f1`). The native tests `double(sinf(theta)) >= 1e-5`; otherwise it follows the zero-angle / near-π branch.
 
 The function does **not** optimize FOV directly: it converts a **proposed relative rotation** into a 3-vector for comparison and subsequent pose-update calculations.
 
@@ -79,8 +79,12 @@ Added five deterministic tests to [`scripts/photosphere_stage_fixtures.py`](http
 ## 7. Next important research
 
 1. Recover exact robust alignment residual and any nonlinear least-squares solver step used after `FUN_001f40f0`; follow model update calls and image-pair status creation into `FUN_001f3848` and the alignment record's offset `+0x40`.
-2. Read `DAT_00161a78` cutoff and enumerate the near-π special-case signs, with independent unit-vector test fixtures.
+2. Recover and native-fixture-test the near-π special-case signs; the threshold `DAT_00161a78 = 1e-5` is now verified from the binary.
 3. Resolve source-image path/session storage schema and concrete distortion correction vtable, ideally with a real native capture ZIP.
 4. Diff real camera panoramas pixel-by-pixel against the Rust implementation, preserving native versus Rust coordinate basis conversion and exact sampling/feathering.
 
 **Result:** FOV flow candidate points now connect to camera-space rays, and the initial relative-pose selection is reconstructed. **Full FOV numerical optimization and Photo Sphere output parity are not yet verified.**
+
+## Follow-up — exact native threshold and 41 reference tests
+
+[Public standalone ELF run #37824606693](https://github.com/Persie0/Playground/actions/runs/37824606693) **passed** and recovered the exact binary64 threshold `0x3ee4f8b588e368f1` = **1e−5** for the sine of SO(3) rotation angle in `FUN_001f2e54`. The clean-room non-π reference now returns a zero rotation for sufficiently small **positive-trace** angles rather than using a generic arbitrary epsilon, and treats near-π separately. The updated [public stage CI #37824736569](https://github.com/Persie0/Playground/actions/runs/37824736569) **passed 41/41** tests, including 2µrad and 1mrad Z rotations on opposite sides of the threshold. These remain reference mathematical checks and do not establish native output pixel equality.
