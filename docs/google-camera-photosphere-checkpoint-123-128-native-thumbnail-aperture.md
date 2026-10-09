@@ -117,3 +117,37 @@ The optimized native `FUN_0039e91c` has two important components: `FUN_0039e5c8`
 The dispatch `FUN_00117b10` uses the optimized route when source dimensions are >= destination dimensions in both axes; the generic `FUN_00117bbc` handles other sizing. Width, height, RGB3 channels, 8-bit storage and row strides are supplied to `FUN_0039e91c`. The exact interpretation/content of both LUTs and the row-boundary fractional weights remain **under native Ghidra decompilation checkpoint 130**, so a bit-identical Rust filter should **not yet be implemented** by guessing the mathematics.
 
 **Priority next:** confirm where both LUTs `DAT_004148f8/004148f0` originate and their 256-byte/1024-byte payloads, mathematically derive row/column area normalization, and implement an independently tested Rust source-thumbnail scaling kernel with byte-level fixtures; then run stock-camera capture comparisons.
+
+## Checkpoints 130–132: original source path, complete row algorithm and lookup-table identity
+
+All newly created public original-ELF investigations completed successfully:
+
+- [Ghidra two-track #37863002939](https://github.com/Persie0/Playground/actions/runs/37863002939) **2/2 passed**, focused decompile including allocator-noreturn repair, both complete native row logic and the session/thumbnail caller.
+- [Native LUT relocation two-track #37863080628](https://github.com/Persie0/Playground/actions/runs/37863080628) **2/2 passed**, original `.got` pointer targets and read-only lookup bytes.
+- [LUT roundtrip and full range #37863199068](https://github.com/Persie0/Playground/actions/runs/37863199068) **passed**, original lookup values independently read from ELF.
+
+Ghidra `FUN_0049e5c8` contains a literal surviving compiled source path **`cityblock/portable/vision/image_processing/affine_gamma_downsizer.cc`**, with the assertion text **`Upscaling is disabled!`**. The original source-image resize `FUN_00217b10` invokes native `FUN_0049e91c(..., CHANNELS=3)` for dimensions where both source width/height are >= target width/height, otherwise uses generic `FUN_00217bbc`. Ghidra independently verifies `FUN_0040aee4` allocates `w×round(w*H/W)` RGB8 and directly dispatches to this method. This establishes that the stock live thumbnail pipeline uses an **affine-gamma downsizer**, not an ordinary linear sRGB Triangle filter.
+
+Native `FUN_0049e5c8` calculates state from source and destination integer sizes and strides. It stores per-axis **`2^30 / destination_width`** and **`2^30 / destination_height`** coefficients, and a Q30 2D area normalization proportional to `destination_width*destination_height/(source_width*source_height)`. The Ghidra decompilation is still cut directly after the allocator call even with a corrected caller allocator return, but direct native ARM64 `0x39e680..0x39e6c8` confirms it allocates/zeros **two rows of signed 32-bit accumulators** with `destination_width * 3` entries each, and initializes row counter/buffers. This is not a Gaussian or simple 2× bilinear approximation.
+
+Full Ghidra `FUN_0049e718`, raw `0x39e718`, was successfully recovered. On every source image scanline it:
+
+1. Advances the vertical fractional progress and decides whether the current source row finishes one thumbnail output row.
+2. Traverses source RGB bytes and accumulates their **lookup-transformed 32-bit values**, distributing fractional horizontal coverage using Q30 integer arithmetic and maintaining RGB carry-over state.
+3. If this source row completes an output row, calculates fractional vertical spillover into the second accumulator row.
+4. Produces each destination byte from the difference between accumulated row buffers, scaled by the Q30 area factor; round with **`+0x20000000`** before right shifting 30; calculate an output table position with **`(+5)>>3` and an additional `+1` table offset**; finally advances output row pointer by output stride and swaps carry buffers.
+
+The **`+1` lookup offset** is explicit in full Ghidra C; it is important for exact byte parity, as tests using the raw inverse table at `index` without this offset would be off by one on some low pixel values. The original code checks width/stride validity, refuses upscaling in this fast path, and can fall back to the separately recovered generic scaler depending on dimensions.
+
+**Exact stock ELF constant tables:**
+
+| Runtime GOT relocation | Original raw `.rodata` target | Format and range |
+|---|---|---|
+| `0x4148f8` | `0x8eb74` | **256-entry uint32 source-byte transform**, index 0→0, 64→896, 128→2717, 192→5199, 255→8186 |
+| `0x4148f0` | `0x8ef74` | **inverse/output byte mapping**, native output indices reaching ≈1024; index 0→0, 255→107, 512→165, 768→213, 1023→255 |
+
+The source table's 256 values are monotonic. The byte table's normal valid index window is **0..1024**, not the 4,096 bytes printed by a broad first-pass memory peek: bytes after approximately index 1026 belong to subsequent unrelated read-only data, so comparing a hypothetical index 2048 is meaningless. The max source transform = **8186**, producing `(8186+5)>>3 = 1023` and then native lookup **`+1`**, i.e. index 1024, returning 255. The two LUTs are **static data** embedded into the original native ELF; they are neither dynamic-calibration coefficients nor specific to a particular phone.
+
+**What is now reconstructible:** the original affine-gamma resize's dataflow, fixed-point numerator/denominator precision, source/output table addresses, output byte indexing, byte/depth/stride contract, and the production 320px thumbnail width with rounded height. **What is not yet delivered:** a Rust, native-byte-equivalent translation of every accumulation edge case, including exact source-row partial weight/carry over/overflow behavior, supported by stock-native sample-frame differential tests. Current Rust `FilterType::Triangle` is still a *documented provisional approximation*, and changing to a guessed LUT/filter combination without verified equivalent output could reduce overall visual quality.
+
+**Suggested verification fixtures when stock captures become available:** alternating dark/bright checkerboard at 4:3, vertical and horizontal 1px/2px stripes, smooth 0..255 ramps, dimensions that do not divide evenly by 320 (e.g. 4032×3024 and odd-size portrait), and captures using the actual device intrinsics. Compare native per-channel output bytes before Gamma sampling rather than relying solely on final panorama SSIM.
