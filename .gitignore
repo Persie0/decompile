@@ -1,0 +1,7 @@
+# Decompiled JADX source archives (reassembled locally via tools/reassemble_sources.py; tracked as split part-* chunks)
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
