@@ -82,3 +82,17 @@ After that successful reference test, [`a6527ce1`](https://github.com/Persie0/Ph
 ### What still blocks exact native parity
 
 The Q30 loop translation and both LUTs are no longer missing, but **original decoded source JPEG bytes and exact native output fixture comparisons** remain unavailable. The clean-room implementation decodes the JPEG to a low-memory maximum 640px intermediate before the native-width 320px downscale, while the original native session may use full decoded source JPEG data. The native scanline stores 32-bit buffers, and this Rust port's wider i64 intermediates can change results only for overflow conditions; neither was exercised by the reference dataset. Per-phone distortion calibration / source camera model and pano-level pixel tests likewise remain unresolved. **Do not label the implementation pixel-identical to Google Camera.**
+
+## Final validation update — checkpoints 136–137 completed
+
+[Production Q30 full Rust suite #37864500955](https://github.com/Persie0/Playground/actions/runs/37864500955) **3/3 SUCCESS**, on exact `PhotosphereRust/main` source revision [`49ffd053`](https://github.com/Persie0/PhotosphereRust/commit/49ffd053bdd319d8448b0e374fdb05f34bdf8ad2). All 3 configurations passed **162/162 library tests**, including `production_q30_gamma_checkerboard_is_bright_and_grayscale`, both native-Q30-vs-rational-area reference tests and every earlier full Rust regression. Entire `cargo test --all-targets` counts including extra integration binaries:
+
+| CI host configuration | Library tests | Other tests | Total |
+|---|---:|---:|---:|
+| Default | 162 | 1+10+2 | **175 passed** |
+| Portable (`--no-default-features`) | 162 | 1+7+2 | **172 passed** |
+| Android-JNI host feature | 162 | 1+10+2 | **175 passed** |
+
+[Independent native Android cross-target #37864614881](https://github.com/Persie0/Playground/actions/runs/37864614881) **2/2 SUCCESS** on the same Rust commit, each running `cargo check --target TARGET --lib --features android-jni` **and** `cargo check --target TARGET --lib --no-default-features --features android-jni`. Targets are **`aarch64-linux-android`** and **`x86_64-linux-android`**. This verifies actual Android conditional code and static type checking but is **not** a device runtime test, Android linker/build of the final shared library, benchmark or image-output comparison.
+
+**Production state:** GammaAdjuster now runs the native-inspired Q30 two-row integer/gamma RGB downsizer; the independently derived exact-area implementation remains **test-only**. The original 1,281 lookup entries have exact mathematical equivalents and were all verified separately. Outstanding: precise original-JPEG input pixels (our intermediate decode remains capped at 640px), full physical-device camera/lens intrinsics, stock-original-vs-Rust per-pixel fixture comparison, downstream mask/blend parity, and real Android/iOS memory/speed/quality benchmarks. Do not claim overall Google Camera clone is fully finished or pixel-identical.
