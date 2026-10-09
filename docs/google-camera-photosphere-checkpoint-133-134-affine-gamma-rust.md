@@ -58,3 +58,27 @@ The full result must be checked before claiming green; a running workflow is not
 2. Compare original decoded full source RGB pixels against Rust's **scaled JPEG decode**; reduce the two-stage resize mismatch when original camera source fixtures become available.
 3. Verify real camera `StandardRosette` lens distortion and exact per-frame projection, then original-vs-Rust Gamma sampled pair counts and exponents.
 4. Confirm final mask-expansion/blender input and benchmark mobile phone CPU, RAM, wall time, and rendered image quality against the original Google Camera.
+
+## 5. Checkpoints 135–137 — native Q30 streaming row-carry implementation (supersedes section 2's production method)
+
+The *initial* Rust rational-area kernel above was a correct clean-room mathematical reference but still lacked the native scanline's staged Q30 rounding. The original `FUN_0049e718` Ghidra pseudocode contains enough information to reconstruct its streaming recurrence directly.
+
+[`PhotosphereRust` commit `4a58de03`](https://github.com/Persie0/PhotosphereRust/commit/4a58de03bdda84bdbd2e67f5b2062e7a0168f635) implemented **`resize_affine_gamma_q30`** as a test-only Rust function, with:
+- One `2^30/dst_width` coefficient for fractional horizontal source-pixel coverage, `2^30/dst_height` for fractional vertical coverage, and `floor((dst_width×dst_height×2^30)/(src_width×src_height))` for final area normalization.
+- Exactly two rows of 3-channel signed accumulation buffers, swapped after each produced output row, plus a per-input-row three-channel partial-x carry.
+- A source-row scanner that integrates full RGB source pixels into the active output x bucket, splits the pixel at a fractional boundary by `(pixel_gamma * fractional_Q30 + 2^29) >> 30`, and carries its remainder to the next output pixel.
+- The same analogous vertical source-row spillover into the next accumulator row.
+- A final `(accumulator_difference * area_Q30 + 2^29) >>30`, followed by the verified native `inverse[1+((linear+5)>>3)]` lookup.
+- A 64-bit buffer/accumulation implementation rather than the stock native's 32-bit words to avoid intermediate overflow outside the stock image envelope, while preserving the same Q30 rounding pattern for normal small thumbnails.
+
+This follows the **two-row original native scanline state machine**, not the previous rational-area rectangle enumeration. The independently retained rational-area version remains an *oracle* for numerical equivalence at expected image-scale precision.
+
+[Public full three-way Rust test run #37864257912](https://github.com/Persie0/Playground/actions/runs/37864257912) **3/3 passed** (default, portable, Android-JNI), including new tests `native_q30_row_carry_matches_rational_area_on_constant_fields` and `native_q30_row_carry_matches_rational_area_for_edges_and_odd_sizes` for 2×2, 5×3, 13×9, 31×23, 64×48, and 640×480 RGB synthetic fixtures. The test-only Q30 method reproduced solid fields within 1 RGB8 code value and varying/checkerboard/striped fields within 3 code values of the independent exact-area reference, with native transfer curves. These tests establish **sensible numerical agreement**, not native image byte identity.
+
+After that successful reference test, [`a6527ce1`](https://github.com/Persie0/PhotosphereRust/commit/a6527ce1b7fb1e4a8e4243c4bad0a5c1866c3980) promoted the Q30 stream to `pub(crate) fn resize_affine_gamma_q30` and placed the rational reference behind `#[cfg(test)]`. [`49ffd053`](https://github.com/Persie0/PhotosphereRust/commit/49ffd053bdd319d8448b0e374fdb05f34bdf8ad2) switches **production** `photometric.rs` to the native-inspired Q30 method for 320px Gamma source thumbnails, retaining the generic Triangle fallback for upscaling.
+
+**Final pinned production validation:** [public full Rust suite #37864500955](https://github.com/Persie0/Playground/actions/runs/37864500955) for default, portable and Android-JNI host. **Separate native Android CPU ABI cross-compilation:** [#37864614881](https://github.com/Persie0/Playground/actions/runs/37864614881), both `aarch64-linux-android` and `x86_64-linux-android`, with feature-on and no-default-feature builds. These must be checked before reporting final green status: workflow creation is not a successful build.
+
+### What still blocks exact native parity
+
+The Q30 loop translation and both LUTs are no longer missing, but **original decoded source JPEG bytes and exact native output fixture comparisons** remain unavailable. The clean-room implementation decodes the JPEG to a low-memory maximum 640px intermediate before the native-width 320px downscale, while the original native session may use full decoded source JPEG data. The native scanline stores 32-bit buffers, and this Rust port's wider i64 intermediates can change results only for overflow conditions; neither was exercised by the reference dataset. Per-phone distortion calibration / source camera model and pano-level pixel tests likewise remain unresolved. **Do not label the implementation pixel-identical to Google Camera.**
