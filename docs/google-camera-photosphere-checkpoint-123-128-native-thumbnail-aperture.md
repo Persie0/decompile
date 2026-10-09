@@ -97,3 +97,23 @@ Synthetic dimensions tests: `4000x3000 → 320x240`, `3000x4000 → 320x427`, `1
 2. Verify actual original capture per-frame `camera+0x30` correction pointer / lens intrinsics, and compare source-mapped pixels with captured `orientations.txt` and `session.meta`.
 3. Trace selected final blender RLE decoded `fill=1` into downstream Laplacian pyramid and validate pixel outputs; some graphcut temporary RLE paths use `fill=100` separately.
 4. Measure on-device Android/iOS CPU, memory, wall time and real original vs clean-room stitched panoramas. Static original ELF analysis plus synthetic unit tests do not establish output identity.
+
+
+## Checkpoint 128 final full Rust regression result
+
+[Public pinned 320px/angle regression #37862724787](https://github.com/Persie0/Playground/actions/runs/37862724787) **completed successfully in 3/3 independent jobs**, pinning `PhotosphereRust` commit `dba1dcf91301662491e9a7199a8e63967fc44f79`. Each lane passed **154/154 library tests**, including `original_camera_gamma_thumbnail_is_fixed_width_and_rounded_aspect`, `native_gamma_angular_aperture_uses_width_over_two_not_pixel_center`, and `native_gamma_shared_ray_collector_matches_pairwise_reference`; additionally:
+- Default: **1+10+2** integration/other all-target tests, total **167 passed**.
+- Portable (`--no-default-features`): **1+7+2** more, total **164 passed**.
+- Android-JNI host feature: **1+10+2** more, total **167 passed**.
+
+The previous angle-only [full #37862449741](https://github.com/Persie0/Playground/actions/runs/37862449741) also passed 3/3. These workflows test native-inspired **functional correctness on CI host**; they do not build physical Android/iOS devices, assert pixel-bit identity, verify stock camera calibration or fix existing repository-wide rustfmt debt.
+
+## Checkpoint 129 native fast RGB8 resampler data-path recovered further
+
+[SHA-verified three-way ARM64 investigation #37862876157](https://github.com/Persie0/Playground/actions/runs/37862876157) **3/3 passed**, using `scripts/photosphere_checkpoint_129.py` with independent tracks for initialization, inner-row calculation, and resize dispatch.
+
+The optimized native `FUN_0039e91c` has two important components: `FUN_0039e5c8` checks widths/stride/storage geometry and sets up **30-bit fixed-point** interpolation coefficients, and `FUN_0039e718` computes output one scanline at a time. The initializer at `0x39e644..0x39e678` uses `0x40000000 = 2^30`, integer divisions by output width/height, and allocates accumulation buffers. The row loop at `0x39e7fc..0x39e878` consumes byte-valued source pixels via an **indexed table of 32-bit integers**, accumulating terms in signed 32-bit buffers and doing normalization using **`LSR #0x1e` (divide by 2^30)**; it has boundary conditions for horizontal/vertical partial coverage. At `0x39e8a8..0x39e8d0` it looks up an output byte in a **second indexed table**, after `+5, ASR #3` on an intermediate scaled integer. This indicates fixed-point weighted accumulation plus lookup-based output conversion, **not simply the Rust Triangle filter**.
+
+The dispatch `FUN_00117b10` uses the optimized route when source dimensions are >= destination dimensions in both axes; the generic `FUN_00117bbc` handles other sizing. Width, height, RGB3 channels, 8-bit storage and row strides are supplied to `FUN_0039e91c`. The exact interpretation/content of both LUTs and the row-boundary fractional weights remain **under native Ghidra decompilation checkpoint 130**, so a bit-identical Rust filter should **not yet be implemented** by guessing the mathematics.
+
+**Priority next:** confirm where both LUTs `DAT_004148f8/004148f0` originate and their 256-byte/1024-byte payloads, mathematically derive row/column area normalization, and implement an independently tested Rust source-thumbnail scaling kernel with byte-level fixtures; then run stock-camera capture comparisons.
