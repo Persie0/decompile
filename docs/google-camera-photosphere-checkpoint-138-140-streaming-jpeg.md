@@ -33,3 +33,19 @@ Implemented directly on `PhotosphereRust/main`:
 - [Checkpoint 140 Android ABI cross-check](https://github.com/Persie0/Playground/actions/runs/37865297695): pinned same Rust commit, `aarch64-linux-android` and `x86_64-linux-android` `cargo check` with `android-jni` in both default and no-default configurations; **both 2/2 jobs passed**.
 
 The original-device end-to-end photometric and panorama comparison remains unverified without actual source JPEGs, camera intrinsics, `orientations.txt`, `session.meta`, and the stock rendered Photo Sphere.
+
+## 3. Final checkpoint 139–140 validation
+
+[Full Rust matrix #37865294570](https://github.com/Persie0/Playground/actions/runs/37865294570) **3/3 SUCCESS**, pinned exact `PhotosphereRust` commit `605bfb7b613bbf58379fec3336f5591e00043b2b`:
+
+| Job | Library tests passed | Other all-target tests | Total passed |
+|---|---:|---:|---:|
+| Default `cargo test --all-targets` | 164 | 1+10+2 | **177** |
+| Portable `--no-default-features` | 163 | 1+7+2 | **173** |
+| Android-JNI host `--features android-jni` | 164 | 1+10+2 | **177** |
+
+Both default and Android-JNI jobs execute **`stock_thumbnail_from_full_jpeg_scanlines_matches_full_decoded_rgb`**, which confirms full-size JPEG RGB decode + Q30 resizer exactly equals direct JPEG scanline + Q30 output on synthetic 640×480, 704×521 and 480×640 sources. All three jobs execute `streaming_q30_rows_are_exactly_equal_to_in_memory_on_odd_rgb_fields`, confirming the shared scanline accumulator on non-divisible and portrait input geometries. No test failures.
+
+[Real Android cross-target `cargo check` #37865297695](https://github.com/Persie0/Playground/actions/runs/37865297695) **2/2 SUCCESS**: AArch64 and x86_64 Android targets with both default and `--no-default-features` plus `android-jni`. These are cross-compilation/type checks, not runtime-on-phone tests or native Google-image comparisons.
+
+**Actual verified improvement:** stock-like full-resolution input RGB pixels reach the gamma-aware Q30 320px resizer directly for `fast-jpeg` builds. The native source JPEG remains compressed until scanline decoding; a full-size RGB image does not need to be allocated by the caller. Exact final image parity and stock decoder YCbCr pixel identity remain unverified.
