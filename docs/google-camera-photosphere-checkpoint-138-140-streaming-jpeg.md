@@ -80,3 +80,17 @@ Native original `FUN_00440994` samples each valid sphere-lattice ray across all 
 [Full pinned Rust #37865764783](https://github.com/Persie0/Playground/actions/runs/37865764783) covers default, portable, Android-JNI all-target; check final result before saying all three passed. [Actual Android cross-compilation #37865771640](https://github.com/Persie0/Playground/actions/runs/37865771640) **2/2 SUCCESS**, with both default and no-default features and JNI enabled for ARM64 and x86_64.
 
 **Outstanding:** native pixel-by-pixel output comparison and real capture-specific lens model state remain necessary for equivalence to stock Google Camera.
+
+## 6. Final checkpoint 142–143 validation
+
+**All jobs completed successfully.** [Full pinned Rust regression #37865764783](https://github.com/Persie0/Playground/actions/runs/37865764783) is **3/3 SUCCESS** on `PhotosphereRust/main` commit [`2c25f51c`](https://github.com/Persie0/PhotosphereRust/commit/2c25f51c157c2dbf05eec5e407214da5deea02b4). `gamma_pairing_observes_off_center_camera_overlap_without_coarse_fov_gate` passed in all three feature configurations, alongside every original full-JPEG-source-vs-streaming thumbnail test.
+
+| Host test configuration | Library tests | Other all-target tests | Total |
+|---|---:|---:|---:|
+| Default | 165 | 1+10+2 | **178 passed** |
+| Portable `--no-default-features` | 164 | 1+7+2 | **174 passed** |
+| Android-JNI host feature | 165 | 1+10+2 | **178 passed** |
+
+[Android cross-check #37865771640](https://github.com/Persie0/Playground/actions/runs/37865771640) **2/2 SUCCESS**, compiling Android `aarch64-linux-android` and `x86_64-linux-android` with `--features android-jni` in both default and `--no-default-features` configurations for the exact same revision. This is compilation/type checking, not running the final native library on a phone.
+
+**End state:** normal `fast-jpeg` Gamma processing consumes original JPEG scanlines directly into the reconstructed Q30 gamma-aware 320px downsizer; the accelerated Gamma collector pairs **all cameras sharing each valid sphere-lattice ray** and no longer eliminates valid off-center overlaps. Native seam-stage RLE decoder fill=1 and no-correction session-storage lens state are independently documented. Remaining blockers: original camera capture fixture and exact lens/camera model parameters, per-photo stock decoder sample parity, later mask-to-pyramid receiver fidelity, and measured physical Android/iOS quality/speed/RAM.
