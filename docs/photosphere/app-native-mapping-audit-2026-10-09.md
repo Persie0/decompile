@@ -68,3 +68,7 @@ The following are **proposed** rather than completed validations. Run all heavy 
 ## Verification boundaries
 
 This audit cross-references **previously completed** analyses; it does not itself execute a new APK decompilation, native binary trace, CI test, or on-device Photo Sphere capture. The named call chains are as established by the linked checkpoints. Any new hypothesis must have pinned-binary disassembly or a runtime fixture before it is promoted to a verified mapping.
+
+## Follow-up: original vptr construction proven in checkpoint 141–144
+
+The independent [native constructor report](google-camera-photosphere-checkpoint-141-144-native-constructors.md) now confirms exact ARM64 stores for `StandardRosette`, `PipelinedImageAccessor`, `AdjusterAccessor` and `FilePathSessionStorage`. Critically, the flow model is installed via `GOT[0x4120f0] = 0x3fd388`, then **`+0x10 → 0x3fd398`**, stored to the embedded model at `+0x58`. Thus its lack of a direct `ADRP+ADD` occurrence is not an absence-of-use finding. Confirmed in public Playground [#37866646533](https://github.com/Persie0/Playground/actions/runs/37866646533), [#37866776628](https://github.com/Persie0/Playground/actions/runs/37866776628), [#37866882087](https://github.com/Persie0/Playground/actions/runs/37866882087), all **3/3**. This resolves constructor vptr installation, *not* the capture-mode model selection or original-device pixel parity.
