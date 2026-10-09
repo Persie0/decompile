@@ -124,3 +124,17 @@ These facts narrow the actual metadata writer producer investigation to the **re
 5. Map source-camera correction creator and any non-null source correction assignment beyond the clone methods established in checkpoints 149 and 154.
 
 All corrected claims are based on the named successful original APK/Ghidra/JADX/DEX runs; no real phone was tested. No claim of bit-identical reconstructed output is made.
+
+## 6. Supplemental corrected renderer-manager-global scanner (checkpoint 158)
+
+The **final corrected** [public original-ELF scanner #37871387184](https://github.com/Persie0/Playground/actions/runs/37871387184) **passed** after explicit Capstone skip-data handling and restoring a valid Python function body. Its [exact source](https://github.com/Persie0/Playground/blob/main/scripts/photosphere_checkpoint_158.py) emits addresses and caller windows, not conclusively typed renderer-manager methods.
+
+Original ARM64 directly identifies global renderer-manager pointer at raw **`0x4170c8`** in:
+
+- JNI FinishCapture at raw **`0xee4c4–0xee508`**: `ADRP #0x417000; ADD #0xc8`, pointer load then receiver virtual **`+0x18`** with prepared finalization request.
+- JNI RenderNextSession at raw **`0xeee18–0xeee64`**: same global pointer load then receiver virtual **`+0x20`** after constructing the render options object.
+- A **third callsite** at raw **`0xeea4c–0xeea60`** also loads exactly global `0x4170c8` and calls the receiver's virtual **`+0x28`**. Its enclosing JNI symbol and role remain to be identified; do **not** assign it to a session.meta writer based solely on slot offsets.
+
+The broad scanner also printed many **false-positive address matches** where `ADRP` targeted a different page such as `0x412000` or the nearby `#0xc8` operand was a stack slot/another object. The three specific `ADRP #0x417000 + ADD #0xc8` pairs above are the relevant exact-reference evidence. Neither this run nor the adjacent JNI readback proves which concrete renderer-manager class owns the global or where `FilePathSessionStorage::WriteMetadata` is finally invoked.
+
+The [initial 158 run #37871175103](https://github.com/Persie0/Playground/actions/runs/37871175103) returned zero due to a truncated Capstone stream, and [first correction #37871277637](https://github.com/Persie0/Playground/actions/runs/37871277637) failed on a Python indentation error. Only final #37871387184 supports the global reference findings.
