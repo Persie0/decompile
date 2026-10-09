@@ -43,7 +43,7 @@ capture_mode = packed_x2 & 0xffffffff
 thumbnail_target_width = packed_x2 >> 32
 ```
 
-The low word's exact enum association with each JNI reset wrapper is separate from the already known `0..5` native mode IDs and must still be mapped from actual wrapper instructions. **The original app's stock numeric thumbnail width remains unproved.**
+The low word's exact enum association with each JNI reset wrapper is separate from the already known `0..5` native mode IDs and must still be mapped from actual wrapper instructions. **The original app's stock numeric thumbnail width **is already proven to be 320 px** in checkpoints 123–128, by the upstream raw `FUN_001188b8` instruction `MOV X9,#0x14000000000` and `ORR X0,X8,X9`; this checkpoint independently identifies the intervening `SessionManagerImpl` virtual owner and bit layout. See [the earlier exact-width investigation](../google-camera-photosphere-checkpoint-123-128-native-thumbnail-aperture.md).**
 
 ## Independent camera-source and session-metadata rechecks
 
@@ -59,7 +59,7 @@ A generic relocation/vtable enumerator can yield false positive slot labels by w
 
 ## Exact unresolved boundaries
 
-1. Recover the JNI reset wrapper's construction of the `SessionManagerImpl::v+0x10` packed `x2` argument and its **upper-width word** on the standard Photo Sphere path.
+1. **Reconfirm the already-mapped 320px width route from JNI reset to the SessionManager owner**, using previous checkpoints 123–128: common reset `0xed84c` calls `FUN_001188b8` at `0xed8a4` to pack `mode | (320 << 32)`, then dispatches to `SessionManagerImpl::v+0x10` at `0xed924`. The numerical value is not an unresolved item; remaining work is any alternative or device-specific session configuration.
 2. Confirm optional source-camera lens-correction installation or absence on real capture state. A default constructor's null pointer is insufficient.
 3. Trace metadata append-file creation and reset behavior during new/restore/undo; this audit proves writer/reader identities, not full lifecycle.
 4. Obtain stock capture-session image/pose/calibration/output fixtures for differential validation; static matches do not prove pixel-identical output.
