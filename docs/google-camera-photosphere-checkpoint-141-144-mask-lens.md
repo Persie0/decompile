@@ -78,3 +78,20 @@ This is a reproducible static binary investigation and a focused test improvemen
 | Android-JNI host | 166 | 1+10+2 | **179 passed** |
 
 The formerly failing `native_unit_rle_mask_expansion_preserves_3x3_wrap_feather` now passes in all three. The initial red CI was solely caused by expecting smoothing on the deliberately hard binary pyramid level 0, and was corrected without changing the actual seam-weight computation. No physical Android runtime, native Google Camera image differential or measured seam-pixel identity is implied by these tests.
+
+## October 12 independent correction-model RTTI follow-up
+
+Public [original pinned ELF two-track RTTI/strings CI #38277919383](https://github.com/Persie0/Playground/actions/runs/38277919383) **2/2 passed**. The stock binary's RTTI/runtimes for candidate imaging/camera families include:
+
+| Type | Raw vptr address point | Project / unproject virtual methods |
+|---|---|---|
+| `cityblock::portable::LinearCamera` | `0x40d540` | `+0x80→0x331b54`, `+0x88→0x331c38` |
+| `cityblock::portable::FisheyeCamera` | `0x40d480` | `+0x80→0x330ec4`, `+0x88→0x331030` |
+| `cityblock::portable::EquirectCamera` | `0x40d3c8` | `+0x80→0x330800`, `+0x88→0x3308c0` |
+| `RotatedVerticalEquirectCamera` | `0x40cdb8` | `+0x80→0x31b408`, `+0x88→0x31b4cc` |
+
+A distinct `CameraRotationModel` vtable was also found (`0x3fd398`), but its slot meanings are **not** interchangeable with 3D source image projection; it belongs to the capture/session controller family.
+
+Neither the filtered RTTI scan nor compiled printable strings exposed a concretely named radial/tangential distortion subclass; only the `fisheye_camera.cc` path and `FisheyeCamera` RTTI matched distortion-related terms. **This does not prove absence of optional correction objects**: the non-null `LinearCamera+0x30` clone/release virtual protocol is definitely compiled, and unnamed/stripped or external plugin-created correctors are possible. Still need runtime-selected pointer and actual coefficients.
+
+The original ELF's fisheye `+0x80/+0x88` *projection functions* above correspond to the correct full vtable address point **`0x40d480`**, not the earlier constructor/setter table ambiguity. They were already implemented separately in clean-room `projection.rs` and `camera_models.rs`; no unverified fisheye default was enabled in this checkpoint.
