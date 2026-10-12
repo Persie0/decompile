@@ -66,3 +66,15 @@ The analogous `FUN_00331ae8` and `FUN_00331b18` clear an existing correction poi
 4. Run original-JPEG decoder/native-row exact comparison and real Android/iOS memory/wall-time/image-quality benchmarks.
 
 This is a reproducible static binary investigation and a focused test improvement, **not a claim of verified Google Camera output equivalence**.
+
+## Final corrected seam CI result
+
+[Corrected public three-configuration full Rust regression #38277502964](https://github.com/Persie0/Playground/actions/runs/38277502964) **3/3 SUCCESS**, with exact Rust commit [`f45484c4`](https://github.com/Persie0/PhotosphereRust/commit/f45484c419f5c9111c47dd4d046cda0ba1273dbd):
+
+| Test configuration | Library tests | Additional integration/other tests | Total |
+|---|---:|---:|---:|
+| Default | 166 | 1+10+2 | **179 passed** |
+| Portable (`--no-default-features`) | 165 | 1+7+2 | **175 passed** |
+| Android-JNI host | 166 | 1+10+2 | **179 passed** |
+
+The formerly failing `native_unit_rle_mask_expansion_preserves_3x3_wrap_feather` now passes in all three. The initial red CI was solely caused by expecting smoothing on the deliberately hard binary pyramid level 0, and was corrected without changing the actual seam-weight computation. No physical Android runtime, native Google Camera image differential or measured seam-pixel identity is implied by these tests.
